@@ -44,7 +44,7 @@ export const heroSlides: HeroSlide[] = [
   {
     id: "bedroom-hotel",
     eyebrow: "🛏️ For Your Bedroom",
-    headline: "The bedroom that feels like a 5-star hotel. Every night.",
+    headline: "The 5 star hotel smell and feeling now brought to your bedrom. All day. All night.",
     subheadline:
       "Set it once. Wake up to a room that smells incredible — automatically.",
     image: HERO_IMAGE_1,
