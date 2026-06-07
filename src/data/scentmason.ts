@@ -16,7 +16,7 @@
 import { OFFER, PRODUCT_SPECS } from "@/lib/constants";
 
 const HERO_IMAGE_1 =
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619";
+  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png";
 
 const HERO_IMAGE_2 =
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el6.png?updatedAt=1780413593841";
@@ -25,13 +25,13 @@ const HERO_IMAGE_3 =
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el3.png?updatedAt=1780413593766";
 
 const PRODUCT_IMAGE = 
-"https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/product_unveil.png"
+"https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/prd_image_dark.png"
 
 const COMPARISON_IMAGE =
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el1.png?updatedAt=1780413594782";
 
 const ORDER_FORM_IMAGE =
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el2.png?updatedAt=1780413593681";
+  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/what's%20inside_package.png";
 
 export const sectionImages = {
   comparison: COMPARISON_IMAGE,
@@ -105,10 +105,15 @@ export const painSection = {
   headline: "Your home should not smell good only when you remember to spray.",
   subheadline:
     "You do not want to babysit a spray can, fight with plug sockets, or worry that guests will walk into a room that feels heavy.",
-  transition: "ScentMason fixes all of this. Automatically.",
+  image:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
+  
+    imageAlt:
+    "A Nigerian home showing the everyday problem of weak room fragrance before using ScentMason Automatic Fragrance Machine",
+  transition: "ScentMason Auto Fragrance Diffuser fixes all the fragrance wahala. Automatically.",
 };
 
-export const painPoints: PainPoint[] = [
+export const painPoints = [
   {
     id: "spray-fades",
     emoji: "😤",
@@ -130,17 +135,46 @@ export const painPoints: PainPoint[] = [
     text: "The generator ran all night. You know that smell. Your guests know it too.",
   },
 ];
-
 export const productIntro = {
-  eyebrow: "Meet ScentMason",
+  eyebrow: "Selling out faster than expected",
   headline:
-    "The diffuser that makes your home smell intentional — without stress.",
+    "The machine that makes your home smell intentional without stress.",
   description:
-    "Meet the diffuser that runs for 60 days on a single charge, mounts without drilling, and sprays on its own — so your home always smells the way you intended.",
+    "Meet the automatic fragrance machine that runs for 60 days on a single charge, mounts without drilling, and sprays on its own — so your home always smells the way you intended.",
   image: PRODUCT_IMAGE,
-  imageAlt: "ScentMason automatic fragrance diffuser product shot",
+  imageAlt: "ScentMason automatic fragrance machine product shot",
+  gallery: [
+    {
+      id: "product-gallery-1",
+      image: PRODUCT_IMAGE,
+      imageAlt: "ScentMason automatic fragrance machine product view one",
+    },
+    {
+      id: "product-gallery-2",
+      image:
+        "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/product_unveil.png?updatedAt=1780459161844",
+      imageAlt: "ScentMason automatic fragrance machine product view two",
+    },
+    {
+      id: "product-gallery-3",
+      image:
+        "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/compare-real-design.png",
+      imageAlt: "ScentMason automatic fragrance machine product view three",
+    },
+    {
+      id: "product-gallery-4",
+      image:
+        "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/wall_office_mount.png",
+      imageAlt: "ScentMason automatic fragrance machine product view four",
+    },
+    {
+      id: "product-gallery-5",
+      image:
+        "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el3.png?updatedAt=1780413593766",
+      imageAlt: "ScentMason automatic fragrance machine product view five",
+    },
+  ],
 };
-
 export const benefits: Benefit[] = [
   {
     id: "bedroom",
@@ -236,7 +270,7 @@ export const videoTestimonials: VideoTestimonial[] = [
 export const whatsInTheBox: BoxItem[] = [
   {
     id: "diffuser",
-    title: "1 × ScentMason Diffuser",
+    title: "1 × Automatic Fragrance Diffuser",
     description: `${PRODUCT_SPECS.size} — slim by design, so it fits your space without looking bulky.`,
   },
   {
@@ -268,62 +302,26 @@ export const whatsInTheBox: BoxItem[] = [
 export const whatsInTheBoxCallout =
   "Everything you need. Nothing missing. Unbox it, mount it, done.";
 
-export const comparisonRows: ComparisonRow[] = [
+export const comparisonImages = [
   {
-    id: "lasts-60-days",
-    feature: "Lasts up to 60 days on one charge",
-    scentmason: "✅",
-    sprayCan: "❌",
-    candle: "❌",
-    plugIn: "❌",
+    id: "reed-diffuser-vs-machine",
+    eyebrow: "Reed Diffuser vs Automatic Fragrance Machine",
+    headline: "One sits there and hopes the scent spreads. The other does the work automatically.",
+    description:
+      "See why an automatic fragrance machine gives you more control, more consistency, and less guesswork than a normal reed diffuser.",
+    image: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/AMD%20vs-reed.png?updatedAt=1780827901026",
+    imageAlt:
+      "Comparison image showing reed diffuser versus ScentMason automatic fragrance machine",
   },
   {
-    id: "no-drill",
-    feature: "No wall drilling",
-    scentmason: "✅",
-    sprayCan: "✅",
-    candle: "✅",
-    plugIn: "❌",
-  },
-  {
-    id: "no-socket",
-    feature: "No socket needed while in use",
-    scentmason: "✅",
-    sprayCan: "✅",
-    candle: "✅",
-    plugIn: "❌",
-  },
-  {
-    id: "automatic",
-    feature: "Automatic — no effort",
-    scentmason: "✅",
-    sprayCan: "❌",
-    candle: "❌",
-    plugIn: "✅",
-  },
-  {
-    id: "no-flame",
-    feature: "No open flame",
-    scentmason: "✅",
-    sprayCan: "✅",
-    candle: "❌",
-    plugIn: "✅",
-  },
-  {
-    id: "rechargeable",
-    feature: "Rechargeable",
-    scentmason: "✅",
-    sprayCan: "❌",
-    candle: "❌",
-    plugIn: "❌",
-  },
-  {
-    id: "heavy-air",
-    feature: "Keeps fragrance consistent after heat, cooking, or generator fumes",
-    scentmason: "✅",
-    sprayCan: "⚠️ Short-lived",
-    candle: "⚠️ Needs attention",
-    plugIn: "⚠️ Needs socket",
+    id: "spray-can-vs-machine",
+    eyebrow: "Spray Can vs Automatic Fragrance Machine",
+    headline: "One works only when you remember. The other keeps working in the background.",
+    description:
+      "Spray cans fade fast. An automatic fragrance machine helps your home stay guest-ready without constant spraying.",
+    image: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spraycan_vs%20Automatic%20Fragrance%20Machine.png?updatedAt=1780827901379",
+    imageAlt:
+      "Comparison image showing spray can versus ScentMason automatic fragrance machine",
   },
 ];
 
@@ -412,7 +410,7 @@ export const packages: PackageOption[] = [
 
 export const orderForm = {
   eyebrow: "Place your order",
-  headline: `Order ScentMason today for ${OFFER.offerPrice}`,
+  headline: `Order Automatic Fragrance Diffuser today for ${OFFER.offerPrice}`,
   subheadline:
     "Fill in your details below. Our sales rep will contact you to confirm your order before dispatch.",
   priceLine: `${OFFER.regularPrice} → ${OFFER.offerPrice}`,
@@ -557,11 +555,11 @@ export const finalCta = {
   eyebrow: "Your home already has a smell.",
   headline: "The question is whether it smells intentional.",
   description:
-    "ScentMason helps your room feel warm, elevated, and guest-ready without spray cans, drilling, plug stress, or daily reminders.",
-  buttonLabel: "Order ScentMason Now",
+    "It helps your room feel warm, elevated, and guest-ready without spray cans, drilling, plug stress, or daily reminders.",
+  buttonLabel: "Order Now",
 };
 
 export const stickyBar = {
-  text: "ScentMason — ₦34,000 · Nationwide Delivery · 2–3 Days",
+  text: "Auto Diffuser — ₦34,000 · Nationwide Delivery · 2–3 Days",
   buttonLabel: "Order Now",
 };

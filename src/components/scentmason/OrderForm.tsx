@@ -55,15 +55,15 @@ export default function OrderForm() {
     >
       <div className="mx-auto w-full max-w-[430px]">
         <div>
-          <p className="mb-4 inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-xs font-black text-[var(--accent)]">
+          <p className="mb-4 inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[15px] font-black text-[var(--accent)]">
             {orderForm.eyebrow}
           </p>
 
-          <h2 className="text-[2.1rem] font-black leading-[1] tracking-tight text-[var(--primary)]">
+          <h2 className="text-[2.1rem] font-black leading-[1.08] tracking-[-0.01em] text-[var(--primary)]">
             {orderForm.headline}
           </h2>
 
-          <p className="mt-5 text-base leading-7 text-[var(--text-muted)]">
+          <p className="mt-5 text-[19px] font-medium leading-9 text-[var(--text-muted)]">
             {orderForm.subheadline}
           </p>
         </div>
@@ -79,15 +79,15 @@ export default function OrderForm() {
           </div>
 
           <div className="mt-3 rounded-3xl bg-[var(--background)] p-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[var(--accent)]">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-[var(--accent)]">
               Your Starter Set
             </p>
 
-            <p className="mt-1 text-xl font-black leading-tight text-[var(--primary)]">
+            <p className="mt-1 text-[1.35rem] font-black leading-[1.12] tracking-[-0.01em] text-[var(--primary)]">
               Diffuser + Signature Oil + Mount + USB Cable
             </p>
 
-            <p className="mt-2 text-xs font-bold leading-5 text-[var(--text-muted)]">
+            <p className="mt-2 text-[17px] font-bold leading-8 text-[var(--text-muted)]">
               Submit your details first. Our sales rep confirms before dispatch.
             </p>
           </div>
@@ -97,7 +97,7 @@ export default function OrderForm() {
           <div className="rounded-[1.5rem] border border-[var(--primary)] bg-[var(--primary)] p-4 shadow-soft">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--accent-soft)]">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent-soft)]">
                   Today’s Offer
                 </p>
 
@@ -105,19 +105,19 @@ export default function OrderForm() {
                   {OFFER.offerPrice}
                 </p>
 
-                <p className="mt-2 text-xs font-bold text-[var(--background)]/85">
+                <p className="mt-2 text-sm font-bold text-[var(--background)]/85">
                   <span className="line-through">{OFFER.regularPrice}</span>{" "}
                   · {OFFER.savings}
                 </p>
               </div>
 
-              <div className="flex min-h-12 max-w-[118px] items-center justify-center rounded-2xl bg-green-100 px-3 py-2 text-center text-[10px] font-black leading-tight text-green-800">
+              <div className="flex min-h-12 max-w-[118px] items-center justify-center rounded-2xl bg-green-100 px-3 py-2 text-center text-xs font-black leading-tight text-green-800">
                 ☑️ Payment on delivery
               </div>
             </div>
 
             <div className="mt-4 rounded-2xl bg-white/10 p-3">
-              <p className="text-xs font-bold leading-5 text-white">
+              <p className="text-[17px] font-bold leading-8 text-white">
                 Less than 3 spray cans a month — but your home smells incredible
                 for months.
               </p>
@@ -126,7 +126,7 @@ export default function OrderForm() {
 
           <form onSubmit={handleSubmit} className="mt-5">
             <div className="mb-5">
-              <p className="mb-3 text-sm font-black text-[var(--primary)]">
+              <p className="mb-3 text-[19px] font-black text-[var(--primary)]">
                 Choose your package
               </p>
 
@@ -149,29 +149,29 @@ export default function OrderForm() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="text-base font-black text-[var(--primary)]">
+                            <p className="text-[1.2rem] font-black leading-[1.12] tracking-[-0.01em] text-[var(--primary)]">
                               {item.name}
                             </p>
 
                             {item.badge ? (
-                              <span className="rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[9px] font-black text-[var(--primary)]">
+                              <span className="rounded-full bg-[var(--accent-soft)] px-2 py-1 text-xs font-black text-[var(--primary)]">
                                 {item.badge}
                               </span>
                             ) : null}
                           </div>
 
-                          <p className="mt-2 text-sm font-bold leading-5 text-[var(--text-muted)]">
+                          <p className="mt-2 text-[17px] font-bold leading-8 text-[var(--text-muted)]">
                             {item.description}
                           </p>
                         </div>
 
                         <div className="text-right">
-                          <p className="text-lg font-black text-[var(--primary)]">
+                          <p className="text-xl font-black text-[var(--primary)]">
                             {item.price}
                           </p>
 
                           {item.savings ? (
-                            <p className="mt-1 text-[10px] font-black text-[var(--accent)]">
+                            <p className="mt-1 text-xs font-black text-[var(--accent)]">
                               {item.savings}
                             </p>
                           ) : null}
@@ -188,7 +188,7 @@ export default function OrderForm() {
                 <div key={field.id}>
                   <label
                     htmlFor={field.name}
-                    className="mb-2 block text-sm font-black text-[var(--primary)]"
+                    className="mb-2 block text-[17px] font-black text-[var(--primary)]"
                   >
                     {field.label}
                   </label>
@@ -200,7 +200,7 @@ export default function OrderForm() {
                       required={field.required}
                       placeholder={field.placeholder}
                       rows={4}
-                      className="w-full rounded-3xl border border-[var(--border)] bg-[var(--background)] px-4 py-4 text-sm font-bold text-[var(--primary)] outline-none transition placeholder:text-[var(--text-muted)]/60 focus:border-[var(--primary)]"
+                      className="w-full rounded-3xl border border-[var(--border)] bg-[var(--background)] px-4 py-4 text-[17px] font-bold text-[var(--primary)] outline-none transition placeholder:text-[var(--text-muted)]/60 focus:border-[var(--primary)]"
                     />
                   ) : field.type === "select" ? (
                     <select
@@ -208,7 +208,7 @@ export default function OrderForm() {
                       name={field.name}
                       required={field.required}
                       defaultValue=""
-                      className="w-full rounded-3xl border border-[var(--border)] bg-[var(--background)] px-4 py-4 text-sm font-bold text-[var(--primary)] outline-none transition focus:border-[var(--primary)]"
+                      className="w-full rounded-3xl border border-[var(--border)] bg-[var(--background)] px-4 py-4 text-[17px] font-bold text-[var(--primary)] outline-none transition focus:border-[var(--primary)]"
                     >
                       <option value="">{field.placeholder}</option>
 
@@ -225,7 +225,7 @@ export default function OrderForm() {
                       type={field.type}
                       required={field.required}
                       placeholder={field.placeholder}
-                      className="w-full rounded-3xl border border-[var(--border)] bg-[var(--background)] px-4 py-4 text-sm font-bold text-[var(--primary)] outline-none transition placeholder:text-[var(--text-muted)]/60 focus:border-[var(--primary)]"
+                      className="w-full rounded-3xl border border-[var(--border)] bg-[var(--background)] px-4 py-4 text-[17px] font-bold text-[var(--primary)] outline-none transition placeholder:text-[var(--text-muted)]/60 focus:border-[var(--primary)]"
                     />
                   )}
                 </div>
@@ -234,7 +234,7 @@ export default function OrderForm() {
 
             <button
               type="submit"
-              className="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-[var(--primary)] px-6 py-4 text-center text-sm font-black text-white shadow-soft transition hover:bg-[var(--primary-hover)]"
+              className="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-[var(--primary)] px-6 py-4 text-center text-base font-black text-white shadow-soft transition hover:bg-[var(--primary-hover)]"
             >
               {orderForm.submitLabel}
             </button>
@@ -246,7 +246,7 @@ export default function OrderForm() {
                 key={point}
                 className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3"
               >
-                <p className="text-[11px] font-black leading-5 text-[var(--primary)]">
+                <p className="text-sm font-black leading-6 text-[var(--primary)]">
                   {point}
                 </p>
               </div>
@@ -254,15 +254,15 @@ export default function OrderForm() {
           </div>
 
           <div className="mt-5 rounded-3xl bg-[var(--primary)] p-5">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[var(--accent-soft)]">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-[var(--accent-soft)]">
               {guarantee.eyebrow}
             </p>
 
-            <h3 className="mt-2 text-xl font-black leading-tight text-white">
+            <h3 className="mt-2 text-[1.35rem] font-black leading-[1.12] tracking-[-0.01em] text-white">
               {guarantee.headline}
             </h3>
 
-            <p className="mt-3 text-sm font-bold leading-6 text-[var(--background)]">
+            <p className="mt-3 text-[17px] font-bold leading-8 text-[var(--background)]">
               {guarantee.description}
             </p>
           </div>

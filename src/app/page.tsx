@@ -1,5 +1,6 @@
 ﻿import HeroCarousel from "@/components/scentmason/HeroCarousel";
 import PainSection from "@/components/scentmason/PainSection";
+import SocialProofBar from "@/components/scentmason/SocialProofBar";
 import ProductIntro from "@/components/scentmason/ProductIntro";
 import HowItWorks from "@/components/scentmason/HowItWorks";
 import WhatsInTheBox from "@/components/scentmason/WhatsInTheBox";
@@ -13,6 +14,7 @@ export default function Home() {
     <main className="min-h-screen bg-[var(--background)] pb-28">
       <HeroCarousel />
       <PainSection />
+      <SocialProofBar />
       <ProductIntro />
       <HowItWorks />
       <WhatsInTheBox />

@@ -1,70 +1,42 @@
-﻿export const BRAND = {
+﻿
+export const BRAND = {
   name: "ScentMason",
   tagline: "Delighting life with scent",
-  description:
-    "A rechargeable automatic fragrance diffuser made for Nigerian homes that want a warm, hotel-like scent without spraying, drilling, or plugging in.",
 };
 
 export const SITE = {
   url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
 };
 
-export const IMAGEKIT = {
-  baseUrl:
-    process.env.NEXT_PUBLIC_IMAGEKIT_URL ||
-    "https://ik.imagekit.io/j1e78ujalr",
-
-  scentMasonFolder:
-    "boxify_testimonilas_edited/perfume_diffuser_48hrs-60days",
-};
-
-export function imageKitUrl(path: string) {
-  const baseUrl = IMAGEKIT.baseUrl.replace(/\/$/, "");
-  const cleanPath = path.replace(/^\//, "");
-
-  return `${baseUrl}/${cleanPath}`;
-}
-
-export function scentMasonAsset(fileName: string) {
-  return imageKitUrl(`${IMAGEKIT.scentMasonFolder}/${fileName}`);
-}
-
 export const SCENTMASON_IMAGES = {
-  heroBedroom: scentMasonAsset(
-    "spa_woman_refreshed.png?updatedAt=1780413593619"
-  ),
+  heroBedroom:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
 
-  heroGuests: scentMasonAsset(
-    "spa_woman_refreshed.png?updatedAt=1780413593619"
-  ),
+  heroGuests:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
 
-  heroNoPlug: scentMasonAsset(
-    "spa_woman_refreshed.png?updatedAt=1780413593619"
-  ),
+  heroNoPlug:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
 
-  productMain: scentMasonAsset(
-    "spa_woman_refreshed.png?updatedAt=1780413593619"
-  ),
+  productMain:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
 
-  videoUnboxingThumb: scentMasonAsset(
-    "spa_woman_refreshed.png?updatedAt=1780413593619"
-  ),
+  videoUnboxingThumb:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
 
-  videoMountingThumb: scentMasonAsset(
-    "spa_woman_refreshed.png?updatedAt=1780413593619"
-  ),
+  videoMountingThumb:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
 
-  videoTestimonialThumb: scentMasonAsset(
-    "spa_woman_refreshed.png?updatedAt=1780413593619"
-  ),
+  videoTestimonialThumb:
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
 
-  videoUnboxing: scentMasonAsset("unboxing.mp4"),
-  videoMounting: scentMasonAsset("mounting.mp4"),
-  videoTestimonial: scentMasonAsset("testimonial.mp4"),
+  videoUnboxing: "",
+  videoMounting: "",
+  videoTestimonial: "",
 };
 
 export const WHATSAPP = {
-  salesRepNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "234XXXXXXXXXX",
+  salesRepNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "2349037880756",
 };
 
 export const OFFER = {
