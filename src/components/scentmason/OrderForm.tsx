@@ -162,7 +162,7 @@ export default function OrderForm() {
 
              <div className="mt-4 rounded-2xl border-2 border-red-600 bg-red-50 p-4 shadow-soft">
         <p className="text-[17px] font-black leading-8 text-red-700">
-             IMPORTANT: PLEASE DO NOT fill the form if you don&apos;t have the money for it...
+             IMPORTANT: PLEASE DO NOT fill this form if you don&apos;t have the money for it...
             OR if you&apos;re travelling in the next 2-4 days.
          </p>
         </div>
