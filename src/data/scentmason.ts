@@ -358,11 +358,11 @@ export const fulfilmentTrust = {
   description:
     "After you submit your order, our sales rep confirms your details on WhatsApp or phone call before dispatch. Your ScentMason order is then handled through Boxify for smooth nationwide delivery.",
   points: [
-    "Nationwide delivery",
-    "2–3 days delivery timeline",
-    "WhatsApp confirmation before dispatch",
-    "Order handled through Boxify",
-  ],
+  "🚚 Nationwide delivery",
+  "⏱️ 2–3 days delivery timeline",
+  "💬 WhatsApp confirmation before dispatch",
+  "💵 Payment on delivery",
+],
 };
 
 export const guarantee = {
@@ -392,21 +392,22 @@ export const packages: PackageOption[] = [
   {
     id: "home-duo",
     name: "Home Duo",
-    price: "₦62,000",
-    compareAt: "₦68,000",
-    savings: "Save ₦6,000",
-    description: "2 Diffusers + 2 Signature Oils for bedroom and living room",
+    price: "₦66,000",
+    compareAt: "₦90,000",
+    savings: "Save ₦24,000",
+    description: "2 Diffusers + 2 Signature Oils + 2 Mounts + 2 USB Cables",
     badge: "Popular",
   },
   {
     id: "full-home",
     name: "Full Home",
-    price: "₦88,000",
-    compareAt: "₦102,000",
-    savings: "Save ₦14,000",
-    description: "3 Diffusers + 3 Signature Oils for multiple rooms",
+    price: "₦98,000",
+    compareAt: "₦135,000",
+    savings: "Save ₦37,000",
+    description: "3 Diffusers + 3 Signature Oils + 3Mounts + 3USB Cables",
   },
 ];
+
 
 export const orderForm = {
   eyebrow: "Place your order",
@@ -416,7 +417,7 @@ export const orderForm = {
   priceLine: `${OFFER.regularPrice} → ${OFFER.offerPrice}`,
   savingsLine: OFFER.savings,
   mentalReframe:
-    "Less than 3 spray cans a month — but your home smells incredible for weeks.",
+    "Less than 3 spray cans a month — but your home smells incredible for many months.",
   submitLabel: "Submit My Order Request",
 };
 
@@ -499,7 +500,7 @@ export const faqs: FAQItem[] = [
     id: "size",
     question: "Is the diffuser as big as it looks in the photos?",
     answer:
-      "ScentMason is slim by design. The actual size is 14 × 6.5 × 2.8cm, so it fits neatly on your wall, shelf, bathroom, bedroom, or office without looking bulky.",
+      "ScentMason Diffuser is slim by design. The actual size is 14 × 6.5 × 2.8cm, so it fits neatly on your wall, shelf, bathroom, bedroom, or office without looking bulky.",
   },
   {
     id: "oil-last",
@@ -563,3 +564,53 @@ export const stickyBar = {
   text: "Auto Diffuser — ₦34,000 · Nationwide Delivery · 2–3 Days",
   buttonLabel: "Order Now",
 };
+
+
+export const extraOilOptions = [
+  {
+    id: "no-extra-oil",
+    label: "No extra oil",
+    bottles: 0,
+    price: "₦0",
+    description: "I only want the oil that comes with my selected package.",
+  },
+  {
+    id: "extra-oil-1",
+    label: "Buy 1 extra oil",
+    bottles: 1,
+    price: "₦10,000",
+    description: "1 extra fragrance oil bottle.",
+  },
+  {
+    id: "extra-oil-2",
+    label: "Buy 2 extra oils",
+    bottles: 2,
+    price: "₦19,000",
+    description: "2 extra fragrance oil bottles.",
+    badge: "Save ₦1,000",
+  },
+  {
+    id: "extra-oil-3",
+    label: "Buy 3 extra oils",
+    bottles: 3,
+    price: "₦28,500",
+    description: "3 extra fragrance oil bottles.",
+    badge: "Save ₦1,500",
+  },
+  {
+    id: "extra-oil-4",
+    label: "Buy 4 extra oils",
+    bottles: 4,
+    price: "₦38,000",
+    description: "4 extra fragrance oil bottles.",
+    badge: "Save ₦2,000",
+  },
+  {
+    id: "extra-oil-5",
+    label: "Buy 5 extra oils",
+    bottles: 5,
+    price: "₦47,000",
+    description: "5 extra fragrance oil bottles.",
+    badge: "Save ₦3,000",
+  },
+];

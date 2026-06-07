@@ -2,6 +2,7 @@
 
 import { type FormEvent } from "react";
 import {
+  extraOilOptions,
   fulfilmentTrust,
   guarantee,
   orderFields,
@@ -10,6 +11,14 @@ import {
   sectionImages,
 } from "@/data/scentmason";
 import { OFFER, SECTION_IDS, WHATSAPP } from "@/lib/constants";
+
+function parseNairaPrice(price: string) {
+  return Number(price.replace(/[₦,\s]/g, "")) || 0;
+}
+
+function formatNaira(amount: number) {
+  return `₦${amount.toLocaleString("en-NG")}`;
+}
 
 export default function OrderForm() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -22,9 +31,29 @@ export default function OrderForm() {
     const state = String(form.get("state") || "");
     const address = String(form.get("address") || "");
     const packageId = String(form.get("packageId") || packages[0]?.id);
+    const extraOilId = String(
+      form.get("extraOilId") || extraOilOptions[0]?.id
+    );
 
     const selectedPackage =
       packages.find((item) => item.id === packageId) || packages[0];
+
+    const selectedExtraOil =
+      extraOilOptions.find((item) => item.id === extraOilId) ||
+      extraOilOptions[0];
+
+    const packagePrice = parseNairaPrice(selectedPackage?.price || "₦0");
+    const extraOilPrice = parseNairaPrice(selectedExtraOil?.price || "₦0");
+    const estimatedTotal = packagePrice + extraOilPrice;
+
+    const extraOilLine =
+      selectedExtraOil?.id === "no-extra-oil"
+        ? "Extra Oil: No extra oil selected"
+        : [
+            `Extra Oil: ${selectedExtraOil?.label}`,
+            `Extra Oil Bottles: ${selectedExtraOil?.bottles}`,
+            `Extra Oil Price: ${selectedExtraOil?.price}`,
+          ].join("\n");
 
     const message = [
       "Hello ScentMason, I want to place an order.",
@@ -35,8 +64,12 @@ export default function OrderForm() {
       `Address: ${address}`,
       "",
       `Package: ${selectedPackage?.name}`,
-      `Price: ${selectedPackage?.price}`,
-      `Details: ${selectedPackage?.description}`,
+      `Package Price: ${selectedPackage?.price}`,
+      `Package Details: ${selectedPackage?.description}`,
+      "",
+      extraOilLine,
+      "",
+      `Estimated Total: ${formatNaira(estimatedTotal)}`,
       "",
       "Please contact me to confirm my order before dispatch.",
     ].join("\n");
@@ -72,7 +105,7 @@ export default function OrderForm() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-[var(--surface-strong)]">
             <img
               src={sectionImages.orderForm}
-              alt="ScentMason order package with diffuser and fragrance oil"
+              alt="ScentMason order package with automatic fragrance machine and fragrance oil"
               className="h-full w-full object-cover"
               loading="lazy"
             />
@@ -84,7 +117,7 @@ export default function OrderForm() {
             </p>
 
             <p className="mt-1 text-[1.35rem] font-black leading-[1.12] tracking-[-0.01em] text-[var(--primary)]">
-              Diffuser + Signature Oil + Mount + USB Cable
+              Machine + Signature Oil + Mount + USB Cable
             </p>
 
             <p className="mt-2 text-[17px] font-bold leading-8 text-[var(--text-muted)]">
@@ -93,7 +126,18 @@ export default function OrderForm() {
           </div>
         </div>
 
-        <div className="mt-5 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-soft">
+        <div className="mt-6 rounded-[2.25rem] border-2 border-green-500 bg-[var(--surface)] p-4 shadow-[0_0_0_5px_rgba(34,197,94,0.12)]">
+          <div className="mb-5 flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-3">
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-600" />
+            </span>
+
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-green-800">
+              Order Page
+            </p>
+          </div>
+
           <div className="rounded-[1.5rem] border border-[var(--primary)] bg-[var(--primary)] p-4 shadow-soft">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -116,12 +160,12 @@ export default function OrderForm() {
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl bg-white/10 p-3">
-              <p className="text-[17px] font-bold leading-8 text-white">
-                Less than 3 spray cans a month — but your home smells incredible
-                for months.
-              </p>
-            </div>
+             <div className="mt-4 rounded-2xl border-2 border-red-600 bg-red-50 p-4 shadow-soft">
+        <p className="text-[17px] font-black leading-8 text-red-700">
+             IMPORTANT: PLEASE DO NOT fill the form if you don&apos;t have the money for it...
+            OR if you&apos;re travelling in the next 2-4 days.
+         </p>
+        </div>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-5">
@@ -144,7 +188,7 @@ export default function OrderForm() {
 
                     <label
                       htmlFor={`package-${item.id}`}
-                      className="block w-full cursor-pointer rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition peer-checked:border-[var(--primary)] peer-checked:bg-[var(--background)] peer-checked:ring-2 peer-checked:ring-[var(--primary)]"
+                      className="block w-full cursor-pointer rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition peer-checked:border-green-500 peer-checked:bg-[var(--background)] peer-checked:ring-2 peer-checked:ring-green-500"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
@@ -173,6 +217,70 @@ export default function OrderForm() {
                           {item.savings ? (
                             <p className="mt-1 text-xs font-black text-[var(--accent)]">
                               {item.savings}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <p className="mb-2 text-[19px] font-black text-[var(--primary)]">
+                Add extra oil
+              </p>
+
+              <p className="mb-3 text-[17px] font-medium leading-8 text-[var(--text-muted)]">
+                Want extra fragrance oil with your order? Select how many extra
+                bottles you want added.
+              </p>
+
+              <div className="space-y-3">
+                {extraOilOptions.map((item, index) => (
+                  <div key={item.id}>
+                    <input
+                      id={`extra-oil-${item.id}`}
+                      type="radio"
+                      name="extraOilId"
+                      value={item.id}
+                      defaultChecked={index === 0}
+                      className="peer sr-only"
+                    />
+
+                    <label
+                      htmlFor={`extra-oil-${item.id}`}
+                      className="block w-full cursor-pointer rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition peer-checked:border-green-500 peer-checked:bg-[var(--background)] peer-checked:ring-2 peer-checked:ring-green-500"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-[1.15rem] font-black leading-[1.12] tracking-[-0.01em] text-[var(--primary)]">
+                              {item.label}
+                            </p>
+
+                            {"badge" in item && item.badge ? (
+                              <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-black text-green-800">
+                                {item.badge}
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <p className="mt-2 text-[17px] font-bold leading-8 text-[var(--text-muted)]">
+                            {item.description}
+                          </p>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <p className="text-xl font-black text-[var(--primary)]">
+                            {item.price}
+                          </p>
+
+                          {item.bottles > 0 ? (
+                            <p className="mt-1 text-xs font-black text-[var(--accent)]">
+                              {item.bottles} bottle
+                              {item.bottles > 1 ? "s" : ""}
                             </p>
                           ) : null}
                         </div>
@@ -234,7 +342,7 @@ export default function OrderForm() {
 
             <button
               type="submit"
-              className="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-[var(--primary)] px-6 py-4 text-center text-base font-black text-white shadow-soft transition hover:bg-[var(--primary-hover)]"
+              className="mt-5 flex min-h-14 w-full items-center justify-center rounded-full bg-green-600 px-6 py-4 text-center text-base font-black text-white shadow-soft transition hover:bg-green-700"
             >
               {orderForm.submitLabel}
             </button>
@@ -246,8 +354,8 @@ export default function OrderForm() {
                 key={point}
                 className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3"
               >
-                <p className="text-sm font-black leading-6 text-[var(--primary)]">
-                  {point}
+                <p className="text-center text-sm font-black leading-6 text-[var(--primary)]">
+              {point}
                 </p>
               </div>
             ))}

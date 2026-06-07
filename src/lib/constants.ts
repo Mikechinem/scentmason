@@ -46,7 +46,6 @@ export const OFFER = {
   savings: "Save ₦11,000 today",
   delivery: "Nationwide delivery",
   deliveryTimeline: "2–3 days delivery",
-  fulfilmentPartner: "Boxify",
   guarantee: "30-Day Replacement Guarantee",
 };
 
