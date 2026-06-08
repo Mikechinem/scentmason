@@ -75,7 +75,7 @@ export function trackOrderLead(payload: OrderLeadPayload) {
     delivery_state: payload.state,
   };
 
-  trackMetaLead(eventId, customData);
+  //trackMetaLead(eventId, customData);
   trackGA4Lead(customData);
 
   fetch("/api/track/lead", {

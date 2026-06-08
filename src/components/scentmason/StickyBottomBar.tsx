@@ -1,5 +1,4 @@
-﻿import Link from "next/link";
-import { OFFER, SECTION_IDS } from "@/lib/constants";
+﻿import { OFFER, SECTION_IDS } from "@/lib/constants";
 import { stickyBar } from "@/data/scentmason";
 
 export default function StickyBottomBar() {
@@ -17,12 +16,12 @@ export default function StickyBottomBar() {
             </p>
           </div>
 
-          <Link
+          <a
             href={`#${SECTION_IDS.orderForm}`}
             className="flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 py-3 text-center text-xs font-black !text-white shadow-soft"
           >
             {stickyBar.buttonLabel}
-          </Link>
+          </a>
         </div>
 
         <div className="mt-2 flex items-center gap-2">

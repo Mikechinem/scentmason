@@ -94,10 +94,10 @@ export default function OrderForm() {
   };
 
   return (
-    <section
-      id={SECTION_IDS.orderForm}
-      className="bg-[var(--background)] px-4 py-16"
-    >
+   <section
+  id={SECTION_IDS.orderForm}
+  className="scroll-mt-6 bg-[var(--background)] px-4 py-16"
+   >
       <div className="mx-auto w-full max-w-[430px]">
         <div>
           <p className="mb-4 inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[15px] font-black text-[var(--accent)]">
