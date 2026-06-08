@@ -49,6 +49,12 @@ export async function GET() {
   return NextResponse.json({
     status: "ok",
     message: "ScentMason Meta CAPI Lead route is active.",
+    envCheck: {
+      hasDatasetId: Boolean(process.env.META_DATASET_ID),
+      hasAccessToken: Boolean(process.env.META_ACCESS_TOKEN),
+      graphVersion: process.env.META_GRAPH_API_VERSION || "v25.0",
+      hasTestEventCode: Boolean(process.env.META_TEST_EVENT_CODE),
+    },
   });
 }
 
@@ -63,8 +69,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Missing META_DATASET_ID or META_ACCESS_TOKEN environment variable.",
+          message: "Missing Meta environment variables.",
+          envCheck: {
+            hasDatasetId: Boolean(datasetId),
+            hasAccessToken: Boolean(accessToken),
+            graphVersion,
+          },
         },
         { status: 500 }
       );
@@ -93,7 +103,7 @@ export async function POST(req: NextRequest) {
           event_time: Math.floor(Date.now() / 1000),
           event_id: eventId,
           action_source: "website",
-          event_source_url: body.eventSourceUrl,
+          event_source_url: body.eventSourceUrl || "https://scentmason.vercel.app",
           user_data: userData,
           custom_data: removeEmptyValues({
             currency: "NGN",
@@ -104,25 +114,37 @@ export async function POST(req: NextRequest) {
       ...(testEventCode ? { test_event_code: testEventCode } : {}),
     };
 
-    const response = await fetch(
-      `https://graph.facebook.com/${graphVersion}/${datasetId}/events?access_token=${accessToken}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(eventPayload),
-      }
-    );
+    const metaUrl = `https://graph.facebook.com/${graphVersion}/${datasetId}/events?access_token=${accessToken}`;
 
-    const result = await response.json();
+    const response = await fetch(metaUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(eventPayload),
+    });
+
+    const result = await response.json().catch(() => null);
 
     if (!response.ok) {
+      console.error("Meta CAPI failed:", {
+        status: response.status,
+        result,
+      });
+
       return NextResponse.json(
         {
           success: false,
           message: "Meta CAPI request failed.",
-          result,
+          metaStatus: response.status,
+          metaResult: result,
+          debug: {
+            hasDatasetId: Boolean(datasetId),
+            hasAccessToken: Boolean(accessToken),
+            graphVersion,
+            eventName,
+            eventId,
+          },
         },
         { status: 500 }
       );
@@ -130,13 +152,16 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      message: "Meta CAPI Lead event sent.",
       result,
     });
   } catch (error) {
+    console.error("Lead tracking route crashed:", error);
+
     return NextResponse.json(
       {
         success: false,
-        message: "Lead tracking route failed.",
+        message: "Lead tracking route crashed.",
         error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
