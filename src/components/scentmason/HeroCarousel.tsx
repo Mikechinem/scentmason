@@ -11,12 +11,12 @@ export default function HeroCarousel() {
       <div className="mx-auto w-full max-w-[430px]">
         <nav className="mb-4 flex items-center justify-between gap-3 rounded-full border border-[#E7DED3] bg-white px-2.5 py-2 shadow-soft">
           <a href="/" className="flex min-w-0 items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black text-sm font-black text-white">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3B1F0E] text-sm font-black text-white">
               SM
             </div>
 
             <div className="min-w-0 leading-none">
-              <p className="truncate text-[15px] font-black text-black">
+              <p className="truncate text-[15px] font-black text-[#3B1F0E]">
                 ScentMason
               </p>
               <p className="mt-0.5 truncate text-[11px] font-bold text-[#6B5A4A]">

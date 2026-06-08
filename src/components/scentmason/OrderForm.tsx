@@ -138,8 +138,11 @@ export default function OrderForm() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-[2.25rem] border-2 border-green-500 bg-[var(--surface)] p-4 shadow-[0_0_0_5px_rgba(34,197,94,0.12)]">
-          <div className="mb-5 flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-3">
+        {/* Scroll target for sticky bar */}
+         <span id="order-form-start" className="block scroll-mt-32"/>
+       <div className="mt-6 rounded-[2.25rem] border-2 border-green-500 bg-[var(--surface)] p-4 shadow-[0_0_0_5px_rgba(34,197,94,0.12)]">
+           
+           <div className="mb-5 flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-3">
             <span className="relative flex h-2.5 w-2.5 shrink-0">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-600" />
