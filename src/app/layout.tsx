@@ -1,6 +1,8 @@
 ﻿import type { Metadata } from "next";
 import "./globals.css";
 import { BRAND, SITE } from "@/lib/constants";
+import MetaPixel from "@/components/tracking/MetaPixel";
+import GoogleAnalytics from "@/components/tracking/GoogleAnalytics";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} | Rechargeable Automatic Fragrance Diffuser`,
@@ -24,7 +26,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-NG">
-      <body>{children}</body>
+      <body>  
+        <MetaPixel />
+        <GoogleAnalytics />
+        {children}
+        </body>
     </html>
   );
 }

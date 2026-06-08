@@ -1,5 +1,5 @@
 ﻿"use client";
-
+import { trackOrderLead } from "@/lib/tracking";
 import { type FormEvent } from "react";
 import {
   extraOilOptions,
@@ -77,6 +77,18 @@ export default function OrderForm() {
     const whatsappUrl = `https://wa.me/${
       WHATSAPP.salesRepNumber
     }?text=${encodeURIComponent(message)}`;
+
+    trackOrderLead({
+  phone,
+  value: estimatedTotal,
+  currency: "NGN",
+  packageName: selectedPackage?.name,
+  packagePrice: selectedPackage?.price,
+  extraOil: selectedExtraOil?.label,
+  extraOilPrice: selectedExtraOil?.price,
+  estimatedTotal: formatNaira(estimatedTotal),
+  state,
+});
 
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };

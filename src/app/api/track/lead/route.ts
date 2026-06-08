@@ -1,18 +1,145 @@
-﻿import { NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
+
+type LeadRequestBody = {
+  eventId?: string;
+  eventName?: string;
+  eventSourceUrl?: string;
+  fbp?: string;
+  fbc?: string;
+  phone?: string;
+  customData?: Record<string, unknown>;
+};
+
+function removeEmptyValues<T extends Record<string, unknown>>(obj: T) {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => {
+      if (value === undefined || value === null || value === "") return false;
+      if (Array.isArray(value) && value.length === 0) return false;
+      return true;
+    })
+  );
+}
+
+function getClientIp(req: NextRequest) {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim();
+  }
+
+  return (
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-real-ip") ||
+    undefined
+  );
+}
+
+function normalizePhone(phone?: string) {
+  if (!phone) return "";
+
+  return phone.replace(/\D/g, "");
+}
+
+function sha256(value: string) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
 
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    message: "ScentMason lead tracking route is active.",
+    message: "ScentMason Meta CAPI Lead route is active.",
   });
 }
 
-export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
+export async function POST(req: NextRequest) {
+  try {
+    const datasetId = process.env.META_DATASET_ID;
+    const accessToken = process.env.META_ACCESS_TOKEN;
+    const graphVersion = process.env.META_GRAPH_API_VERSION || "v25.0";
+    const testEventCode = process.env.META_TEST_EVENT_CODE;
 
-  return NextResponse.json({
-    success: true,
-    message: "Lead tracking request received.",
-    data: body,
-  });
+    if (!datasetId || !accessToken) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Missing META_DATASET_ID or META_ACCESS_TOKEN environment variable.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const body = (await req.json().catch(() => ({}))) as LeadRequestBody;
+
+    const eventName = body.eventName || "Lead";
+    const eventId = body.eventId || `server_${Date.now()}`;
+    const userAgent = req.headers.get("user-agent") || undefined;
+    const clientIp = getClientIp(req);
+    const normalizedPhone = normalizePhone(body.phone);
+
+    const userData = removeEmptyValues({
+      client_ip_address: clientIp,
+      client_user_agent: userAgent,
+      fbp: body.fbp,
+      fbc: body.fbc,
+      ph: normalizedPhone ? [sha256(normalizedPhone)] : undefined,
+    });
+
+    const eventPayload = {
+      data: [
+        {
+          event_name: eventName,
+          event_time: Math.floor(Date.now() / 1000),
+          event_id: eventId,
+          action_source: "website",
+          event_source_url: body.eventSourceUrl,
+          user_data: userData,
+          custom_data: removeEmptyValues({
+            currency: "NGN",
+            ...body.customData,
+          }),
+        },
+      ],
+      ...(testEventCode ? { test_event_code: testEventCode } : {}),
+    };
+
+    const response = await fetch(
+      `https://graph.facebook.com/${graphVersion}/${datasetId}/events?access_token=${accessToken}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(eventPayload),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Meta CAPI request failed.",
+          result,
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      result,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Lead tracking route failed.",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
 }
