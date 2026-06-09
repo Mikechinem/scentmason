@@ -6,7 +6,7 @@ export default function FAQSection() {
       <div className="mx-auto w-full max-w-[430px]">
         <div>
           <p className="mb-4 inline-flex rounded-full border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-[15px] font-black text-[var(--accent)]">
-            Questions Before You Order
+            Questions Before You Order?
           </p>
 
           <h2 className="text-[2.1rem] font-black leading-[1.08] tracking-[-0.01em] text-[var(--primary)]">

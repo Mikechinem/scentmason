@@ -6,6 +6,7 @@ import HowItWorks from "@/components/scentmason/HowItWorks";
 import WhatsInTheBox from "@/components/scentmason/WhatsInTheBox";
 import ComparisonTable from "@/components/scentmason/ComparisonTable";
 import OrderForm from "@/components/scentmason/OrderForm";
+import FulfilmentTrust from "@/components/scentmason/FulfilmentTrust";
 import FAQSection from "@/components/scentmason/FAQSection";
 import StickyBottomBar from "@/components/scentmason/StickyBottomBar";
 
@@ -20,6 +21,7 @@ export default function Home() {
       <WhatsInTheBox />
       <ComparisonTable />
       <OrderForm />
+      <FulfilmentTrust />
       <FAQSection />
       <StickyBottomBar />
     </main>

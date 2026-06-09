@@ -31,7 +31,7 @@ const COMPARISON_IMAGE =
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el1.png?updatedAt=1780413594782";
 
 const ORDER_FORM_IMAGE =
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/what's%20inside_package.png";
+  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/unbox_real.png";
 
 export const sectionImages = {
   comparison: COMPARISON_IMAGE,
@@ -106,7 +106,7 @@ export const painSection = {
   subheadline:
     "You do not want to babysit a spray can, fight with plug sockets, or worry that guests will walk into a room that feels heavy.",
   image:
-    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spa_woman_refreshed.png?updatedAt=1780413593619",
+    "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/model_girl_prd_real.png",
   
     imageAlt:
     "A Nigerian home showing the everyday problem of weak room fragrance before using ScentMason Automatic Fragrance Machine",
@@ -171,6 +171,24 @@ export const productIntro = {
       id: "product-gallery-5",
       image:
         "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el3.png?updatedAt=1780413593766",
+      imageAlt: "ScentMason automatic fragrance machine product view five",
+    },
+    {
+      id: "product-gallery-6",
+      image:
+        "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el6.png?updatedAt=1780413593841",
+      imageAlt: "ScentMason automatic fragrance machine product view five",
+    },
+    {
+      id: "product-gallery-7",
+      image:
+        "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el4.png?updatedAt=1780413594402",
+      imageAlt: "ScentMason automatic fragrance machine product view five",
+    },
+    {
+      id: "product-gallery-8",
+      image:
+        "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/prd2x.png?updatedAt=1781025552653",
       imageAlt: "ScentMason automatic fragrance machine product view five",
     },
   ],
@@ -353,11 +371,13 @@ export const testimonials: Testimonial[] = [
 ];
 
 export const fulfilmentTrust = {
-  eyebrow: "Delivered by Boxify",
-  headline: "Place your order. We confirm. Boxify handles delivery.",
+  headline: "We Hate To See You Scammed...",
   description:
-    "After you submit your order, our sales rep confirms your details on WhatsApp or phone call before dispatch. Your ScentMason order is then handled through Boxify for smooth nationwide delivery.",
-  points: [
+    "You don't pay a dime until the product reaches your door step.",
+     image: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/prd2x.png?updatedAt=1781025552653",
+  imageAlt:
+    "Every product is carefully confirmed and packaged before delivery",
+    points: [
   "🚚 Nationwide delivery",
   "⏱️ 2–3 days delivery timeline",
   "💬 WhatsApp confirmation before dispatch",
