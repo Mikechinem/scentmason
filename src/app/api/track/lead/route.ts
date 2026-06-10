@@ -1,9 +1,10 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 
+export const runtime = "nodejs";
+
 type LeadRequestBody = {
   eventId?: string;
-  eventName?: string;
   eventSourceUrl?: string;
   fbp?: string;
   fbc?: string;
@@ -35,35 +36,64 @@ function getClientIp(req: NextRequest) {
   );
 }
 
-function normalizePhone(phone?: string) {
+function normalizeNigerianPhone(phone?: string) {
   if (!phone) return "";
 
-  return phone.replace(/\D/g, "");
+  let cleaned = phone.replace(/\D/g, "");
+
+  if (cleaned.startsWith("0")) {
+    cleaned = `234${cleaned.slice(1)}`;
+  }
+
+  if (cleaned.startsWith("2340")) {
+    cleaned = `234${cleaned.slice(4)}`;
+  }
+
+  return cleaned;
 }
 
 function sha256(value: string) {
   return crypto.createHash("sha256").update(value).digest("hex");
 }
 
+function getMetaEnv() {
+  const datasetId =
+    process.env.META_DATASET_ID ||
+    process.env.META_PIXEL_ID ||
+    process.env.NEXT_PUBLIC_META_PIXEL_ID;
+
+  const accessToken =
+    process.env.META_ACCESS_TOKEN || process.env.META_CAPI_ACCESS_TOKEN;
+
+  const graphVersion = process.env.META_GRAPH_API_VERSION || "v25.0";
+  const testEventCode = process.env.META_TEST_EVENT_CODE;
+
+  return {
+    datasetId,
+    accessToken,
+    graphVersion,
+    testEventCode,
+  };
+}
+
 export async function GET() {
+  const { datasetId, accessToken, graphVersion, testEventCode } = getMetaEnv();
+
   return NextResponse.json({
     status: "ok",
     message: "ScentMason Meta CAPI Lead route is active.",
     envCheck: {
-      hasDatasetId: Boolean(process.env.META_DATASET_ID),
-      hasAccessToken: Boolean(process.env.META_ACCESS_TOKEN),
-      graphVersion: process.env.META_GRAPH_API_VERSION || "v25.0",
-      hasTestEventCode: Boolean(process.env.META_TEST_EVENT_CODE),
+      hasDatasetId: Boolean(datasetId),
+      hasAccessToken: Boolean(accessToken),
+      graphVersion,
+      hasTestEventCode: Boolean(testEventCode),
     },
   });
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const datasetId = process.env.META_DATASET_ID;
-    const accessToken = process.env.META_ACCESS_TOKEN;
-    const graphVersion = process.env.META_GRAPH_API_VERSION || "v25.0";
-    const testEventCode = process.env.META_TEST_EVENT_CODE;
+    const { datasetId, accessToken, graphVersion, testEventCode } = getMetaEnv();
 
     if (!datasetId || !accessToken) {
       return NextResponse.json(
@@ -82,11 +112,11 @@ export async function POST(req: NextRequest) {
 
     const body = (await req.json().catch(() => ({}))) as LeadRequestBody;
 
-    const eventName = body.eventName || "Lead";
-    const eventId = body.eventId || `server_${Date.now()}`;
+    const eventName = "Lead";
+    const eventId = body.eventId || `lead_${Date.now()}`;
     const userAgent = req.headers.get("user-agent") || undefined;
     const clientIp = getClientIp(req);
-    const normalizedPhone = normalizePhone(body.phone);
+    const normalizedPhone = normalizeNigerianPhone(body.phone);
 
     const userData = removeEmptyValues({
       client_ip_address: clientIp,
@@ -94,6 +124,7 @@ export async function POST(req: NextRequest) {
       fbp: body.fbp,
       fbc: body.fbc,
       ph: normalizedPhone ? [sha256(normalizedPhone)] : undefined,
+      external_id: normalizedPhone ? [sha256(normalizedPhone)] : undefined,
     });
 
     const eventPayload = {
@@ -103,7 +134,10 @@ export async function POST(req: NextRequest) {
           event_time: Math.floor(Date.now() / 1000),
           event_id: eventId,
           action_source: "website",
-          event_source_url: body.eventSourceUrl || "https://scentmason.vercel.app",
+          event_source_url:
+            body.eventSourceUrl ||
+            process.env.NEXT_PUBLIC_SITE_URL ||
+            "https://scentmason.vercel.app",
           user_data: userData,
           custom_data: removeEmptyValues({
             currency: "NGN",
@@ -153,6 +187,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Meta CAPI Lead event sent.",
+      metaStatus: response.status,
       result,
     });
   } catch (error) {

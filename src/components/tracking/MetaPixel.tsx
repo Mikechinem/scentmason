@@ -4,12 +4,7 @@ import Script from "next/script";
 
 declare global {
   interface Window {
-    fbq?: (
-      command: "init" | "track" | "trackCustom",
-      eventNameOrPixelId: string,
-      params?: Record<string, unknown>,
-      options?: Record<string, unknown>
-    ) => void;
+    fbq?: (...args: unknown[]) => void;
     _fbq?: unknown;
   }
 }
@@ -34,6 +29,8 @@ export default function MetaPixel() {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
+
+            fbq('set', 'autoConfig', 'false', '${META_PIXEL_ID}');
             fbq('init', '${META_PIXEL_ID}');
             fbq('track', 'PageView');
           `,
