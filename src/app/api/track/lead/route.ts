@@ -112,8 +112,27 @@ export async function POST(req: NextRequest) {
 
     const body = (await req.json().catch(() => ({}))) as LeadRequestBody;
 
+    /**
+     * Important:
+     * The frontend must generate this same eventId and use it for:
+     * 1. Browser Pixel Lead eventID
+     * 2. Server CAPI event_id
+     *
+     * This prevents Meta from counting browser Lead and server Lead as two leads.
+     */
+    if (!body.eventId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Missing eventId. Browser Pixel Lead and CAPI Lead must share the same eventId for deduplication.",
+        },
+        { status: 400 }
+      );
+    }
+
     const eventName = "Lead";
-    const eventId = body.eventId || `lead_${Date.now()}`;
+    const eventId = body.eventId;
     const userAgent = req.headers.get("user-agent") || undefined;
     const clientIp = getClientIp(req);
     const normalizedPhone = normalizeNigerianPhone(body.phone);
@@ -188,6 +207,8 @@ export async function POST(req: NextRequest) {
       success: true,
       message: "Meta CAPI Lead event sent.",
       metaStatus: response.status,
+      eventName,
+      eventId,
       result,
     });
   } catch (error) {
