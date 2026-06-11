@@ -14,6 +14,9 @@ declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
+    ttq?: {
+      track?: (...args: unknown[]) => void;
+    };
   }
 }
 
@@ -35,6 +38,26 @@ function getCookie(name: string) {
     .find((row) => row.startsWith(`${name}=`));
 
   return cookie ? decodeURIComponent(cookie.split("=")[1] || "") : "";
+}
+
+function getLocalStorageValue(name: string) {
+  if (typeof window === "undefined") return "";
+
+  try {
+    return window.localStorage.getItem(name) || "";
+  } catch {
+    return "";
+  }
+}
+
+function getQueryParam(name: string) {
+  if (typeof window === "undefined") return "";
+
+  try {
+    return new URLSearchParams(window.location.search).get(name) || "";
+  } catch {
+    return "";
+  }
 }
 
 function generateEventId() {
@@ -65,6 +88,29 @@ export function trackMetaLead(
   );
 }
 
+export function trackTikTokLead(
+  eventId: string,
+  customData?: Record<string, unknown>
+) {
+  if (typeof window === "undefined") return;
+
+  const ttq = (
+    window as Window & {
+      ttq?: {
+        track?: (...args: unknown[]) => void;
+      };
+    }
+  ).ttq;
+
+  ttq?.track?.("SubmitForm", {
+    event_id: eventId,
+    content_name: "ScentMason Order Lead",
+    content_type: "product",
+    content_category: "Automatic Fragrance Machine",
+    ...customData,
+  });
+}
+
 export function trackGA4Lead(customData?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
 
@@ -77,13 +123,6 @@ export function trackGA4Lead(customData?: Record<string, unknown>) {
 export function trackOrderLead(payload: OrderLeadPayload) {
   if (typeof window === "undefined") return;
 
-  /**
-   * One eventId is generated here and reused for:
-   * 1. Browser Pixel Lead eventID
-   * 2. Server CAPI Lead event_id
-   *
-   * This prevents Meta from counting browser Lead + server Lead as two separate leads.
-   */
   const eventId = generateEventId();
 
   const customData = removeEmptyValues({
@@ -99,13 +138,16 @@ export function trackOrderLead(payload: OrderLeadPayload) {
     delivery_state: payload.state,
   });
 
-  // Browser-side Lead: visible in Chrome Meta Pixel Helper.
+  // Browser-side Meta Lead.
   trackMetaLead(eventId, customData);
+
+  // Browser-side TikTok SubmitForm.
+  trackTikTokLead(eventId, customData);
 
   // GA4 lead event.
   trackGA4Lead(customData);
 
-  // Server-side CAPI Lead: visible in Meta Events Manager.
+  // Server-side Meta CAPI Lead.
   fetch("/api/track/lead", {
     method: "POST",
     keepalive: true,
@@ -117,6 +159,26 @@ export function trackOrderLead(payload: OrderLeadPayload) {
       eventSourceUrl: window.location.href,
       fbp: getCookie("_fbp"),
       fbc: getCookie("_fbc"),
+      phone: payload.phone,
+      customData,
+    }),
+  }).catch(() => {
+    // Silent fail so the buyer still reaches WhatsApp.
+  });
+
+  // Server-side TikTok Events API SubmitForm.
+  fetch("/api/track/tiktok/lead", {
+    method: "POST",
+    keepalive: true,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      eventId,
+      eventSourceUrl: window.location.href,
+      referrer: document.referrer,
+      ttp: getCookie("_ttp"),
+      ttclid: getQueryParam("ttclid") || getLocalStorageValue("ttclid"),
       phone: payload.phone,
       customData,
     }),
