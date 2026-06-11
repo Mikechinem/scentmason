@@ -3,6 +3,7 @@
 import Script from "next/script";
 
 const TIKTOK_PIXEL_CODE = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_CODE;
+console.log("TikTok Pixel ENV:", TIKTOK_PIXEL_CODE);
 
 export default function TikTokPixel() {
   if (!TIKTOK_PIXEL_CODE) return null;
@@ -14,43 +15,71 @@ export default function TikTokPixel() {
       dangerouslySetInnerHTML={{
         __html: `
           !function (w, d, t) {
-            w.TiktokAnalyticsObject=t;
-            var ttq=w[t]=w[t]||[];
-            ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"];
-            ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
-            for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
-            ttq.instance=function(t){
-              for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);
-              return e;
-            };
-            ttq.load=function(e,n){
-              var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;
-              ttq._i=ttq._i||{};
-              ttq._i[e]=[];
-              ttq._i[e]._u=r;
-              ttq._t=ttq._t||{};
-              ttq._t[e]=+new Date;
-              ttq._o=ttq._o||{};
-              ttq._o[e]=n||{};
-              n=document.createElement("script");
-              n.type="text/javascript";
-              n.async=!0;
-              n.src=r+"?sdkid="+e+"&lib="+t;
-              e=document.getElementsByTagName("script")[0];
-              e.parentNode.insertBefore(n,e);
+            w.TiktokAnalyticsObject = t;
+            var ttq = w[t] = w[t] || [];
+
+            ttq.methods = [
+              "page",
+              "track",
+              "identify",
+              "instances",
+              "debug",
+              "on",
+              "off",
+              "once",
+              "ready",
+              "alias",
+              "group",
+              "enableCookie",
+              "disableCookie",
+              "holdConsent",
+              "revokeConsent",
+              "grantConsent"
+            ];
+
+            ttq.setAndDefer = function (target, method) {
+              target[method] = function () {
+                target.push([method].concat(Array.prototype.slice.call(arguments, 0)));
+              };
             };
 
-            try {
-              var params = new URLSearchParams(window.location.search);
-              var ttclid = params.get("ttclid");
-              if (ttclid) {
-                localStorage.setItem("ttclid", ttclid);
+            for (var i = 0; i < ttq.methods.length; i++) {
+              ttq.setAndDefer(ttq, ttq.methods[i]);
+            }
+
+            ttq.instance = function (pixelCode) {
+              var instance = ttq._i[pixelCode] || [];
+              for (var i = 0; i < ttq.methods.length; i++) {
+                ttq.setAndDefer(instance, ttq.methods[i]);
               }
-            } catch (e) {}
+              return instance;
+            };
 
-            ttq.load('${TIKTOK_PIXEL_CODE}');
+            ttq.load = function (pixelCode, options) {
+              var scriptUrl = "https://analytics.tiktok.com/i18n/pixel/events.js";
+
+              ttq._i = ttq._i || {};
+              ttq._i[pixelCode] = [];
+              ttq._i[pixelCode]._u = scriptUrl;
+
+              ttq._t = ttq._t || {};
+              ttq._t[pixelCode] = +new Date();
+
+              ttq._o = ttq._o || {};
+              ttq._o[pixelCode] = options || {};
+
+              var script = d.createElement("script");
+              script.type = "text/javascript";
+              script.async = true;
+              script.src = scriptUrl + "?sdkid=" + pixelCode + "&lib=" + t;
+
+              var firstScript = d.getElementsByTagName("script")[0];
+              firstScript.parentNode.insertBefore(script, firstScript);
+            };
+
+            ttq.load("${TIKTOK_PIXEL_CODE}");
             ttq.page();
-          }(window, document, 'ttq');
+          }(window, document, "ttq");
         `,
       }}
     />
