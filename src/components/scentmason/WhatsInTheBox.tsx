@@ -2,6 +2,7 @@ import {
   sectionImages,
   whatsInTheBox,
   whatsInTheBoxCallout,
+  whatsInTheBoxVideo,
 } from "@/data/scentmason";
 
 export default function WhatsInTheBox() {
@@ -9,6 +10,28 @@ export default function WhatsInTheBox() {
     <section className="bg-[var(--background)] px-4 py-16">
       <div className="mx-auto w-full max-w-[430px]">
         <div>
+
+          <div className="mt-7 rounded-[2rem] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-soft">
+  <div className="mb-4 px-2">
+    <h3 className="text-[1.6rem] font-black leading-[1.08] tracking-[-0.01em] text-[var(--primary)]">
+      {whatsInTheBoxVideo.title}
+    </h3>
+
+    <p className="mt-2 text-[17px] font-bold leading-7 text-[var(--text-muted)]">
+      {whatsInTheBoxVideo.description}
+    </p>
+  </div>
+
+  <div className="overflow-hidden rounded-[1.5rem] bg-black">
+    <video
+      src={whatsInTheBoxVideo.videoUrl}
+      controls
+      playsInline
+      preload="metadata"
+      className="h-auto w-full"
+    />
+  </div>
+</div>
           <p className="mb-4 inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-[15px] font-black text-[var(--accent)]">
             What’s Inside Your Order
           </p>

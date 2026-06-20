@@ -3,27 +3,6 @@
 import { stickyBar } from "@/data/scentmason";
 
 export default function StickyBottomBar() {
-  const scrollToOrderForm = (
-    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>
-  ) => {
-    event.preventDefault();
-
-    const target = document.getElementById("order-form-start");
-
-    if (!target) {
-      window.location.hash = "order-form-start";
-      return;
-    }
-
-    const targetPosition =
-      target.getBoundingClientRect().top + window.scrollY - 96;
-
-    window.scrollTo({
-      top: targetPosition,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3">
       <div className="mx-auto w-full max-w-[430px] rounded-[1.5rem] border border-[var(--border)] bg-[var(--background)] p-3 shadow-soft">
@@ -40,7 +19,6 @@ export default function StickyBottomBar() {
 
           <a
             href="#order-form-start"
-            onClick={scrollToOrderForm}
             className="flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 py-3 text-center text-xs font-black !text-white shadow-soft"
           >
             {stickyBar.buttonLabel}

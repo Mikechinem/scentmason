@@ -317,6 +317,13 @@ export const whatsInTheBox: BoxItem[] = [
   },
 ];
 
+export const whatsInTheBoxVideo = {
+  title: "Watch the quick unboxing",
+  description:
+    "See exactly what comes inside your ScentMason package before you order.",
+  videoUrl: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/diffus_unbox_woman.MOV",
+};
+
 export const whatsInTheBoxCallout =
   "Everything you need. Nothing missing. Unbox it, mount it, done.";
 
