@@ -365,14 +365,17 @@ export default function RechargeableDiffuserPage() {
       </section>
 
       {/* Contact */}
-      <section className="px-4 py-10 text-center">
-        <p className="text-[16px] font-medium text-black/70">
-          For more enquiries call us on{" "}
-          <a href="tel:07064969603" className="font-bold">
-            0706 496 9603
-          </a>
-        </p>
-      </section>
+      <section className="mx-4 my-10 rounded-[2rem] bg-white px-6 py-12 text-center shadow-[0_20px_60px_rgba(0,0,0,0.12)] ring-1 ring-black/5 sm:mx-10 sm:px-10 sm:py-16">
+  <p className="mx-auto max-w-3xl text-[24px] font-semibold leading-[1.25] text-black sm:text-[34px]">
+    For more enquiries, call us on{" "}
+    <a
+      href="tel:07064969603"
+      className="inline-block font-black text-black underline decoration-black/30 underline-offset-4 transition hover:scale-[1.03]"
+    >
+      0706 496 9603
+    </a>
+  </p>
+</section>
 
       {/* Facebook disclaimer */}
       <p className="mx-auto max-w-[720px] px-4 pb-14 text-center text-[11px] font-medium leading-5 text-black/40">

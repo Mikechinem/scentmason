@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 
 type SetOption = "1" | "2" | "3" | "4" | "5";
 type OilOption = "0" | "1" | "2" | "3" | "4" | "5";
@@ -52,11 +52,38 @@ export default function OrderForm3() {
   const totalOilBottles = Number(oil) + (freeOilGranted ? 1 : 0);
   const total = setPricing.price + oilPricing.price;
 
+  // Manage body scroll layout lock when modal popup context is open
+  useEffect(() => {
+    if (submitted) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => { document.body.style.overflow = "unset"; };
+  }, [submitted]);
+
+  // Smooth scroll sync handler exclusively optimized for error validations
+  useEffect(() => {
+    if (error) {
+      const errorEl = document.getElementById("form-error-message");
+      if (errorEl) {
+        errorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [error]);
+
+  const getCookie = (cookieName: string) => {
+    if (typeof document === "undefined") return undefined;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${cookieName}=`);
+    if (parts.length === 2) return parts.pop()?.split(";").shift();
+    return undefined;
+  };
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
 
-    // Read values directly from the DOM elements to ensure accurate fallback data
     const finalSets = (document.getElementById("native-hidden-sets") as HTMLInputElement)?.value || sets;
     const finalOil = (document.getElementById("native-hidden-oil") as HTMLInputElement)?.value || oil;
     const currentTotal = SET_PRICING[finalSets as SetOption].price + OIL_PRICING[finalOil as OilOption].price;
@@ -67,50 +94,79 @@ export default function OrderForm3() {
     }
 
     setSubmitting(true);
+
+    const sharedEventId = `sm_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+
     try {
       if (typeof window !== "undefined" && (window as any).fbq) {
         (window as any).fbq("track", "Lead", {
           content_name: "ScentMason Diffuser",
           value: currentTotal,
           currency: "NGN",
-          num_items: finalSets,
-        });
+          num_items: Number(finalSets),
+        }, { eventID: sharedEventId });
       }
 
-      const res = await fetch("/api/track/lead", {
+      if (typeof window !== "undefined" && (window as any).ttq) {
+        (window as any).ttq.track("CompleteRegistration", {
+          content_name: "ScentMason Diffuser",
+          value: currentTotal,
+          currency: "NGN",
+        }, { event_id: sharedEventId });
+      }
+
+      const unifiedOrderPayload = {
+        eventId: sharedEventId,
+        eventSourceUrl: currentUrl,
+        referrer: typeof document !== "undefined" ? document.referrer : undefined,
+        name,
+        phone,
+        whatsapp,
+        state,
+        address,
+        sets: finalSets,
+        setPrice: SET_PRICING[finalSets as SetOption].price,
+        oilBottlesOrdered: Number(finalOil),
+        oilBottlesFree: finalSets === "5" ? 1 : 0,
+        oilBottlesTotal: Number(finalOil) + (finalSets === "5" ? 1 : 0),
+        oilPrice: OIL_PRICING[finalOil as OilOption].price,
+        total: currentTotal,
+        fbp: getCookie("_fbp"),
+        fbc: getCookie("_fbc"),
+        ttp: getCookie("_ttp"),
+        ttclid: getCookie("ttclid"),
+      };
+
+      const metaResponse = await fetch("/api/track/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name, phone, whatsapp, state, address, 
-          sets: finalSets,
-          setPrice: SET_PRICING[finalSets as SetOption].price,
-          oilBottlesOrdered: Number(finalOil),
-          oilBottlesFree: finalSets === "5" ? 1 : 0,
-          oilBottlesTotal: Number(finalOil) + (finalSets === "5" ? 1 : 0),
-          oilPrice: OIL_PRICING[finalOil as OilOption].price,
-          total: currentTotal,
-        }),
+        body: JSON.stringify(unifiedOrderPayload),
       });
 
-      if (!res.ok) throw new Error("Request failed");
+      await fetch("/api/track/tiktok/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(unifiedOrderPayload),
+      });
+
+      if (!metaResponse.ok) throw new Error("Primary ingestion engine failed");
+      
       setSubmitted(true);
-    } catch {
+    } catch (err) {
+      console.error("Order submission tracking loop exception:", err);
       setError("Something went wrong sending your order. Please call or WhatsApp us on 0706 496 9603 to confirm.");
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (submitted) {
-    return (
-      <div className="pt-6 text-center">
-        <p className="text-[18px] font-semibold">Order Received ✅</p>
-        <p className="mt-3 text-[14px] font-medium leading-6 text-black/70">
-          Thank you, {name.split(" ")[0]}. A ScentMason sales rep will call you shortly on {phone} to confirm your order.
-        </p>
-      </div>
-    );
-  }
+  // Pre-calculate target routing parameters for dynamic customer chat matching
+  const fallbackSets = typeof document !== "undefined" ? (document.getElementById("native-hidden-sets") as HTMLInputElement)?.value : sets;
+  const selectedPackageLabel = SET_PRICING[fallbackSets as SetOption]?.label || "Order Package";
+  const whatsappUrl = `https://wa.me/2347064969603?text=${encodeURIComponent(
+    `Hello ScentMason, I just successfully completed my order for the ${selectedPackageLabel}. My name is ${name}. Please confirm my delivery details.`
+  )}`;
 
   return (
     <div className="relative z-[999999] pt-6" id="unbreakable-form-container">
@@ -224,7 +280,11 @@ export default function OrderForm3() {
           </div>
         </div>
 
-        {error && <p className="mt-4 text-[13px] font-semibold text-red-600">{error}</p>}
+        {error && (
+          <p id="form-error-message" className="mt-4 text-[13px] font-semibold text-red-600 scroll-mt-20">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
@@ -239,6 +299,43 @@ export default function OrderForm3() {
           A sales rep will call to confirm before your order is dispatched.
         </p>
       </form>
+
+      {/* PREMIUM THANK YOU MODAL OVERLAY */}
+      {submitted && (
+        <div className="fixed inset-0 z-[9999999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-md transform rounded-2xl bg-white p-6 text-center shadow-2xl animate-scaleIn transition-all border border-black/5">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-7 h-7">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+
+            <h3 className="mt-4 text-[21px] font-bold text-black tracking-tight">Order Received Successfully! ✅</h3>
+            
+            <p className="mt-2 text-[14px] font-medium leading-relaxed text-black/70 px-2">
+              Thank you <span className="font-bold text-black">{name.split(" ")[0]}</span>, your oder has been received successfully.
+            </p>
+
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-left">
+              <p className="text-[13px] font-bold text-amber-950 leading-relaxed">
+                ⚠️ WHAT NEXT? A ScentMason customer care representative will call you shortly on <span className="underline font-extrabold">{phone}</span> to verify your destination details before your order is dispatched.
+              </p>
+            </div>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 text-center text-[16px] font-bold text-white shadow-md hover:scale-[1.01] active:scale-100 transition-all"
+            >
+              <svg viewBox="0 0 32 32" className="h-5 w-5 shrink-0" fill="#ffffff">
+                <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95-.137-.17-1.103-1.47-1.103-2.8 0-1.33.7-1.984.95-2.255.246-.27.535-.337.713-.337.178 0 .357 0 .513.008.165.008.387-.063.605.462.224.54.762 1.86.83 1.994.067.135.112.293.022.47-.09.178-.135.288-.27.443-.135.157-.284.35-.405.47-.135.135-.276.282-.118.55.157.27.7 1.155 1.504 1.873 1.04.927 1.917 1.213 2.187 1.348.27.135.428.113.586-.067.157-.18.674-.785.854-1.055.18-.27.36-.225.605-.135.246.09 1.564.738 1.832.872.27.135.45.202.516.315.067.113.067.652-.227 1.483z" />
+              </svg>
+              Chat Us On WhatsApp
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* VANILLA FALLBACK ENGINE */}
       <script dangerouslySetInnerHTML={{ __html: `

@@ -10,6 +10,8 @@ type TikTokLeadRequestBody = {
   ttp?: string;
   ttclid?: string;
   phone?: string;
+  eventName?: string; // ✅ Allowed dynamic event passing from frontend
+  total?: string | number; // ✅ Fixed: Added tracking for flat total parameter
   customData?: Record<string, unknown>;
 };
 
@@ -25,11 +27,9 @@ function removeEmptyValues<T extends Record<string, unknown>>(obj: T) {
 
 function getClientIp(req: NextRequest) {
   const forwardedFor = req.headers.get("x-forwarded-for");
-
   if (forwardedFor) {
     return forwardedFor.split(",")[0]?.trim();
   }
-
   return (
     req.headers.get("cf-connecting-ip") ||
     req.headers.get("x-real-ip") ||
@@ -39,21 +39,16 @@ function getClientIp(req: NextRequest) {
 
 function normalizeNigerianPhoneForTikTok(phone?: string) {
   if (!phone) return "";
-
   let cleaned = phone.replace(/\D/g, "");
-
   if (cleaned.startsWith("0")) {
     cleaned = `234${cleaned.slice(1)}`;
   }
-
   if (cleaned.startsWith("2340")) {
     cleaned = `234${cleaned.slice(4)}`;
   }
-
   if (!cleaned.startsWith("234")) {
     cleaned = `234${cleaned}`;
   }
-
   return `+${cleaned}`;
 }
 
@@ -67,7 +62,6 @@ function sha256(value: string) {
 function getTikTokEnv() {
   const pixelCode =
     process.env.TIKTOK_PIXEL_CODE || process.env.NEXT_PUBLIC_TIKTOK_PIXEL_CODE;
-
   const accessToken = process.env.TIKTOK_ACCESS_TOKEN;
   const testEventCode = process.env.TIKTOK_TEST_EVENT_CODE;
 
@@ -80,7 +74,6 @@ function getTikTokEnv() {
 
 export async function GET() {
   const { pixelCode, accessToken, testEventCode } = getTikTokEnv();
-
   return NextResponse.json({
     status: "ok",
     message: "ScentMason TikTok Events API route is active.",
@@ -123,7 +116,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const eventName = "SubmitForm";
+    // ✅ Fixed: Changed default to "CompleteRegistration" to seamlessly pair with frontend browser logs
+    const eventName = body.eventName || "CompleteRegistration";
     const eventId = body.eventId;
     const userAgent = req.headers.get("user-agent") || undefined;
     const clientIp = getClientIp(req);
@@ -153,6 +147,7 @@ export async function POST(req: NextRequest) {
           }),
           properties: removeEmptyValues({
             currency: "NGN",
+            value: body.total, // ✅ Fixed: Order valuation value maps perfectly for deep analytical optimization
             ...body.customData,
           }),
         },
@@ -199,7 +194,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "TikTok Events API SubmitForm event sent.",
+      message: "TikTok Events API CompleteRegistration event sent.",
       tiktokStatus: response.status,
       eventName,
       eventId,
@@ -207,7 +202,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("TikTok tracking route crashed:", error);
-
     return NextResponse.json(
       {
         success: false,
