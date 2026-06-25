@@ -380,8 +380,7 @@ export default function OrderForm3() {
             var btn = e.target.closest(".native-selectable-btn");
             if (!btn) return;
             
-            e.preventDefault();
-            e.stopPropagation();
+            
 
             var type = btn.getAttribute("data-option-type");
             var val = btn.getAttribute("data-value");
