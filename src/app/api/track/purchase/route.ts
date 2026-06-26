@@ -84,7 +84,7 @@ export async function GET() {
   const { datasetId, accessToken, graphVersion, testEventCode } = getMetaEnv();
   return NextResponse.json({
     status: "ok",
-    message: "ScentMason Meta CAPI Purchase & Google Sheets route is active.", // Aligned label
+    message: "ScentMason Meta CAPI Purchase & Google Sheets route is active.",
     envCheck: {
       hasDatasetId: Boolean(datasetId),
       hasAccessToken: Boolean(accessToken),
@@ -98,7 +98,14 @@ export async function POST(req: NextRequest) {
     const { datasetId, accessToken, graphVersion, testEventCode } = getMetaEnv();
     const googleSheetsUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
 
-    if (!datasetId || !accessToken) {
+    // --- Dynamic Multi-Pixel Array Definition ---
+    const activeAccounts = [
+      { id: process.env.NEXT_PUBLIC_META_PIXEL_ID_1 || datasetId, token: process.env.META_ACCESS_TOKEN_1 || accessToken },
+      { id: process.env.NEXT_PUBLIC_META_PIXEL_ID_2, token: process.env.META_ACCESS_TOKEN_2 },
+      { id: process.env.NEXT_PUBLIC_META_PIXEL_ID_3, token: process.env.META_ACCESS_TOKEN_3 },
+    ].filter(acc => acc.id && acc.token);
+
+    if (activeAccounts.length === 0) {
       return NextResponse.json(
         { success: false, message: "Missing Meta environment variables." },
         { status: 500 }
@@ -115,7 +122,7 @@ export async function POST(req: NextRequest) {
     }
 
     // --- 1. RUN META CAPI TRACKING LOGIC ---
-    const eventName = "Purchase"; // Aligned explicitly for core purchase conversions
+    const eventName = "Purchase";
     const eventId = body.eventId;
     const userAgent = req.headers.get("user-agent") || undefined;
     const clientIp = getClientIp(req);
@@ -152,15 +159,23 @@ export async function POST(req: NextRequest) {
       ...(testEventCode ? { test_event_code: testEventCode } : {}),
     };
 
-    const metaUrl = `https://graph.facebook.com/${graphVersion}/${datasetId}/events?access_token=${accessToken}`;
-
-    const metaResponse = await fetch(metaUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(eventPayload),
+    // --- Parallel Multi-Pixel Server Firing Engine ---
+    const capiPromises = activeAccounts.map(async (account) => {
+      const metaUrl = `https://graph.facebook.com/${graphVersion}/${account.id}/events?access_token=${account.token}`;
+      const res = await fetch(metaUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(eventPayload),
+      });
+      const json = await res.json().catch(() => null);
+      return { ok: res.ok, json };
     });
 
-    const metaResult = await metaResponse.json().catch(() => null);
+    const results = await Promise.all(capiPromises);
+
+    // Structural adapters to keep your downstream error handling intact
+    const metaResponse = { ok: results.some((r) => r.ok) };
+    const metaResult = results[0]?.json || null;
 
     // --- 2. GOOGLE SHEETS DISPATCH ---
     if (googleSheetsUrl) {

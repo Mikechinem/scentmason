@@ -9,10 +9,27 @@ declare global {
   }
 }
 
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+// 1. Gather all pixel IDs dynamically.
+// We keep your old variable as a fallback so nothing breaks if it's still named that way!
+const pixelIds = [
+  process.env.NEXT_PUBLIC_META_PIXEL_ID_1 || process.env.NEXT_PUBLIC_META_PIXEL_ID,
+  process.env.NEXT_PUBLIC_META_PIXEL_ID_2,
+  process.env.NEXT_PUBLIC_META_PIXEL_ID_3,
+].filter(Boolean) as string[];
 
 export default function MetaPixel() {
-  if (!META_PIXEL_ID) return null;
+  // If no environment variables are defined, render nothing
+  if (pixelIds.length === 0) return null;
+
+  // 2. Generate the config lines dynamically for each pixel ID
+  const initScripts = pixelIds
+    .map(
+      (id) => `
+        fbq('set', 'autoConfig', 'false', '${id}');
+        fbq('init', '${id}');
+      `
+    )
+    .join("\n");
 
   return (
     <>
@@ -30,22 +47,24 @@ export default function MetaPixel() {
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
 
-            fbq('set', 'autoConfig', 'false', '${META_PIXEL_ID}');
-            fbq('init', '${META_PIXEL_ID}');
+            ${initScripts}
             fbq('track', 'PageView');
           `,
         }}
       />
 
-      <noscript>
-        <img
-          height="1"
-          width="1"
-          style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
-          alt=""
-        />
-      </noscript>
+      {/* 3. Render noscript fallback images for every active pixel ID */}
+      {pixelIds.map((id) => (
+        <noscript key={id}>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src={`https://www.facebook.com/tr?id=${id}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+      ))}
     </>
   );
 }
