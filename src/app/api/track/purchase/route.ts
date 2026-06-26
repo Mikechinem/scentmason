@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 export const runtime = "nodejs";
 
-type LeadRequestBody = {
+type PurchaseRequestBody = {
   eventId?: string;
   eventSourceUrl?: string;
   fbp?: string;
@@ -84,7 +84,7 @@ export async function GET() {
   const { datasetId, accessToken, graphVersion, testEventCode } = getMetaEnv();
   return NextResponse.json({
     status: "ok",
-    message: "ScentMason Meta CAPI Lead & Google Sheets route is active.",
+    message: "ScentMason Meta CAPI Purchase & Google Sheets route is active.", // Aligned label
     envCheck: {
       hasDatasetId: Boolean(datasetId),
       hasAccessToken: Boolean(accessToken),
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = (await req.json().catch(() => ({}))) as LeadRequestBody;
+    const body = (await req.json().catch(() => ({}))) as PurchaseRequestBody;
 
     if (!body.eventId) {
       return NextResponse.json(
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
     }
 
     // --- 1. RUN META CAPI TRACKING LOGIC ---
-    const eventName = "Lead";
+    const eventName = "Purchase"; // Aligned explicitly for core purchase conversions
     const eventId = body.eventId;
     const userAgent = req.headers.get("user-agent") || undefined;
     const clientIp = getClientIp(req);
@@ -154,7 +154,6 @@ export async function POST(req: NextRequest) {
 
     const metaUrl = `https://graph.facebook.com/${graphVersion}/${datasetId}/events?access_token=${accessToken}`;
 
-    // Execute Meta Event Dispatch
     const metaResponse = await fetch(metaUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -163,12 +162,11 @@ export async function POST(req: NextRequest) {
 
     const metaResult = await metaResponse.json().catch(() => null);
 
-    // --- 2. RUN SECURE SERVER-SIDE GOOGLE SHEETS DISPATCH ---
-    // Fixed: Only checks for url presence since Google Apps Script manages access permission policies natively
+    // --- 2. GOOGLE SHEETS DISPATCH ---
     if (googleSheetsUrl) {
       try {
         const sheetsPayload = {
-          eventId: body.eventId, // Fixed: Forwarded event tracking sequence code
+          eventId: body.eventId, 
           name: body.name || "",
           phone: body.phone || "",
           whatsapp: body.whatsapp || "", 
@@ -205,7 +203,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Lead pixel captured and sheet synchronised.",
+      message: "Purchase pixel captured and sheet synchronised.",
       eventId,
     });
   } catch (error) {

@@ -82,14 +82,26 @@ export default function OrderForm3() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (submitting) return; // UI LOCK: Stops immediate double submission rapid-clicks
     setError("");
 
     const finalSets = (document.getElementById("native-hidden-sets") as HTMLInputElement)?.value || sets;
     const finalOil = (document.getElementById("native-hidden-oil") as HTMLInputElement)?.value || oil;
     const currentTotal = SET_PRICING[finalSets as SetOption].price + OIL_PRICING[finalOil as OilOption].price;
 
-    if (!name.trim() || !phone.trim() || !state || !address.trim()) {
+    const cleanPhone = phone.trim();
+    const cleanName = name.trim();
+
+    if (!cleanName || !cleanPhone || !state || !address.trim()) {
       setError("Please fill in all fields so we can confirm your order.");
+      return;
+    }
+
+    // LAYER 2 DEDUPLICATION: Check localStorage to prevent double lead entries
+    const orderFingerprint = `sm_order_${cleanPhone}_${finalSets}_${finalOil}`;
+    if (typeof window !== "undefined" && localStorage.getItem(orderFingerprint)) {
+      console.warn("Duplicate submission blocked. Forwarding customer safely to success view.");
+      setSubmitted(true);
       return;
     }
 
@@ -100,7 +112,7 @@ export default function OrderForm3() {
 
     try {
       if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq("track", "Lead", {
+        (window as any).fbq("track", "Purchase", {
           content_name: "ScentMason Diffuser",
           value: currentTotal,
           currency: "NGN",
@@ -109,22 +121,29 @@ export default function OrderForm3() {
       }
 
       if (typeof window !== "undefined" && (window as any).ttq) {
-        (window as any).ttq.track("CompleteRegistration", {
+        
+        (window as any).ttq.identify({
+        phone_number: cleanPhone,
+          });
+          
+          (window as any).ttq.track("Purchase", {
           content_name: "ScentMason Diffuser",
           value: currentTotal,
           currency: "NGN",
+          quantity: Number(finalSets),
         }, { event_id: sharedEventId });
       }
 
       const unifiedOrderPayload = {
+        eventName: "Purchase", // Explicitly passed to sync backend tracking modules
         eventId: sharedEventId,
         eventSourceUrl: currentUrl,
         referrer: typeof document !== "undefined" ? document.referrer : undefined,
-        name,
-        phone,
+        name: cleanName,
+        phone: cleanPhone,
         whatsapp,
         state,
-        address,
+        address: address.trim(),
         sets: finalSets,
         setPrice: SET_PRICING[finalSets as SetOption].price,
         oilBottlesOrdered: Number(finalOil),
@@ -138,20 +157,30 @@ export default function OrderForm3() {
         ttclid: getCookie("ttclid"),
       };
 
-      const metaResponse = await fetch("/api/track/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(unifiedOrderPayload),
-      });
+      // Execute track calls in parallel; gracefully capture TikTok network failures
+      const [metaResponse] = await Promise.all([
+        fetch("/api/track/purchase", { // Patched folder endpoint routing mapping
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(unifiedOrderPayload),
+        }),
+        fetch("/api/track/tiktok/purchase", { // Patched folder endpoint routing mapping
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(unifiedOrderPayload),
+        }).catch((err) => {
+          console.error("TikTok pipeline async suppression background block:", err);
+          return null; 
+        })
+      ]);
 
-      await fetch("/api/track/tiktok/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(unifiedOrderPayload),
-      });
-
-      if (!metaResponse.ok) throw new Error("Primary ingestion engine failed");
+      if (!metaResponse || !metaResponse.ok) throw new Error("Primary ingestion engine failed");
       
+      // Save order context locally to lock out secondary duplications
+      if (typeof window !== "undefined") {
+        localStorage.setItem(orderFingerprint, "true");
+      }
+
       setSubmitted(true);
     } catch (err) {
       console.error("Order submission tracking loop exception:", err);
@@ -163,16 +192,31 @@ export default function OrderForm3() {
 
   // Pre-calculate target routing parameters for dynamic customer chat matching
   const fallbackSets = typeof document !== "undefined" ? (document.getElementById("native-hidden-sets") as HTMLInputElement)?.value : sets;
+  const fallbackOil = typeof document !== "undefined" ? (document.getElementById("native-hidden-oil") as HTMLInputElement)?.value : oil;
+  
   const selectedPackageLabel = SET_PRICING[fallbackSets as SetOption]?.label || "Order Package";
-  const whatsappUrl = `https://wa.me/2347064969603?text=${encodeURIComponent(
-    `Hello ScentMason, I just successfully completed my order for the ${selectedPackageLabel}. My name is ${name}. Please confirm my delivery details.`
-  )}`;
+  const chosenOilLabel = OIL_PRICING[fallbackOil as OilOption]?.label || "No extra oil";
+
+  // Highly conversion-optimized structural message string
+  const successMessageText = `Hello ScentMason, I just successfully completed my order form online! 
+
+📦 Package Selection: ${selectedPackageLabel}
+💧 Fragrance Addon: ${chosenOilLabel}
+👤 Customer Name: ${name}
+📞 Phone Line: ${phone}
+📍 Delivery Destination: ${address}, ${state} State.
+
+Please verify my delivery data details and speed up my dispatch assembly!`;
+
+  const whatsappUrl = `https://wa.me/2347064969603?text=${encodeURIComponent(successMessageText)}`;
 
   return (
     <div className="relative z-[999999] pt-6" id="unbreakable-form-container">
-      {/* Hidden trackers for safe Vanilla-to-React data transfer */}
-      <input type="hidden" id="native-hidden-sets" value={sets} onChange={() => {}} />
-      <input type="hidden" id="native-hidden-oil" value={oil} onChange={() => {}} />
+      {/* CRITICAL FIX: Changed from 'value' to 'defaultValue'. 
+        Stops React from resetting data updates passed by your mobile Vanilla Fallback script.
+      */}
+      <input type="hidden" id="native-hidden-sets" defaultValue={sets} />
+      <input type="hidden" id="native-hidden-oil" defaultValue={oil} />
 
       <form onSubmit={handleSubmit} className="bg-white text-black">
         <div className="rounded-xl border-2 border-red-600 bg-red-50 p-4">
@@ -313,12 +357,12 @@ export default function OrderForm3() {
             <h3 className="mt-4 text-[21px] font-bold text-black tracking-tight">Order Received Successfully! ✅</h3>
             
             <p className="mt-2 text-[14px] font-medium leading-relaxed text-black/70 px-2">
-              Thank you <span className="font-bold text-black">{name.split(" ")[0]}</span>, your oder has been received successfully.
+              Thank you <span className="font-bold text-black">{name.split(" ")[0]}</span>, if you want your order delivered faster, please inform us on WhatsApp.
             </p>
 
             <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-left">
               <p className="text-[13px] font-bold text-amber-950 leading-relaxed">
-                ⚠️ WHAT NEXT? A ScentMason customer care representative will call you shortly on <span className="underline font-extrabold">{phone}</span> to verify your destination details before your order is dispatched.
+                ⚠️ WHAT NEXT? A ScentMason customer care representative will call you shortly on <span className="underline font-extrabold">{phone}</span> to verify your destination details before your order is delivered.
               </p>
             </div>
 
@@ -380,8 +424,6 @@ export default function OrderForm3() {
             var btn = e.target.closest(".native-selectable-btn");
             if (!btn) return;
             
-            
-
             var type = btn.getAttribute("data-option-type");
             var val = btn.getAttribute("data-value");
             var price = parseInt(btn.getAttribute("data-price"), 10);

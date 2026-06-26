@@ -3,15 +3,15 @@ import crypto from "crypto";
 
 export const runtime = "nodejs";
 
-type TikTokLeadRequestBody = {
+type TikTokPurchaseRequestBody = {
   eventId?: string;
   eventSourceUrl?: string;
   referrer?: string;
   ttp?: string;
   ttclid?: string;
   phone?: string;
-  eventName?: string; // ✅ Allowed dynamic event passing from frontend
-  total?: string | number; // ✅ Fixed: Added tracking for flat total parameter
+  eventName?: string; 
+  total?: string | number; 
   customData?: Record<string, unknown>;
 };
 
@@ -49,7 +49,7 @@ function normalizeNigerianPhoneForTikTok(phone?: string) {
   if (!cleaned.startsWith("234")) {
     cleaned = `234${cleaned}`;
   }
-  return `+${cleaned}`;
+  return `+${cleaned}`; // Crucial for TikTok E.164 hash matching
 }
 
 function sha256(value: string) {
@@ -76,7 +76,7 @@ export async function GET() {
   const { pixelCode, accessToken, testEventCode } = getTikTokEnv();
   return NextResponse.json({
     status: "ok",
-    message: "ScentMason TikTok Events API route is active.",
+    message: "ScentMason TikTok Events API Purchase route is active.", // Aligned label
     envCheck: {
       hasPixelCode: Boolean(pixelCode),
       hasAccessToken: Boolean(accessToken),
@@ -103,21 +103,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = (await req.json().catch(() => ({}))) as TikTokLeadRequestBody;
+    const body = (await req.json().catch(() => ({}))) as TikTokPurchaseRequestBody;
 
     if (!body.eventId) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Missing eventId. TikTok Pixel and Events API must share the same event_id for deduplication.",
+          message: "Missing eventId. TikTok Pixel and Events API must share the same event_id for deduplication.",
         },
         { status: 400 }
       );
     }
 
-    // ✅ Fixed: Changed default to "CompleteRegistration" to seamlessly pair with frontend browser logs
-    const eventName = body.eventName || "CompleteRegistration";
+    // Aligned: Dynamically reads payload "Purchase" event sent by frontend form
+    const eventName = body.eventName || "Purchase"; 
     const eventId = body.eventId;
     const userAgent = req.headers.get("user-agent") || undefined;
     const clientIp = getClientIp(req);
@@ -147,7 +146,7 @@ export async function POST(req: NextRequest) {
           }),
           properties: removeEmptyValues({
             currency: "NGN",
-            value: body.total, // ✅ Fixed: Order valuation value maps perfectly for deep analytical optimization
+            value: body.total, 
             ...body.customData,
           }),
         },
@@ -194,7 +193,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "TikTok Events API CompleteRegistration event sent.",
+      message: `TikTok Events API ${eventName} event sent successfully.`, // Dynamic logging text alignment
       tiktokStatus: response.status,
       eventName,
       eventId,
