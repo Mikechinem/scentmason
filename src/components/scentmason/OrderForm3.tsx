@@ -6,11 +6,11 @@ type SetOption = "1" | "2" | "3" | "4" | "5";
 type OilOption = "0" | "1" | "2" | "3" | "4" | "5";
 
 const SET_PRICING: Record<SetOption, { label: string; price: number; save: number }> = {
-  "1": { label: "1 Set", price: 34000, save: 11000 },
-  "2": { label: "2 Sets", price: 66000, save: 24000 },
-  "3": { label: "3 Sets", price: 98000, save: 37000 },
-  "4": { label: "4 Sets", price: 130000, save: 42000 },
-  "5": { label: "5 Sets", price: 160000, save: 55000 },
+  "1": { label: "1 Set", price: 28000, save: 11000 },
+  "2": { label: "2 Sets", price: 54000, save: 24000 },
+  "3": { label: "3 Sets", price: 80000, save: 37000 },
+  "4": { label: "4 Sets", price: 105000, save: 42000 },
+  "5": { label: "5 Sets", price: 132000, save: 55000 },
 };
 
 const OIL_PRICING: Record<OilOption, { label: string; price: number }> = {

@@ -232,7 +232,7 @@ export default function RechargeableDiffuserPage() {
       {/* Testimonials - scrolling, screenshot-style review cards, animate into view */}
       <section className="py-10">
         <h2 className="px-4 text-center text-[24px] font-bold tracking-tight text-black">
-          Selected 5 star Customer Reviews
+         Customer Reviews
         </h2>
 
         <div className="mt-6 flex gap-4 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
