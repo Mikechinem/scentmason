@@ -163,7 +163,7 @@ export default function RechargeableDiffuserPage() {
           </p>
 
           <p className="mt-1 text-[36px] font-bold text-[#3B1F0E]">
-            ₦34,000
+            ₦28,000
           </p>
 
           <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3">
