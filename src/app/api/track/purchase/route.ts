@@ -137,14 +137,28 @@ export async function POST(req: NextRequest) {
     const normalizedPhone = normalizeNigerianPhone(body.phone);
     const hashedPhone = normalizedPhone ? sha256(normalizedPhone) : undefined;
 
-    // FIX: external_id changed from Array back to flat string format to comply with Meta spec
+    // Extract, clean, and map extra high-converting match identifiers
+    const nameParts = (body.name || "").trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+
+    const hashedFirstName = firstName ? sha256(firstName) : undefined;
+    const hashedLastName = lastName ? sha256(lastName) : undefined;
+    const hashedState = body.state ? sha256(body.state) : undefined;
+    const hashedCountry = sha256("ng"); // Force localization index match for Nigeria
+
+    // Updated parameter assignment payload optimized for premium EMQ scores
     const userData = removeEmptyValues({
       client_ip_address: clientIp,
       client_user_agent: userAgent,
       fbp: body.fbp,
       fbc: body.fbc,
-      ph: hashedPhone ? [hashedPhone] : undefined,       // Must be array
-      external_id: hashedPhone ? hashedPhone : undefined, // Must be a single flat string
+      ph: hashedPhone ? [hashedPhone] : undefined,         // Must be array
+      fn: hashedFirstName ? [hashedFirstName] : undefined, // Must be array
+      ln: hashedLastName ? [hashedLastName] : undefined,   // Must be array
+      st: hashedState ? [hashedState] : undefined,         // Must be array
+      country: [hashedCountry],                            // Must be array
+      external_id: hashedPhone ? hashedPhone : undefined,  // Must be a single flat string
     });
 
     const eventPayload = {
