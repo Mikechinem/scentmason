@@ -121,12 +121,11 @@ export default function OrderForm3() {
       }
 
       if (typeof window !== "undefined" && (window as any).ttq) {
-        
         (window as any).ttq.identify({
-        phone_number: cleanPhone,
-          });
+          phone_number: cleanPhone,
+        });
           
-          (window as any).ttq.track("Purchase", {
+        (window as any).ttq.track("Purchase", {
           content_name: "ScentMason Diffuser",
           value: currentTotal,
           currency: "NGN",
@@ -159,12 +158,12 @@ export default function OrderForm3() {
 
       // Execute track calls in parallel; gracefully capture TikTok network failures
       const [metaResponse] = await Promise.all([
-        fetch("/api/track/purchase", { // Patched folder endpoint routing mapping
+        fetch("/api/track/purchase", { 
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(unifiedOrderPayload),
         }),
-        fetch("/api/track/tiktok/purchase", { // Patched folder endpoint routing mapping
+        fetch("/api/track/tiktok/purchase", { 
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(unifiedOrderPayload),
@@ -212,9 +211,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
   return (
     <div className="relative z-[999999] pt-6" id="unbreakable-form-container">
-      {/* CRITICAL FIX: Changed from 'value' to 'defaultValue'. 
-        Stops React from resetting data updates passed by your mobile Vanilla Fallback script.
-      */}
       <input type="hidden" id="native-hidden-sets" defaultValue={sets} />
       <input type="hidden" id="native-hidden-oil" defaultValue={oil} />
 
@@ -387,7 +383,8 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           var container = document.getElementById("unbreakable-form-container");
           if (!container) return;
 
-          var currentPkgPrice = 34000;
+          // FIX: Updated to synchronize perfectly with your updated React rates
+          var currentPkgPrice = 28000;
           var currentOilPrice = 0;
           var currentPkgValue = "1";
           var currentOilValue = "0";

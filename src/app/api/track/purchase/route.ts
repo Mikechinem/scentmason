@@ -49,20 +49,28 @@ function getClientIp(req: NextRequest) {
   );
 }
 
+// FIX: Bulletproof normalization for all Nigerian user entries
 function normalizeNigerianPhone(phone?: string) {
   if (!phone) return "";
-  let cleaned = phone.replace(/\D/g, "");
+  let cleaned = phone.replace(/\D/g, ""); // Remove non-numeric characters entirely
+
   if (cleaned.startsWith("0")) {
     cleaned = `234${cleaned.slice(1)}`;
-  }
-  if (cleaned.startsWith("2340")) {
+  } else if (cleaned.startsWith("2340")) {
     cleaned = `234${cleaned.slice(4)}`;
+  } else if (!cleaned.startsWith("234") && cleaned.length >= 9) {
+    // Catch-all: handles users who skip both the country code and the leading 0 (e.g., '803...')
+    cleaned = `234${cleaned}`;
   }
   return cleaned;
 }
 
+// FIX: Protect integrity against trailing spaces or case differences
 function sha256(value: string) {
-  return crypto.createHash("sha256").update(value).digest("hex");
+  return crypto
+    .createHash("sha256")
+    .update(value.trim().toLowerCase())
+    .digest("hex");
 }
 
 function getMetaEnv() {
@@ -127,14 +135,16 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get("user-agent") || undefined;
     const clientIp = getClientIp(req);
     const normalizedPhone = normalizeNigerianPhone(body.phone);
+    const hashedPhone = normalizedPhone ? sha256(normalizedPhone) : undefined;
 
+    // FIX: external_id changed from Array back to flat string format to comply with Meta spec
     const userData = removeEmptyValues({
       client_ip_address: clientIp,
       client_user_agent: userAgent,
       fbp: body.fbp,
       fbc: body.fbc,
-      ph: normalizedPhone ? [sha256(normalizedPhone)] : undefined,
-      external_id: normalizedPhone ? [sha256(normalizedPhone)] : undefined,
+      ph: hashedPhone ? [hashedPhone] : undefined,       // Must be array
+      external_id: hashedPhone ? hashedPhone : undefined, // Must be a single flat string
     });
 
     const eventPayload = {
