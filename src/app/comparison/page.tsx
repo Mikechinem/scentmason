@@ -129,16 +129,23 @@ export default function RechargeableDiffuserPage() {
         </p>
 
         <h1 className="mx-auto mt-4 max-w-[620px] text-[25px] font-normal leading-9 tracking-tight text-black sm:text-[28px]">
-          This diffuser will <span className="font-bold">make your home smell luxurious</span> like a 5-star hotel.
+          The diffuser that <span className="font-bold">makes your home smell luxurious</span> like a <br></br>5-star hotel without you remembering to spray all the time.
         </h1>
-
-        <div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
-          <img
-            src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915"
-            alt="ScentMason rechargeable automatic fragrance diffuser"
-            className="h-auto w-full object-cover"
-          />
-        </div>
+<div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
+  <img
+    src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915"
+    alt="ScentMason rechargeable automatic fragrance diffuser"
+    className="h-auto w-full object-cover"
+  />
+</div>
+<div className="mx-auto mt-5 max-w-[520px] rounded-xl border border-black/[0.06] bg-black/[0.02] p-4 text-center">
+  <p className="text-[16px] font-semibold leading-relaxed text-black">
+    No drilling. No plugging in. No remembering.
+  </p>
+  <p className="mt-1 text-[15px] font-medium text-amber-600">
+    Just set it once and enjoy luxury scent all days all nights.
+  </p>
+</div>
 
         <CTAButton />
       </section>
@@ -188,9 +195,9 @@ export default function RechargeableDiffuserPage() {
 
       {/* No more bad odour */}
       <section className="px-4 py-10 text-center">
-        <h2 className="mx-auto max-w-[600px] text-[23px] font-bold leading-9 tracking-tight text-black">
-          No more bad odour. This rechargeable diffuser is your trusted helper for tackling bad odour in your:
-        </h2>
+       <h2 className="mx-auto max-w-[600px] text-[23px] font-bold leading-9 tracking-tight text-black">
+  Your home should <span className="text-red-600">never embarrass you</span> even when visitors come <span className="underline decoration-black/30 decoration-2">unannounced</span>. This <span className="text-amber-600">Smart diffuser</span> helps you kick-out annoying odour in your:
+</h2>
 
         <ul className="mx-auto mt-5 max-w-[420px] space-y-2 text-left">
           {useCases.map((item) => (
@@ -216,9 +223,9 @@ export default function RechargeableDiffuserPage() {
 
       {/* Spa vibe */}
       <section className="px-4 py-10 text-center">
-        <h2 className="mx-auto max-w-[600px] text-[23px] font-bold leading-9 tracking-tight text-black">
-          It beautifies and gives your space a spa and 5-star hotel vibe…
-        </h2>
+        <h2 className="mx-auto max-w-[600px] text-[23px] font-normal leading-9 tracking-tight text-black/80">
+  It automatically transforms your space into a <span className="font-bold text-black text-[24px]">5-star luxury spa</span> using a sleek, sculptural design—<span className="font-bold text-amber-600">no manual spraying, no tracking, zero effort.</span>
+</h2>
 
         <div className="mx-auto mt-6 w-full max-w-[560px] overflow-hidden rounded-2xl border border-black/10">
           <img
