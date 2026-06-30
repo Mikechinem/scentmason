@@ -135,6 +135,7 @@ export const painPoints = [
     text: "The generator ran all night. You know that smell. Your guests know it too.",
   },
 ];
+
 export const productIntro = {
   eyebrow: "Selling out faster than expected",
   headline:
@@ -411,26 +412,26 @@ export const packages: PackageOption[] = [
   {
     id: "starter",
     name: "Starter",
-    price: "₦34,000",
-    compareAt: "₦45,000",
-    savings: "Save ₦11,000",
+    price: "₦28,000",
+    compareAt: "₦34,000",
+    savings: "Save ₦6,000",
     description: "1 Diffuser + 1 Signature Oil + Mount + USB Cable",
   },
   {
     id: "home-duo",
     name: "Home Duo",
-    price: "₦66,000",
-    compareAt: "₦90,000",
-    savings: "Save ₦24,000",
+    price: "₦54,000",
+    compareAt: "₦68,000",
+    savings: "Save ₦14,000",
     description: "2 Diffusers + 2 Signature Oils + 2 Mounts + 2 USB Cables",
     badge: "Popular",
   },
   {
     id: "full-home",
     name: "Full Home",
-    price: "₦98,000",
-    compareAt: "₦135,000",
-    savings: "Save ₦37,000",
+    price: "₦81,000",
+    compareAt: "₦102,000",
+    savings: "Save ₦21,000",
     description: "3 Diffusers + 3 Signature Oils + 3Mounts + 3USB Cables",
   },
 ];
@@ -588,7 +589,7 @@ export const finalCta = {
 };
 
 export const stickyBar = {
-  text: "Auto Diffuser — ₦34,000 · Nationwide Delivery · 2–3 Days",
+  text: "Auto Diffuser — ₦28,000 · Nationwide Delivery · 2–3 Days",
   buttonLabel: "Order Now",
 };
 

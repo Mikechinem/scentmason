@@ -1,5 +1,6 @@
 import OrderForm3 from "@/components/scentmason/OrderForm3";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
+import DiffuserGraveyard from "@/components/scentmason/DiffuserGraveyard";
 
 
 const useCases = [
@@ -28,7 +29,7 @@ const whyLove = [
 const testimonials = [
   {
     name: "Lydia Apat",
-    text: "At first I thought it was just like an ordinary air freshener, but this one is different. The fragrance lasts long and my whole sitting room smells like a hotel lobby now.",
+    text: "I’ve used other fragrance machines before, but this one is different. It’s stronger, lasts longer, and even after months of use, the fragrance still comes out really well.",
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/woman_diff1.png",
   },
   {
@@ -37,7 +38,7 @@ const testimonials = [
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/man_diff3.png",
   },
   {
-    name: "Ngozi",
+    name: "Sefunmi",
     text: "Best purchase I've made this year! My guests always ask what I use, and it looks so fine sitting on my console table. Delivery was fast too.",
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/womn_diff2.png",
   },
@@ -47,7 +48,7 @@ const testimonials = [
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/womandiff4.png",
   },
   {
-    name: "Chiamaka Obi",
+    name: "Chamun Ishaya",
     text: "My salon smells amazing now. Clients keep asking what I use and I just point at the machine on the wall.",
     avatar: "https://ik.imagekit.io/j1e78ujalr/sm12.2.png?updatedAt=1773233437317",
   },
@@ -64,7 +65,7 @@ const testimonials = [
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/womandif6.png",
   },
   {
-    name: "Kelechi Nnamdi",
+    name: "Benson Ode",
     text: "Ordered 2 sets for my apartment. Best decision — every room now smells consistent and clean.",
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/man_diff1.png",
   },
@@ -218,7 +219,11 @@ export default function RechargeableDiffuserPage() {
           />
         </div>
 
-        <CTAButton />
+
+            <CTAButton />
+        <DiffuserGraveyard />
+
+        
       </section>
 
       {/* Spa vibe */}

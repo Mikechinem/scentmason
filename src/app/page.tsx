@@ -3,7 +3,9 @@ import PainSection from "@/components/scentmason/PainSection";
 import SocialProofBar from "@/components/scentmason/SocialProofBar";
 import ProductIntro from "@/components/scentmason/ProductIntro";
 import HowItWorks from "@/components/scentmason/HowItWorks";
+import DiffuserGraveyard from "@/components/scentmason/DiffuserGraveyard";
 import WhatsInTheBox from "@/components/scentmason/WhatsInTheBox";
+import FragranceCard from "@/components/scentmason/FragranceCard";
 import ComparisonTable from "@/components/scentmason/ComparisonTable";
 import OrderForm from "@/components/scentmason/OrderForm";
 import FulfilmentTrust from "@/components/scentmason/FulfilmentTrust";
@@ -18,8 +20,10 @@ export default function Home() {
       <SocialProofBar />
       <ProductIntro />
       <HowItWorks />
+      <DiffuserGraveyard />
       <WhatsInTheBox />
       <ComparisonTable />
+      <FragranceCard/>
       <OrderForm />
       <FulfilmentTrust />
       <FAQSection />

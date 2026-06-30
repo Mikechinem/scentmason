@@ -40,10 +40,10 @@ export const WHATSAPP = {
 };
 
 export const OFFER = {
-  productName: "ScentMason Automatic Fragrance Diffuser",
-  regularPrice: "₦45,000",
-  offerPrice: "₦34,000",
-  savings: "Save ₦11,000 today",
+  productName: "Automatic Fragrance Diffuser(RECHARGEABLE)",
+  regularPrice: "₦34,000",
+  offerPrice: "₦28,000",
+  savings: "Save ₦6,000 today",
   delivery: "Nationwide delivery",
   deliveryTimeline: "2–3 days delivery",
   guarantee: "30-Day Replacement Guarantee",
