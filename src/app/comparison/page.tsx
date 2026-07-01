@@ -243,9 +243,9 @@ export default function RechargeableDiffuserPage() {
 
       {/* Testimonials - scrolling, screenshot-style review cards, animate into view */}
       <section className="py-10">
-        <h2 className="px-4 text-center text-[24px] font-bold tracking-tight text-black">
-         Customer Reviews
-        </h2>
+        <h2 className="mt-4 px-4 text-center text-[28px] font-bold tracking-tight text-black leading-tight sm:text-[36px]">
+    Customer Reviews
+  </h2>
 
         <div className="mt-6 flex gap-4 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {testimonials.map((review, index) => (
@@ -290,9 +290,82 @@ export default function RechargeableDiffuserPage() {
       </section>
 
     
+
+      {/* Why you'll love it */}
+      <section className="bg-white px-4 py-14 text-center">
+  {/* Premium Luxury Badge & Headings */}
+  <div className="inline-block mx-auto">
+    <span className="text-[12px] font-bold uppercase tracking-widest text-[#A27B5C] bg-[#A27B5C]/10 px-3 py-1 rounded-full">
+      Intelligent Engineering
+    </span>
+  </div>
+  
+  <h2 className="mt-4 text-[28px] font-extrabold tracking-tight text-black leading-tight sm:text-[36px]">
+    Why You’ll Love the ScentMason Intelligent Diffuser
+  </h2>
+
+  {/* High-Conversion Dynamic List */}
+  <ul className="mx-auto mt-8 max-w-[520px] space-y-4 text-left">
+    {whyLove.map((item) => (
+      <li 
+        key={item} 
+        className="flex gap-4 items-start p-4 rounded-xl border border-zinc-100 bg-zinc-50/50 shadow-sm transition-all duration-200 hover:border-zinc-200"
+      >
+        {/* ScentMason Luxury Brown SVG Check Icon */}
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#A27B5C]/10 text-[#A27B5C] mt-0.5">
+          <svg 
+            className="h-3.5 w-3.5 stroke-[3]" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        </div>
+
+        {/* Scaled Text Label */}
+        <p className="text-[17px] font-semibold leading-relaxed text-zinc-900">
+          {item}
+        </p>
+      </li>
+    ))}
+  </ul>
+
+  {/* Premium Wall Mount Image Display Block */}
+  <div className="mx-auto mt-10 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10 shadow-sm">
+    <img
+      src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/compare-real-design.png?updatedAt=1780833409537"
+      alt="ScentMason diffuser mounted seamlessly on a wall"
+      className="h-auto w-full object-cover"
+      loading="lazy"
+    />
+  </div>
+
+  {/* Interactive Conversion Trigger */}
+  <div className="mt-8">
+    <CTAButton label="I Want This Now" />
+  </div>
+</section>
+      {/* Unboxing video */}
+      <section className="px-4 py-10 text-center">
+        <h2 className="mt-4 text-[28px] font-bold tracking-tight text-black leading-tight sm:text
+        text-[36px]">See It In Action</h2>
+
+        <div className="mx-auto mt-6 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
+          <video
+            controls
+            poster="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/prd_image_dark.png?updatedAt=1780838530529"
+            className="h-auto w-full"
+          >
+            <source src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/diffus_unbox_woman.MOV/ik-video.mp4?updatedAt=1781957688695" type="video/mp4" />
+          </video>
+        </div>
+      </section>
+
+
       {/* What's inside */}
       <section className="px-4 py-10 text-center">
-        <h2 className="text-[24px] font-bold tracking-tight text-black">
+        <h2 className="mt-4 text-[28px] font-extrabold tracking-tight text-black leading-tight sm:text-[36px]">
           What Is Inside Your Order?
         </h2>
 
@@ -314,46 +387,6 @@ export default function RechargeableDiffuserPage() {
             </li>
           ))}
         </ul>
-      </section>
-
-      {/* Why you'll love it */}
-      <section className="px-4 py-10 text-center">
-        <h2 className="text-[24px] font-bold tracking-tight text-black">
-          Why You'll Love Your Smart Aromatheraphy Diffuser
-        </h2>
-
-        <ul className="mx-auto mt-5 max-w-[480px] space-y-3 text-left">
-          {whyLove.map((item) => (
-            <li key={item} className="text-[17px] font-medium leading-7">
-              ✅ {item}
-            </li>
-          ))}
-        </ul>
-
-        <div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
-          <img
-            src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/compare-real-design.png?updatedAt=1780833409537"
-            alt="ScentMason diffuser mounted on wall"
-            className="h-auto w-full object-cover"
-          />
-        </div>
-
-        <CTAButton label="I Want This Now" />
-      </section>
-
-      {/* Unboxing video */}
-      <section className="px-4 py-10 text-center">
-        <h2 className="text-[24px] font-bold tracking-tight text-black">See It In Action</h2>
-
-        <div className="mx-auto mt-6 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
-          <video
-            controls
-            poster="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/prd_image_dark.png?updatedAt=1780838530529"
-            className="h-auto w-full"
-          >
-            <source src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/diffus_unbox_woman.MOV/ik-video.mp4?updatedAt=1781957688695" type="video/mp4" />
-          </video>
-        </div>
       </section>
 
       {/* Order form intro + form, wrapped in a shared light green border */}
