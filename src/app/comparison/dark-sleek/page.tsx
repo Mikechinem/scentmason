@@ -84,22 +84,24 @@ export default function RechargeableDiffuserPage() {
   return (
     <main className="bg-black text-white font-sans antialiased selection:bg-[#3B1F0E] selection:text-white">
       
-      {/* Hero Section */}
-      <section className="px-4 py-16 text-center max-w-4xl mx-auto">
+      {/* Hero Section — Reduced top padding to bring everything up cleanly */}
+      <section className="px-4 pt-6 pb-16 text-center max-w-4xl mx-auto">
         <p className="inline-block rounded-full bg-white px-5 py-2 text-[13px] font-black uppercase tracking-widest text-black border border-[#3B1F0E] ring-4 ring-[#3B1F0E]/20">
           Aromatherapy Diffuser (Rechargeable)
         </p>
 
-        {/* Headline completely maintained */}
-        <h1 className="mx-auto mt-8 max-w-[800px] text-[34px] font-black leading-tight tracking-tight text-white sm:text-[46px]">
-          The intelligent fragrance machine that transforms your home into a{" "}
+        {/* Headline — Adjusted spacing to shift up tighter against the badge */}
+        <h1 className="mx-auto mt-5 max-w-[800px] text-[34px] font-black leading-tight tracking-tight text-white sm:text-[46px]">
+          The Intelligent Fragrance Machine That Transforms Your Home Into A{" "}
           <span className="underline decoration-[#3B1F0E] decoration-4 underline-offset-8">
-            healing sanctuary.
+            Healing Sanctuary.
           </span>
         </h1>
 
-        {/* Extracted Interactive Hero Gallery Component */}
-        <HeroGallery />
+        {/* Extracted Interactive Hero Gallery Component — Sits prominently higher */}
+        <div className="mt-6">
+          <HeroGallery />
+        </div>
 
         {/* Short Text Detail Callout */}
         <div className="mx-auto mt-8 max-w-[560px] rounded-2xl border-2 border-[#3B1F0E] bg-white p-6 shadow-xl">
@@ -140,7 +142,7 @@ export default function RechargeableDiffuserPage() {
               ₦28,000
             </p>
             <p className="text-[13px] font-black uppercase tracking-wider text-red-600 mt-2">
-              ⚠️ Limited Promo Price Offer Available Today
+              ⚠️ Limited Promo Price Offer Available Now.
             </p>
           </div>
 
