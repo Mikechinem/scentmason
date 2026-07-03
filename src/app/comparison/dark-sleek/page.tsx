@@ -1,6 +1,7 @@
 import OrderForm4 from "@/components/scentmason/OrderForm4";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
 import DiffuserGraveyard from "@/components/scentmason/DiffuserGraveyard";
+import HeroGallery from "@/components/scentmason/HeroGallery";
 
 const useCases = [
   "Bedroom",
@@ -68,17 +69,6 @@ const testimonials = [
   },
 ];
 
-const galleryImages = [
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el3.png?updatedAt=1780413593766",
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el7.png?updatedAt=1780413593530",
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/wall_office_mount.png?updatedAt=1780841614076",
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el6.png?updatedAt=1780413593841",
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el2.png?updatedAt=1780413593681",
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el5.png?updatedAt=1780413594046",
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/wall_office_mount.png?updatedAt=1780841614076",
-  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/el1.png?updatedAt=1780413594782",
-];
-
 function CTAButton({ label = "YES! I WANT TO BUY NOW" }: { label?: string }) {
   return (
     <a
@@ -100,6 +90,7 @@ export default function RechargeableDiffuserPage() {
           Aromatherapy Diffuser (Rechargeable)
         </p>
 
+        {/* Headline completely maintained */}
         <h1 className="mx-auto mt-8 max-w-[800px] text-[34px] font-black leading-tight tracking-tight text-white sm:text-[46px]">
           The intelligent fragrance machine that transforms your home into a{" "}
           <span className="underline decoration-[#3B1F0E] decoration-4 underline-offset-8">
@@ -107,13 +98,8 @@ export default function RechargeableDiffuserPage() {
           </span>
         </h1>
 
-        <div className="mx-auto mt-12 w-full max-w-[560px] overflow-hidden rounded-2xl border-4 border-[#3B1F0E]/30 bg-black shadow-2xl">
-          <img
-            src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915"
-            alt="ScentMason rechargeable automatic fragrance diffuser"
-            className="h-auto w-full object-cover"
-          />
-        </div>
+        {/* Extracted Interactive Hero Gallery Component */}
+        <HeroGallery />
 
         {/* Short Text Detail Callout */}
         <div className="mx-auto mt-8 max-w-[560px] rounded-2xl border-2 border-[#3B1F0E] bg-white p-6 shadow-xl">
@@ -158,7 +144,6 @@ export default function RechargeableDiffuserPage() {
             </p>
           </div>
 
-          {/* Adjusted feature row displaying the brand color with clean white text */}
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="rounded-xl bg-[#3B1F0E] px-4 py-4 flex items-center justify-center shadow-sm border border-[#3B1F0E]">
               <p className="text-[15px] font-black text-white tracking-wide uppercase text-center">
