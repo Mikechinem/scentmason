@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 
 type SetOption = "1" | "2" | "3" | "4" | "5";
 type OilOption = "0" | "1" | "2" | "3" | "4" | "5";
@@ -45,12 +46,18 @@ export default function OrderForm3() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   const setPricing = SET_PRICING[sets];
   const oilPricing = OIL_PRICING[oil];
   const freeOilGranted = sets === "5";
   const totalOilBottles = Number(oil) + (freeOilGranted ? 1 : 0);
   const total = setPricing.price + oilPricing.price;
+
+  // Track hydration mounting state to prevent Next.js SSR portal mismatches
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Manage body scroll layout lock when modal popup context is open
   useEffect(() => {
@@ -340,10 +347,10 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         </p>
       </form>
 
-      {/* PREMIUM THANK YOU MODAL OVERLAY */}
-      {submitted && (
+      {/* PREMIUM THANK YOU MODAL OVERLAY (Safely Teleported to Body Element via Portal) */}
+      {mounted && submitted && createPortal(
         <div className="fixed inset-0 z-[9999999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
-          <div className="relative w-full max-w-md transform rounded-2xl bg-white p-6 text-center shadow-2xl animate-scaleIn transition-all border border-black/5">
+          <div className="relative w-full max-w-md transform rounded-2xl bg-white p-6 text-center shadow-2xl animate-scaleIn transition-all border border-black/5 text-black">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-7 h-7">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -374,7 +381,8 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               Chat Us On WhatsApp
             </a>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* VANILLA FALLBACK ENGINE */}
