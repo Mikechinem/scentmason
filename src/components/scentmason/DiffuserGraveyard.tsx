@@ -62,7 +62,7 @@ export default function DiffuserGraveyard() {
           </span>
         </div>
 
-        {/* The Solution: Engineered尊 Differentiation with Integrated Image Asset */}
+        {/* The Solution: Engineered Differentiation with Integrated Image Asset */}
         <div className="bg-black text-white p-6 rounded-2xl border border-zinc-900 shadow-xl sm:p-8 md:p-10">
           <div className="flex flex-col md:flex-row gap-8 items-center">
             
@@ -100,7 +100,7 @@ export default function DiffuserGraveyard() {
             {/* Premium Visual Asset Box */}
             <div className="w-full md:w-[280px] shrink-0 order-1 md:order-2 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 aspect-[4/3] md:aspect-square">
               <img 
-                src="https://res.cloudinary.com/doatbjjtn/image/upload/v1782791483/difuser_on_solid_rock_qwswxv.png" 
+                src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/ChatGPT%20Image%20Jul%205,%202026,%2010_58_08%20AM.png" 
                 alt="ScentMason automatic premium diffuser sitting on a solid rock foundation engineered for continuous durability" 
                 className="h-full w-full object-cover"
                 loading="lazy"
