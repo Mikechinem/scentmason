@@ -118,23 +118,36 @@ export default function OrderForm3() {
     const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
     try {
+      // --- BULLETPROOF TRACKING INLINE FIXES ---
+      const numericValue = Number(currentTotal) || 0;
+
       if (typeof window !== "undefined" && (window as any).fbq) {
         (window as any).fbq("track", "Purchase", {
           content_name: "ScentMason Diffuser",
-          value: currentTotal,
+          value: numericValue,
           currency: "NGN",
           num_items: Number(finalSets),
         }, { eventID: sharedEventId });
       }
 
       if (typeof window !== "undefined" && (window as any).ttq) {
+        // Normalize phone format to E.164 locally to fix the console warning
+        let cleanTikTokPhone = cleanPhone.replace(/\D/g, "");
+        if (cleanTikTokPhone.startsWith("0")) {
+          cleanTikTokPhone = "234" + cleanTikTokPhone.slice(1);
+        } else if (!cleanTikTokPhone.startsWith("234")) {
+          cleanTikTokPhone = "234" + cleanTikTokPhone;
+        }
+        cleanTikTokPhone = "+" + cleanTikTokPhone;
+
         (window as any).ttq.identify({
-          phone_number: cleanPhone,
+          phone_number: cleanTikTokPhone,
         });
           
         (window as any).ttq.track("Purchase", {
           content_name: "ScentMason Diffuser",
-          value: currentTotal,
+          content_id: "scentmason_diffuser",
+          value: numericValue,
           currency: "NGN",
           quantity: Number(finalSets),
         }, { event_id: sharedEventId });
@@ -156,7 +169,7 @@ export default function OrderForm3() {
         oilBottlesFree: finalSets === "5" ? 1 : 0,
         oilBottlesTotal: Number(finalOil) + (finalSets === "5" ? 1 : 0),
         oilPrice: OIL_PRICING[finalOil as OilOption].price,
-        total: currentTotal,
+        total: numericValue, // Ensures server gets clean number format
         fbp: getCookie("_fbp"),
         fbc: getCookie("_fbc"),
         ttp: getCookie("_ttp"),

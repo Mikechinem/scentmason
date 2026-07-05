@@ -11,10 +11,10 @@ type PurchaseRequestBody = {
   phone?: string;
   whatsapp?: string;
   
-  // Custom tracking data object
+  // Custom tracking data object fallback
   customData?: Record<string, unknown>;
 
-  // Flat Order Form fields mapping directly to Google Sheets
+  // Flat Order Form fields mapping directly from front-end layout
   name?: string;
   state?: string;
   address?: string;
@@ -49,7 +49,7 @@ function getClientIp(req: NextRequest) {
   );
 }
 
-// FIX: Bulletproof normalization for all Nigerian user entries
+// Bulletproof normalization for all Nigerian user entries
 function normalizeNigerianPhone(phone?: string) {
   if (!phone) return "";
   let cleaned = phone.replace(/\D/g, ""); // Remove non-numeric characters entirely
@@ -65,7 +65,7 @@ function normalizeNigerianPhone(phone?: string) {
   return cleaned;
 }
 
-// FIX: Protect integrity against trailing spaces or case differences
+// Protect integrity against trailing spaces or case differences
 function sha256(value: string) {
   return crypto
     .createHash("sha256")
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // --- 1. RUN META CAPI TRACKING LOGIC ---
+    // --- 1. COMPILE DATA AND CONSTRUCT EVENT PAYLOADS ---
     const eventName = "Purchase";
     const eventId = body.eventId;
     const userAgent = req.headers.get("user-agent") || undefined;
@@ -172,18 +172,59 @@ export async function POST(req: NextRequest) {
             body.eventSourceUrl ||
             process.env.NEXT_PUBLIC_SITE_URL ||
             "https://scentmason.vercel.app",
-          user_data: userData,
+          user_data: userData, // Tied compiled match identifiers directly into the transmission layout
           custom_data: removeEmptyValues({
-            currency: "NGN",
-            value: body.total,
-            ...body.customData,
+            content_name: "ScentMason Diffuser",
+            content_type: "product",
+            num_items: Number(body.sets) || 1,
+            ...body.customData, // Spread safe fallbacks first
+            currency: "NGN",    // Hardcoded last so nothing can overwrite it
+            value: (() => {
+              // Extract raw string from total fallback chain
+              const rawValue = String(body.total || body.customData?.value || "0");
+              // Strip everything except numbers and decimal points (removes ₦, commas, letters)
+              const cleanedValue = rawValue.replace(/[^0-9.]/g, "");
+              return cleanedValue ? parseFloat(cleanedValue) : 0;
+            })(),
           }),
         },
       ],
       ...(testEventCode ? { test_event_code: testEventCode } : {}),
     };
 
-    // --- Parallel Multi-Pixel Server Firing Engine ---
+    // --- 2. PREPARE GOOGLE SHEETS ASYNCHRONOUSLY (NON-BLOCKING) ---
+   let sheetsPromise: Promise<Response | null> = Promise.resolve(null);
+    if (googleSheetsUrl) {
+      const sheetsPayload = {
+        eventId: body.eventId, 
+        name: body.name || "",
+        phone: body.phone || "",
+        whatsapp: body.whatsapp || "", 
+        state: body.state || "",
+        address: body.address || "",
+        sets: body.sets || "",
+        setPrice: body.setPrice || "",
+        oilBottlesOrdered: body.oilBottlesOrdered || 0,
+        oilBottlesFree: body.oilBottlesFree || 0,
+        oilBottlesTotal: body.oilBottlesTotal || 0,
+        oilPrice: body.oilPrice || 0,
+        total: body.total || "",
+      };
+
+      // We attach a local catch handler to ensure sheet bugs can't crash the CAPI collection cycle
+      sheetsPromise = fetch(googleSheetsUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sheetsPayload),
+      }).catch((sheetErr) => {
+        console.error("Google Sheets background synchronization failed:", sheetErr);
+        return null;
+      });
+    } else {
+      console.warn("Google Sheets synchronization skipped: Missing GOOGLE_SHEETS_WEBHOOK_URL variable.");
+    }
+
+    // --- 3. PREPARE META CAPI ASYNCHRONOUSLY (NON-BLOCKING) ---
     const capiPromises = activeAccounts.map(async (account) => {
       const metaUrl = `https://graph.facebook.com/${graphVersion}/${account.id}/events?access_token=${account.token}`;
       const res = await fetch(metaUrl, {
@@ -195,43 +236,19 @@ export async function POST(req: NextRequest) {
       return { ok: res.ok, json };
     });
 
-    const results = await Promise.all(capiPromises);
+    // =========================================================================
+    // 4. UNIFIED CONCURRENCY ENGINE: FIRE ALL CHANNELS SIMULTANEOUSLY
+    // =========================================================================
+    const [_, ...capiResults] = await Promise.all([
+      sheetsPromise,
+      ...capiPromises,
+    ]);
 
-    // Structural adapters to keep your downstream error handling intact
-    const metaResponse = { ok: results.some((r) => r.ok) };
-    const metaResult = results[0]?.json || null;
+    // Structural adapters to keep your downstream error handling perfectly intact
+    const metaResponse = { ok: capiResults.some((r) => r.ok) };
+    const metaResult = capiResults[0]?.json || null;
 
-    // --- 2. GOOGLE SHEETS DISPATCH ---
-    if (googleSheetsUrl) {
-      try {
-        const sheetsPayload = {
-          eventId: body.eventId, 
-          name: body.name || "",
-          phone: body.phone || "",
-          whatsapp: body.whatsapp || "", 
-          state: body.state || "",
-          address: body.address || "",
-          sets: body.sets || "",
-          setPrice: body.setPrice || "",
-          oilBottlesOrdered: body.oilBottlesOrdered || 0,
-          oilBottlesFree: body.oilBottlesFree || 0,
-          oilBottlesTotal: body.oilBottlesTotal || 0,
-          oilPrice: body.oilPrice || 0,
-          total: body.total || "",
-        };
-
-        await fetch(googleSheetsUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(sheetsPayload),
-        });
-      } catch (sheetErr) {
-        console.error("Google Sheets background synchronization failed:", sheetErr);
-      }
-    } else {
-      console.warn("Google Sheets synchronization skipped: Missing GOOGLE_SHEETS_WEBHOOK_URL variable.");
-    }
-
+    // --- 5. ENFORCE ARCHITECTURAL VALIDATION RULES ---
     if (!metaResponse.ok) {
       console.error("Meta CAPI execution dropped:", metaResult);
       return NextResponse.json(
