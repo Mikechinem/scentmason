@@ -1,3 +1,4 @@
+import Image from "next/image";
 import OrderForm3 from "@/components/scentmason/OrderForm3";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
 import DiffuserGraveyard from "@/components/scentmason/DiffuserGraveyard";
@@ -114,19 +115,61 @@ export default function RechargeableDiffuserPage() {
   return (
     <main className="bg-white text-black">
       
-      {/* Hero Section - Loads instantly without scroll delays to preserve structural LCP metrics */}
-      <section className="px-4 pt-6 pb-12 text-center bg-white text-black max-w-xl mx-auto">
-        <div className="mb-3">
-          <span className="inline-block rounded-full bg-[#3B1F0E]/5 px-3 py-1 text-[13px] font-bold uppercase tracking-wider text-[#3B1F0E] border border-[#3B1F0E]/10">
-            Aromatherapy Diffuser (Rechargeable)
-          </span>
+      {/* Hero Section - Framed within ScentMason Signature Color Border */}
+      <section className="relative w-full overflow-hidden bg-white px-4 py-8 sm:py-12 md:px-6">
+        <div className="mx-auto flex w-full max-w-[650px] flex-col items-center text-center border-[3px] border-[#422311] bg-white p-5 sm:p-10 rounded-2xl shadow-xl">
+          
+          {/* 1. Conversational Pre-Headline Hook */}
+          <p className="mb-5 text-[15px] font-medium leading-relaxed text-neutral-600 sm:text-[17px]">
+            Looking for ways to make your space smell expensive without you spending expensive?
+          </p>
+
+          {/* 3. Gold Framed Headline Space */}
+          <div className="w-full border-[3px] border-[#A27B5C] bg-[#A27B5C]/5 p-5 sm:p-8 rounded-md shadow-inner backdrop-blur-[1px]">
+            <h1 className="text-[25px] font-black leading-snug tracking-tight text-black sm:text-[36px] sm:leading-normal">
+              🔥The 2026 Smart Rechargeable Fragrance Machine That{" "}
+              <span className="text-[#3B1F0E] underline decoration-[#A27B5C] decoration-3 underline-offset-4">
+                Makes Your Entire Space Smell Luxurious
+              </span>{" "}
+              Like A <span className="font-black text-neutral-900">5-Star Luxury Hotel...</span>{" "}
+              <span className="mt-2 block font-black text-red-600 sm:mt-1 sm:inline">
+                Without You Lifting A Finger
+              </span>
+            </h1>
+          </div>
+
+          {/* 4. Premium Product Image Frame */}
+          <div className="relative mt-8 w-full max-w-[500px] overflow-hidden rounded-xl bg-neutral-50 p-2 border border-neutral-100 shadow-sm group">
+            <Image 
+              src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915" 
+              alt="ScentMason Premium Luxury Automatic Fragrance Diffuser" 
+              width={500} 
+              height={500} 
+              className="h-auto w-full rounded-lg object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+              priority 
+            />
+            {/* Trust Badge/Overlay Indicator if needed */}
+            <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-sm text-[10px] font-bold text-white px-2.5 py-1 rounded uppercase tracking-wider">
+              Premium Build
+            </div>
+          </div>
+
+          {/* 5. Direct Response Call To Action Stack */}
+          <div className="mt-8 w-full max-w-[480px]">
+            <CTAButton label="Yes I Want To Buy Now" />
+            
+            {/* Optional micro-copy trust factor below CTA to optimize conversions */}
+            <p className="mt-2 text-[11px] text-neutral-500 font-medium tracking-wide flex items-center justify-center gap-1.5">
+              🔒 Secure Delivery Nationwide • Pay On Delivery Available
+            </p>
+          </div>
+
         </div>
+      </section>
 
-        <h1 className="mx-auto text-[26px] font-extrabold leading-tight tracking-tight text-black sm:text-[36px] max-w-[540px]">
-          The diffuser that <span className="text-[#3B1F0E] underline decoration-[#A27B5C] decoration-2 underline-offset-4">makes your home smell luxurious</span> like a 5-star hotel.
-        </h1>
-
-        <p className="mt-5 text-[15px] font-bold text-zinc-500 uppercase tracking-wider flex items-center justify-center gap-1.5">
+      {/* Video Summary Section - Split into an isolated responsive section block */}
+      <section className="bg-white px-4 py-10 text-center">
+        <p className="text-[15px] font-bold text-zinc-500 uppercase tracking-wider flex items-center justify-center gap-1.5">
           <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           Watch The Quick Video Demo
         </p>
@@ -140,10 +183,6 @@ export default function RechargeableDiffuserPage() {
           >
             <source src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/diffus_unbox_woman.MOV/ik-video.mp4?updatedAt=1781957688695" type="video/mp4" />
           </video>
-        </div>
-
-        <div className="mt-5 w-full max-w-[480px] mx-auto">
-          <CTAButton label="Yes I Want To Buy Now" />
         </div>
 
         <div className="mx-auto mt-6 w-full max-w-[480px] rounded-xl border border-amber-900/10 bg-amber-50/30 p-4 text-center">
@@ -202,7 +241,7 @@ export default function RechargeableDiffuserPage() {
               </div>
               <div className="rounded-lg bg-[#3B1F0E] px-3 py-3">
                 <p className="text-[16px] font-semibold text-white">
-                  60 Days No Charging
+                  Works Without Electricity
                 </p>
               </div>
             </div>

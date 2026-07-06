@@ -234,7 +234,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
       <input type="hidden" id="native-hidden-sets" defaultValue={sets} />
       <input type="hidden" id="native-hidden-oil" defaultValue={oil} />
 
-      <form onSubmit={handleSubmit} className="bg-white text-black">
+      <form onSubmit={handleSubmit} action="javascript:void(0)" className="bg-white text-black">
         <div className="rounded-xl border-2 border-red-600 bg-red-50 p-4">
           <p className="text-[14px] font-bold leading-6 text-red-700">
             IMPORTANT: PLEASE DO NOT fill this form if you don&apos;t have the money for it... OR if you&apos;re travelling in the next 2-4 days.
@@ -348,11 +348,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !mounted}
           id="native-submit-btn"
           className="mt-6 w-full rounded-full bg-[#25D366] px-6 py-4 text-center text-[17px] font-semibold text-white disabled:opacity-60"
         >
-          {submitting ? "Sending Your Order..." : `YES I WANT THIS NOW — ${formatNaira(total)}`}
+          {!mounted ? "Loading..." : submitting ? "Sending Your Order..." : `YES I WANT THIS NOW — ${formatNaira(total)}`}
         </button>
 
         <p className="mt-4 text-center text-[12px] font-medium text-black/50">

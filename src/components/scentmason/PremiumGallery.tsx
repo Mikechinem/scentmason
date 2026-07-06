@@ -8,6 +8,8 @@ interface PremiumGalleryProps {
 }
 
 const defaultGalleryImages = [
+  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/family_stone%20(1).png?updatedAt=1783274641004",
+  "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/diffuser_satone_lake%20(3).png?updatedAt=1783274640881",
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915",
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/spraycan_vs%20Automatic%20Fragrance%20Machine.png?updatedAt=1780827901379",
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/AMD%20vs-reed.png?updatedAt=1780827901026",
