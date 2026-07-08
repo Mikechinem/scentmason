@@ -1,5 +1,7 @@
-﻿"use client";
+﻿// src/components/tracking/metapixels.tsx
+"use client";
 
+import { useEffect } from "react";
 import Script from "next/script";
 
 declare global {
@@ -9,8 +11,7 @@ declare global {
   }
 }
 
-// 1. Gather all pixel IDs dynamically.
-// We keep your old variable as a fallback so nothing breaks if it's still named that way!
+// Gather active pixel IDs
 const pixelIds = [
   process.env.NEXT_PUBLIC_META_PIXEL_ID_1 || process.env.NEXT_PUBLIC_META_PIXEL_ID,
   process.env.NEXT_PUBLIC_META_PIXEL_ID_2,
@@ -18,14 +19,63 @@ const pixelIds = [
 ].filter(Boolean) as string[];
 
 export default function MetaPixel() {
-  // If no environment variables are defined, render nothing
+  
+  useEffect(() => {
+    // DIAGNOSTIC 1: Confirm the component mounted and check what IDs it found
+    console.log("⚙️ [Meta Pixel] Component mounted. Active tracking IDs found:", pixelIds);
+
+    if (pixelIds.length === 0) {
+      console.warn("⚠️ [Meta Pixel] Tracking aborted: No pixel IDs discovered in environment variables.");
+      return;
+    }
+
+    const midEngagementTime = 15000;  // 15 seconds
+    const highEngagementTime = 30000; // 30 seconds
+
+    // A. Timer for Mid Engagement (15s)
+    const midTimer = setTimeout(() => {
+      if (window.fbq) {
+        // Loop through each initialized pixel to ensure reliable multi-tracking execution
+        pixelIds.forEach((id) => {
+          window.fbq!("trackSingleCustom", id, "MidEngagementReader", {
+            timeSpent: "15s",
+            page: window.location.pathname,
+          });
+        });
+        console.log("🎯 [Meta Pixel] Fired 'MidEngagementReader' custom event for all pixels.");
+      } else {
+        console.error("❌ [Meta Pixel] 15s reached, but 'window.fbq' is completely missing from the window context!");
+      }
+    }, midEngagementTime);
+
+    // B. Timer for High Engagement (30s)
+    const highTimer = setTimeout(() => {
+      if (window.fbq) {
+        pixelIds.forEach((id) => {
+          window.fbq!("trackSingleCustom", id, "HighEngagementReader", {
+            timeSpent: "30s",
+            page: window.location.pathname,
+          });
+        });
+        console.log("🔥 [Meta Pixel] Fired 'HighEngagementReader' custom event for all pixels.");
+      } else {
+        console.error("❌ [Meta Pixel] 30s reached, but 'window.fbq' is completely missing from the window context!");
+      }
+    }, highEngagementTime);
+
+    return () => {
+      clearTimeout(midTimer);
+      clearTimeout(highTimer);
+    };
+  }, []);
+
   if (pixelIds.length === 0) return null;
 
-  // 2. Generate the config lines dynamically for each pixel ID
+  // Generate config setup. (Note: autoConfig expects a literal boolean false, not a string 'false')
   const initScripts = pixelIds
     .map(
       (id) => `
-        fbq('set', 'autoConfig', 'false', '${id}');
+        fbq('set', 'autoConfig', false, '${id}');
         fbq('init', '${id}');
       `
     )
@@ -53,7 +103,6 @@ export default function MetaPixel() {
         }}
       />
 
-      {/* 3. Render noscript fallback images for every active pixel ID */}
       {pixelIds.map((id) => (
         <noscript key={id}>
           <img
