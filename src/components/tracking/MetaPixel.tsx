@@ -11,18 +11,24 @@ declare global {
   }
 }
 
-// Gather active pixel IDs
+// 1. Gather active pixel IDs from environment variables
 const pixelIds = [
   process.env.NEXT_PUBLIC_META_PIXEL_ID_1 || process.env.NEXT_PUBLIC_META_PIXEL_ID,
   process.env.NEXT_PUBLIC_META_PIXEL_ID_2,
   process.env.NEXT_PUBLIC_META_PIXEL_ID_3,
 ].filter(Boolean) as string[];
 
+// 2. Fetch the test event code (Will be present in Dev/Preview, undefined in Production)
+const testEventCode = process.env.NEXT_PUBLIC_META_TEST_EVENT_CODE;
+
 export default function MetaPixel() {
   
   useEffect(() => {
-    // DIAGNOSTIC 1: Confirm the component mounted and check what IDs it found
-    console.log("⚙️ [Meta Pixel] Component mounted. Active tracking IDs found:", pixelIds);
+    // Confirm the component mounted and log current tracking configuration
+    console.log("⚙️ [Meta Pixel] Component mounted. Active tracking IDs:", pixelIds);
+    if (testEventCode) {
+      console.log(`🧪 [Meta Pixel] Active Testing Session! Route Code matched: ${testEventCode}`);
+    }
 
     if (pixelIds.length === 0) {
       console.warn("⚠️ [Meta Pixel] Tracking aborted: No pixel IDs discovered in environment variables.");
@@ -35,16 +41,24 @@ export default function MetaPixel() {
     // A. Timer for Mid Engagement (15s)
     const midTimer = setTimeout(() => {
       if (window.fbq) {
-        // Loop through each initialized pixel to ensure reliable multi-tracking execution
         pixelIds.forEach((id) => {
-          window.fbq!("trackSingleCustom", id, "MidEngagementReader", {
-            timeSpent: "15s",
-            page: window.location.pathname,
-          });
+          // Dynamic evaluation: Only attach options object if a test event code actually exists
+          const options = testEventCode ? { testEventCode } : undefined;
+
+          window.fbq!(
+            "trackSingleCustom", 
+            id, 
+            "MidEngagementReader", 
+            {
+              timeSpent: "15s",
+              page: window.location.pathname,
+            },
+            options // 👈 Passes seamlessly to Meta's 5th parameter layer
+          );
         });
-        console.log("🎯 [Meta Pixel] Fired 'MidEngagementReader' custom event for all pixels.");
+        console.log(`🎯 [Meta Pixel] Fired 'MidEngagementReader'. Production-Safe Mode: ${!testEventCode}`);
       } else {
-        console.error("❌ [Meta Pixel] 15s reached, but 'window.fbq' is completely missing from the window context!");
+        console.error("❌ [Meta Pixel] 15s reached, but 'window.fbq' is missing from window context!");
       }
     }, midEngagementTime);
 
@@ -52,14 +66,22 @@ export default function MetaPixel() {
     const highTimer = setTimeout(() => {
       if (window.fbq) {
         pixelIds.forEach((id) => {
-          window.fbq!("trackSingleCustom", id, "HighEngagementReader", {
-            timeSpent: "30s",
-            page: window.location.pathname,
-          });
+          const options = testEventCode ? { testEventCode } : undefined;
+
+          window.fbq!(
+            "trackSingleCustom", 
+            id, 
+            "HighEngagementReader", 
+            {
+              timeSpent: "30s",
+              page: window.location.pathname,
+            },
+            options
+          );
         });
-        console.log("🔥 [Meta Pixel] Fired 'HighEngagementReader' custom event for all pixels.");
+        console.log(`🔥 [Meta Pixel] Fired 'HighEngagementReader'. Production-Safe Mode: ${!testEventCode}`);
       } else {
-        console.error("❌ [Meta Pixel] 30s reached, but 'window.fbq' is completely missing from the window context!");
+        console.error("❌ [Meta Pixel] 30s reached, but 'window.fbq' is missing from window context!");
       }
     }, highEngagementTime);
 
@@ -71,7 +93,7 @@ export default function MetaPixel() {
 
   if (pixelIds.length === 0) return null;
 
-  // Generate config setup. (Note: autoConfig expects a literal boolean false, not a string 'false')
+  // Generate config setup
   const initScripts = pixelIds
     .map(
       (id) => `
