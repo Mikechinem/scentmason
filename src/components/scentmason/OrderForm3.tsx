@@ -98,8 +98,9 @@ export default function OrderForm3() {
 
     const cleanPhone = phone.trim();
     const cleanName = name.trim();
+    const cleanAddress = address.trim();
 
-    if (!cleanName || !cleanPhone || !state || !address.trim()) {
+    if (!cleanName || !cleanPhone || !state || !cleanAddress) {
       setError("Please fill in all fields so we can confirm your order.");
       return;
     }
@@ -153,6 +154,10 @@ export default function OrderForm3() {
         }, { event_id: sharedEventId });
       }
 
+      // 💡 Invisible Match Enhancement: Slices City details dynamically from delivery address for CAPI
+      const addressParts = cleanAddress.split(",").map(part => part.trim());
+      const extractedCity = addressParts.length > 1 ? addressParts[addressParts.length - 2] : addressParts[0] || "";
+
       const unifiedOrderPayload = {
         eventName: "Purchase", // Explicitly passed to sync backend tracking modules
         eventId: sharedEventId,
@@ -160,9 +165,10 @@ export default function OrderForm3() {
         referrer: typeof document !== "undefined" ? document.referrer : undefined,
         name: cleanName,
         phone: cleanPhone,
-        whatsapp,
+        whatsapp: whatsapp.trim(),
         state,
-        address: address.trim(),
+        city: extractedCity, // 💡 Extracted cleanly in the background to align with the new route expectations
+        address: cleanAddress,
         sets: finalSets,
         setPrice: SET_PRICING[finalSets as SetOption].price,
         oilBottlesOrdered: Number(finalOil),
@@ -404,7 +410,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           var container = document.getElementById("unbreakable-form-container");
           if (!container) return;
 
-          // FIX: Updated to synchronize perfectly with your updated React rates
           var currentPkgPrice = 28000;
           var currentOilPrice = 0;
           var currentPkgValue = "1";

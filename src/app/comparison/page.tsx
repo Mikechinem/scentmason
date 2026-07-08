@@ -3,6 +3,9 @@ import OrderForm3 from "@/components/scentmason/OrderForm3";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
 import DiffuserGraveyard from "@/components/scentmason/DiffuserGraveyard";
 import PremiumGallery from "@/components/scentmason/PremiumGallery";
+import ScarcitySection from "@/components/scentmason/ScarcitySection";
+import FAQSection2 from "@/components/scentmason/FAQSection2";
+
 
 const useCases = [
   "Bedroom",
@@ -448,13 +451,18 @@ export default function RechargeableDiffuserPage() {
                 Buy 5 machines and get 1 extra fragrance oil free, automatically
                 added to your order.
               </p>
-            </div>
-
+            </div> 
+            <ScarcitySection />
             <OrderForm3 />
           </div>
         </section>
       </ScrollReveal>
 
+ 
+        <section>
+       <FAQSection2 />
+        </section>
+     
       {/* Contact Section */}
       <ScrollReveal delay={100}>
         <section className="mx-4 my-10 rounded-[2rem] bg-white px-6 py-12 text-center shadow-[0_20px_60px_rgba(0,0,0,0.12)] ring-1 ring-black/5 sm:mx-10 sm:px-10 sm:py-16">
@@ -469,7 +477,7 @@ export default function RechargeableDiffuserPage() {
           </p>
         </section>
       </ScrollReveal>
-
+       
       {/* Facebook Disclaimer */}
       <p className="mx-auto max-w-[720px] px-4 pb-14 text-center text-[11px] font-medium leading-5 text-black/40">
         This site is not part of the Facebook website, Facebook Inc, the
