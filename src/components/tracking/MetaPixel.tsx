@@ -22,7 +22,7 @@ const pixelIds = [
 const testEventCode = process.env.NEXT_PUBLIC_META_TEST_EVENT_CODE;
 
 export default function MetaPixel() {
-  
+
   useEffect(() => {
     // Confirm the component mounted and log current tracking configuration
     console.log("⚙️ [Meta Pixel] Component mounted. Active tracking IDs:", pixelIds);
@@ -46,9 +46,9 @@ export default function MetaPixel() {
           const options = testEventCode ? { testEventCode } : undefined;
 
           window.fbq!(
-            "trackSingleCustom", 
-            id, 
-            "MidEngagementReader", 
+            "trackSingleCustom",
+            id,
+            "MidEngagementReader",
             {
               timeSpent: "15s",
               page: window.location.pathname,
@@ -69,9 +69,9 @@ export default function MetaPixel() {
           const options = testEventCode ? { testEventCode } : undefined;
 
           window.fbq!(
-            "trackSingleCustom", 
-            id, 
-            "HighEngagementReader", 
+            "trackSingleCustom",
+            id,
+            "HighEngagementReader",
             {
               timeSpent: "30s",
               page: window.location.pathname,
@@ -120,7 +120,23 @@ export default function MetaPixel() {
             'https://connect.facebook.net/en_US/fbevents.js');
 
             ${initScripts}
-            fbq('track', 'PageView');
+
+            var pageViewEventId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : ('pv_' + Date.now() + '_' + Math.random().toString(16).slice(2));
+            console.log('🆔 [Meta Pixel] PageView eventId generated:', pageViewEventId);
+            fbq('track', 'PageView', {}, { eventID: pageViewEventId });
+
+            fetch('/api/track/pageview', {
+              method: 'POST',
+              keepalive: true,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                eventId: pageViewEventId,
+                eventSourceUrl: window.location.href
+              })
+            })
+              .then(function(res) { return res.json(); })
+              .then(function(data) { console.log('✅ [Meta Pixel] /api/track/pageview response:', data); })
+              .catch(function(err) { console.error('❌ [Meta Pixel] /api/track/pageview fetch failed:', err); });
           `,
         }}
       />
