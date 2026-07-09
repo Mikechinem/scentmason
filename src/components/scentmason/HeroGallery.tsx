@@ -4,12 +4,11 @@ import { useState, useEffect } from "react";
 
 const heroImages = [
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915",
-  "https://res.cloudinary.com/doatbjjtn/image/upload/v1782788300/gardenia_deep_so4elw.png",
-  "https://res.cloudinary.com/doatbjjtn/image/upload/v1782788300/white-peach_pzruxu.png",
-  "https://res.cloudinary.com/doatbjjtn/image/upload/v1782788299/Hilton_e6vjyk.png",
-  "https://res.cloudinary.com/doatbjjtn/image/upload/v1782788299/lavender_tdeabk.png",
+  "https://res.cloudinary.com/doatbjjtn/image/upload/f_auto,q_auto,w_800/v1782788300/gardenia_deep_so4elw.png",
+  "https://res.cloudinary.com/doatbjjtn/image/upload/f_auto,q_auto,w_800/v1782788300/white-peach_pzruxu.png",
+  "https://res.cloudinary.com/doatbjjtn/image/upload/f_auto,q_auto,w_800/v1782788299/Hilton_e6vjyk.png",
+  "https://res.cloudinary.com/doatbjjtn/image/upload/f_auto,q_auto,w_800/v1782788299/lavender_tdeabk.png",
 ];
-
 export default function HeroGallery() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
