@@ -126,7 +126,7 @@ export default function FlashSalePromoPage() {
           <div className="mx-auto w-full max-w-[480px]">
             <div className="text-center">
               <p className="text-[13px] font-extrabold uppercase tracking-wider text-red-600">
-                Promo Price Ends After This Weekend
+                Promo Price Ends Today.
               </p>
               <h2 className="mt-2 text-[22px] font-bold tracking-tight text-[#BF9903] sm:text-[24px]">
                 Fill This Order Form Below — Your Promo Price Is Locked The Moment You
@@ -144,8 +144,27 @@ export default function FlashSalePromoPage() {
              
              {/* Unboxing Video Section */}
       <section className="mt-10 px-4 py-16 text-center max-w-4xl mx-auto bg-black">
-        <h2 className="text-[32px] font-black tracking-tight text-white sm:text-[42px]">See It In Action</h2>
+      <h2 className="text-[32px] font-black tracking-tight text-white sm:text-[42px]">See It In Action</h2>
+<p className="mt-2 text-[14px] font-medium tracking-wide text-white/60 sm:text-[15px]">
+  Play the video
+</p>
+<div className="video-arrow-blink mt-1 text-[32px] font-black text-red-600 sm:text-[40px]">
+  ↓
+</div>
 
+<style
+  dangerouslySetInnerHTML={{
+    __html: `
+      @keyframes videoArrowBlink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.15; }
+      }
+      .video-arrow-blink {
+        animation: videoArrowBlink 1s ease-in-out infinite;
+      }
+    `,
+  }}
+/>
         <div className="mx-auto mt-8 w-full max-w-[560px] overflow-hidden rounded-2xl border-4 border-[#3B1F0E]/40 bg-black shadow-2xl">
           <video
             controls

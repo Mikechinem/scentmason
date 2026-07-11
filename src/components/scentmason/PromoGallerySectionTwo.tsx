@@ -40,7 +40,7 @@ const items: UseCaseItem[] = [
   {
     label: "What's In The Box",
     imageUrl:
-      "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/unbox_real.png?tr=w-360,q-75,f-webp",
+      "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/prd2x.png?updatedAt=1781025552653?tr=w-360,q-75,f-webp",
     alt: "Unboxing the ScentMason automatic fragrance machine",
   },
 ];
