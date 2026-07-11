@@ -39,6 +39,12 @@ const items: ProblemSolutionItem[] = [
       "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/WhatsApp%20Image%202026-07-10%20at%2007.47.14.jpeg?tr=w-600,q-75,f-webp",
     alt: "Aromatherapy fragrance machine clearing kitchen odours",
   },
+  {
+    problem: "Every of your space to bring calmness and insipirations?",
+    imageUrl:
+      "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/compare-real-design.png?updatedAt=1780833409537?tr=w-600,q-75,f-webp",
+    alt: "Aromatherapy fragrance machine clearing kitchen odours",
+  },
 ];
 
 export default function PromoGallerySectionOne() {
