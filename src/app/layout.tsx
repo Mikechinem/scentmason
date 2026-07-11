@@ -1,4 +1,5 @@
-﻿import type { Metadata } from "next";
+﻿// src/app/layout.tsx
+import type { Metadata } from "next";
 import "./globals.css";
 import { BRAND, SITE } from "@/lib/constants";
 import MetaPixel from "@/components/tracking/MetaPixel";
@@ -27,12 +28,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-NG">
-      <body>  
+      <body className="antialiased">  
+        {/* Main Application Interface */}
+        {children}
+
+        {/* Global Performance & Marketing Trackers */}
         <MetaPixel />
         <GoogleAnalytics />
         <TikTokPixel />
-        {children}
-        </body>
+      </body>
     </html>
   );
 }
