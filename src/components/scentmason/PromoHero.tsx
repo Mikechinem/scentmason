@@ -14,28 +14,47 @@ export default function PromoHero() {
         </p>
 
         {/* Gold-framed headline */}
-        <div className="mt-5 w-full border-[3px] border-[#C17F4A] bg-[#C17F4A]/5 p-5 sm:p-8 rounded-md shadow-inner">
-          <h1 className="text-[24px] font-black leading-snug tracking-tight text-[#000000] sm:text-[34px] sm:leading-normal">
-            Get The Smart Fragrance Machine For{" "}
-            <span className="text-red-600">₦27,000</span> Today Only!
-          </h1>
+        {/* Gold-framed headline */}
+<div className="mt-5 w-full border-[3px] border-[#C17F4A] bg-[#C17F4A]/5 p-5 sm:p-8 rounded-md shadow-inner">
+  <h1 className="text-[24px] font-black leading-snug tracking-tight text-[#000000] sm:text-[34px] sm:leading-normal">
+    Get The Smart Fragrance Machine For{" "}
+    <span className="text-red-600">₦27,000</span>
+  </h1>
 
-          <div className="mt-3 flex items-center justify-center gap-3">
-            <span className="text-[18px] font-medium text-black/40 line-through sm:text-[22px]">
-              ₦45,000
-            </span>
-            <span className="text-[28px] font-extrabold text-[#000000] sm:text-[36px]">
-              ₦27,000
-            </span>
-          </div>
+  <div className="mt-3 flex items-center justify-center gap-3">
+    <span className="text-[18px] font-medium text-black/40 line-through sm:text-[22px]">
+      ₦45,000
+    </span>
+    <span className="text-[28px] font-extrabold text-[#000000] sm:text-[36px]">
+      ₦27,000
+    </span>
+  </div>
 
-          {/* Savings pill — red is now reserved exclusively for savings/urgency signals */}
-          <div className="mt-3 flex justify-center">
-            <span className="inline-block rounded-full bg-red-600 px-4 py-1 text-[13px] font-bold text-white sm:text-[14px]">
-              You Save ₦18,000 Today
-            </span>
-          </div>
-        </div>
+  {/* Unique 2-for-50k split offer */}
+  <div className="mt-4 flex items-center justify-center gap-3">
+    <div className="h-px flex-1 max-w-[60px] bg-[#3B1F0E]/20" />
+    <span className="text-[13px] font-bold uppercase tracking-wide text-[#3B1F0E]/60 sm:text-[14px]">
+      Or Get 2 For
+    </span>
+    <div className="h-px flex-1 max-w-[60px] bg-[#3B1F0E]/20" />
+  </div>
+
+  <div className="mt-2 flex items-center justify-center gap-3">
+    <span className="text-[18px] font-medium text-black/40 line-through sm:text-[22px]">
+      ₦90,000
+    </span>
+    <span className="text-[28px] font-extrabold text-[#000000] sm:text-[36px]">
+      ₦50,000
+    </span>
+  </div>
+
+  {/* Savings pill — red is now reserved exclusively for savings/urgency signals */}
+  <div className="mt-3 flex justify-center">
+    <span className="inline-block rounded-full bg-red-600 px-4 py-1 text-[13px] font-bold text-white sm:text-[14px]">
+      Save Up To ₦40,000 Today
+    </span>
+  </div>
+</div>
 
         {/* Feature chips — moved out of red, now match brand brown for cohesion.
             Red is reserved for price/urgency only. */}
@@ -51,13 +70,18 @@ export default function PromoHero() {
           </span>
         </div>
 
-        <p className="mt-3 text-[18px] font-medium leading-relaxed text-black/70 sm:text-[18px]">
-          This Aromatherapy Fragrance Machine runs itself for{" "}
-          <span className="font-bold text-[#3B1F0E] underline decoration-[#C17F4A] decoration-2 underline-offset-2">
-            60 days straight.
-          </span>{" "}
-          Your guests will always wonder how.
-        </p>
+       <div className="mt-5 w-full rounded-xl bg-[#3B1F0E] px-4 py-4 shadow-lg sm:px-6 sm:py-5">
+  <p className="flex items-start gap-2.5 text-[18px] font-medium leading-relaxed text-white/90 sm:text-[18px]">
+    <span className="mt-0.5 shrink-0 text-[22px]">✨</span>
+    <span>
+      This Aromatherapy Fragrance Machine sprays by itself{" "}
+      <span className="font-bold text-[#EFBF04] underline decoration-[#EFBF04] decoration-2 underline-offset-2">
+        60 days straight without electricity.
+      </span>{" "}
+      Your guests will always wonder how.
+    </span>
+  </p>
+</div>
 
         {/* Product image */}
         <div className="relative mt-7 w-full max-w-[440px] overflow-hidden rounded-xl bg-neutral-50 p-2 border border-neutral-100 shadow-sm">
