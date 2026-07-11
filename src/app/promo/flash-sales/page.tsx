@@ -206,7 +206,6 @@ export default function FlashSalePromoPage() {
 
              <ScarcitySection />
             <div className="mt-2 rounded-2xl border-2 border-[#bff0d4] p-4">
-              
               <OrderFormPromo />
             </div>
           </div>

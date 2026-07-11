@@ -27,7 +27,7 @@ const OIL_PRICING: Record<OilOption, { label: string; price: number }> = {
 const STATES = [
   "Abia", "Abuja (FCT)", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa",
   "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu",
-  "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi",
+  "Imo","Kaduna", "Kano", "Sokoto", "Kogi",
   "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo",
   "Plateau", "Rivers",
 ];
