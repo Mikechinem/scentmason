@@ -45,7 +45,7 @@ function FeatureCard({
       <div className="min-w-0 pt-0.5">
         <p
           className="
-            text-[13px]
+            text-[15px]
             font-extrabold
             leading-[1.15]
             tracking-[-0.01em]
@@ -60,7 +60,7 @@ function FeatureCard({
         <p
           className="
             mt-1
-            text-[10px]
+            text-[12px]
             font-semibold
             leading-[1.3]
             text-[#7a5c45]
@@ -235,7 +235,7 @@ function ProductVisual() {
         <span
           className="
             mt-1
-            text-[6px]
+            text-[8px]
             font-medium
             uppercase
             leading-none
@@ -318,7 +318,7 @@ export default function PremiumHero() {
             TOP EYEBROW
             Straight horizontal line.
         ================================================= */}
-        <div
+        {/*   <div
           className="
             mb-5
             flex
@@ -351,8 +351,8 @@ export default function PremiumHero() {
           </p>
 
           <span className="h-px flex-1 bg-[#3b1f0e]/20 lg:hidden" />
-        </div>
-
+        </div> */}
+        
         {/* =================================================
             MAIN HERO GRID
 
@@ -377,9 +377,21 @@ export default function PremiumHero() {
           {/* =================================================
               PRODUCT VISUAL
           ================================================= */}
-          <div className="order-1 lg:order-2">
-            <ProductVisual />
-          </div>
+          <div
+  className="
+    order-1
+    pt-20
+
+    sm:pt-12
+
+    lg:order-2
+    lg:pt-12
+
+    xl:pt-14
+  "
+>
+  <ProductVisual />
+</div>
 
           {/* =================================================
               HERO COPY
@@ -397,31 +409,48 @@ export default function PremiumHero() {
             {/* =================================================
                 SUB-HEADLINE
             ================================================= */}
-            <h1
+  <h1
   className="
     mx-auto
-    max-w-[620px]
-    text-[25px]
+    max-w-[560px]
+    text-[22px]
     font-medium
     leading-[1.18]
     tracking-[-0.025em]
     text-[#1e1008]
 
-    sm:text-[30px]
+    sm:text-[27px]
+    sm:leading-[1.16]
 
     lg:mx-0
-    lg:text-[36px]
-    lg:leading-[1.13]
+    lg:text-[32px]
+    lg:leading-[1.12]
 
-    xl:text-[40px]
+    xl:text-[36px]
+    xl:leading-[1.1]
   "
 >
   The diffuser that makes your home smell{" "}
-  <span className="font-extrabold text-[#3b1f0e]">
-    luxurious like a <br/>5-star hotel
+
+  <span
+    className="
+      font-extrabold
+      tracking-[-0.035em]
+      text-[#A67C00]
+    "
+  >
+    luxurious like a <br className="hidden sm:block" />
+    5-star hotel
   </span>{" "}
-  <span className="font-semibold">
-    without constantly remembering to spray.
+
+  <span
+    className="
+      font-normal
+      tracking-[-0.025em]
+      text-[#1e1008]
+    "
+  >
+    without You constantly remembering to spray.
   </span>
 </h1>
 
@@ -527,7 +556,7 @@ export default function PremiumHero() {
       uppercase
       leading-none
       tracking-[0.14em]
-      text-white/90
+      text-white/70
 
       sm:text-[11px]
     "
@@ -537,30 +566,6 @@ export default function PremiumHero() {
 </span>
 </a>
 </div>
-
-            {/* =================================================
-                SUPPORTING COPY
-            ================================================= */}
-            <p
-              className="
-                mx-auto
-                mt-5
-                max-w-[500px]
-                text-[14px]
-                font-medium
-                leading-6
-                text-[#7a5c45]
-
-                sm:text-[15px]
-                sm:leading-6
-
-                lg:mx-0
-                lg:text-[16px]
-              "
-            >
-              Set it once. Enjoy a warm, elevated home fragrance
-              experience for weeks automatically.
-            </p>
 
             {/* =================================================
                 SELLING POINTS

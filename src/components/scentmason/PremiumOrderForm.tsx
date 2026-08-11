@@ -923,12 +923,12 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         </button>
 
         <div className="mt-4 text-center">
-          <p className="text-[12px] font-medium leading-5 text-black/45">
+          <p className="text-[15px] font-medium leading-5 text-black/45">
             A sales rep will call to confirm before your
             order is dispatched.
           </p>
 
-          <p className="mt-2 text-[11px] font-semibold text-[#A67C00]">
+          <p className="mt-2 text-[20px] font-semibold text-[#A67C00]">
             Payment on delivery available
           </p>
         </div>

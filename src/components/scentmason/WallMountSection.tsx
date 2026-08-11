@@ -274,9 +274,9 @@ export default function WallMountSection() {
                 mx-auto
                 mt-5
                 max-w-lg
-                text-[16px]
+                text-[20px]
                 leading-7
-                text-[#5f4b3c]
+                text-[#E7000B]
 
                 sm:mt-6
                 sm:text-[17px]
@@ -362,7 +362,7 @@ export default function WallMountSection() {
                   <span
                     className="
                       min-w-0
-                      text-[13px]
+                      text-[16px]
                       font-semibold
                       leading-tight
                       text-[#1e1008]
@@ -405,7 +405,7 @@ export default function WallMountSection() {
 
               <p
                 className="
-                  text-[12px]
+                  text-[13px]
                   font-medium
                   leading-6
                   tracking-wide

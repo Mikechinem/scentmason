@@ -6,33 +6,33 @@ const DIFFUSER_IMAGE =
 const FEATURES = [
   {
     title: "No Water Needed",
-    description: "No limescale build-up.",
+    description: "Safe for pet.",
     position: "top-left",
+  },
+  {
+    title: "Sprays On its Own",
+    description: "Fresh scent, every second.",
+    position: "top-right",
+  },
+  {
+    title: "No-blockage",
+    description: "guaranteed to last longer.",
+    position: "bottom-left",
   },
   {
     title: "Pure Oil Technology",
     description: "100% pure fragrance oil.",
-    position: "top-right",
-  },
-  {
-    title: "Anti-Clog",
-    description: "Handles thick oils.",
-    position: "bottom-left",
-  },
-  {
-    title: "Consistent Mist",
-    description: "Powerful scent, every day.",
     position: "bottom-right",
   },
 ];
 
 const PROBLEMS = [
   {
-    title: "The Water-Limescale Choke",
+    title: "No Water-Limescale Choke",
     text: "Water-based ultrasonic diffusers force you to mix oils with water. Over time, minerals can build up around the vibration plate and reduce mist output.",
   },
   {
-    title: "Cheap Aerosol Nozzles Clog Easily",
+    title: "No Cheap Aerosol Nozzles Clog",
     text: "Standard automatic battery sprayers can struggle with thicker fragrance oils, causing inconsistent spraying and poor atomization.",
   },
 ];
@@ -129,7 +129,6 @@ export default function DiffuserEngineeringSection() {
 
           {/* =================================================
               IMAGE + CIRCULAR CALLOUTS
-
               One visual unit.
               Product stays large and central.
           ================================================= */}
@@ -416,15 +415,18 @@ export default function DiffuserEngineeringSection() {
             className="
               text-[30px]
               font-medium
-              leading-[1.08]
-              tracking-[-0.04em]
+              leading-[1.14]
+              tracking-[-0.035em]
               text-[#1e1008]
 
               sm:text-[42px]
+              sm:leading-[1.1]
 
               lg:text-[52px]
+              lg:leading-[1.08]
 
               xl:text-[58px]
+              xl:leading-[1.07]
             "
           >
             Tired of Diffusers That Stop
@@ -440,7 +442,7 @@ export default function DiffuserEngineeringSection() {
               mx-auto
               mt-5
               max-w-3xl
-              text-[14px]
+              text-[18px]
               leading-6
               text-[#5f4b3c]
 
@@ -464,7 +466,7 @@ export default function DiffuserEngineeringSection() {
               mx-auto
               mt-4
               max-w-3xl
-              text-[14px]
+              text-[18px]
               leading-6
               text-[#5f4b3c]
 
@@ -482,14 +484,14 @@ export default function DiffuserEngineeringSection() {
           <p
             className="
               mt-3
-              text-[13px]
+              text-[25px]
               font-medium
               text-[#7a5c45]
 
               sm:text-[15px]
             "
           >
-            Here is why your old ones stopped working:
+            SCENTMASON DIFFUSER CUTS YOUR WASTE SPEND:
           </p>
         </div>
 
@@ -550,7 +552,7 @@ export default function DiffuserEngineeringSection() {
                 <h3
                   className="
                     pt-1
-                    text-[16px]
+                    text-[18px]
                     font-extrabold
                     leading-tight
                     text-[#1e1008]
@@ -565,7 +567,7 @@ export default function DiffuserEngineeringSection() {
               <p
                 className="
                   mt-4
-                  text-[13px]
+                  text-[15px]
                   leading-6
                   text-[#5f4b3c]
 
@@ -597,19 +599,6 @@ export default function DiffuserEngineeringSection() {
             lg:py-14
           "
         >
-          <p
-            className="
-              text-[10px]
-              font-bold
-              uppercase
-              tracking-[0.2em]
-              text-[#7a5c45]
-
-              sm:text-[12px]
-            "
-          >
-            How ScentMason Changes Everything
-          </p>
 
           <h3
             className="
@@ -637,7 +626,7 @@ export default function DiffuserEngineeringSection() {
               mx-auto
               mt-4
               max-w-3xl
-              text-[14px]
+              text-[18px]
               leading-6
               text-[#5f4b3c]
 
@@ -647,8 +636,7 @@ export default function DiffuserEngineeringSection() {
               lg:text-[17px]
             "
           >
-            ScentMason does not use ultrasonic water plates, and it does not
-            use cheap aerosol push-nozzles. Instead, it is engineered with
+            ScentMason is engineered with
             an internal{" "}
             <strong className="text-[#3b1f0e]">
               Industrial Cold-Air Micro-Pump.
@@ -712,7 +700,7 @@ export default function DiffuserEngineeringSection() {
 
                   <h4
                     className="
-                      text-[15px]
+                      text-[18px]
                       font-extrabold
                       leading-tight
                       text-[#1e1008]
@@ -728,7 +716,7 @@ export default function DiffuserEngineeringSection() {
                   className="
                     mt-2
                     pl-11
-                    text-[13px]
+                    text-[15px]
                     leading-6
                     text-[#5f4b3c]
 
@@ -787,6 +775,7 @@ export default function DiffuserEngineeringSection() {
 
 /* ============================================================
    CALLOUT COMPONENT
+   DESCRIPTION IS OPTIONAL
    ============================================================ */
 
 function Callout({
@@ -795,7 +784,7 @@ function Callout({
   align = "left",
 }: {
   title: string;
-  description: string;
+  description?: string;
   align?: "left" | "right";
 }) {
   return (
@@ -854,24 +843,26 @@ function Callout({
         </span>
       </div>
 
-      {/* FEATURE DESCRIPTION */}
-      <p
-        className="
-          mt-2
-          text-[11px]
-          font-semibold
-          leading-[1.35]
-          text-[#5f4b3c]
+      {/* FEATURE DESCRIPTION — ONLY RENDERS WHEN PROVIDED */}
+      {description && (
+        <p
+          className="
+            mt-2
+            text-[12px]
+            font-semibold
+            leading-[1.35]
+            text-[#5f4b3c]
 
-          sm:mt-2.5
-          sm:text-[13px]
-          sm:leading-5
+            sm:mt-2.5
+            sm:text-[13px]
+            sm:leading-5
 
-          lg:text-[14px]
-        "
-      >
-        {description}
-      </p>
+            lg:text-[14px]
+          "
+        >
+          {description}
+        </p>
+      )}
     </div>
   );
 }
