@@ -18,6 +18,10 @@ export const metadata: Metadata = {
     url: SITE.url,
     siteName: BRAND.name,
     type: "website",
+      },
+ 
+      other: {
+    "facebook-domain-verification": "pibj0993wcr015g1jxoqpdukdfs8z2",
   },
 };
 
