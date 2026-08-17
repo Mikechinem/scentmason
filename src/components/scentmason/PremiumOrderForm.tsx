@@ -72,6 +72,7 @@ export default function PremiumOrderForm() {
   const [phone, setPhone] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [state, setState] = useState("");
+  const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -153,9 +154,10 @@ export default function PremiumOrderForm() {
 
     const cleanPhone = phone.trim();
     const cleanName = name.trim();
+    const cleanCity = city.trim();
     const cleanAddress = address.trim();
 
-    if (!cleanName || !cleanPhone || !state || !cleanAddress) {
+    if (!cleanName || !cleanPhone || !state || !cleanCity || !cleanAddress) {
       setError(
         "Please fill in all fields so we can confirm your order."
       );
@@ -252,7 +254,7 @@ export default function PremiumOrderForm() {
         phone: cleanPhone,
         whatsapp: whatsapp.trim(),
         state,
-        city: extractedCity,
+        city: cleanCity,
         address: cleanAddress,
 
         sets: finalSets,
@@ -277,7 +279,7 @@ export default function PremiumOrderForm() {
       };
 
       const [metaResponse] = await Promise.all([
-        fetch("/api/track/purchase", {
+        fetch("/api/track/premium-purchase", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -792,6 +794,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             </div>
 
             <div>
+
               <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
                 State
               </label>
@@ -827,6 +830,37 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                 ))}
               </select>
             </div>
+
+                    <div>
+  <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
+    Town / City
+  </label>
+
+  <input
+    type="text"
+    value={city}
+    onChange={(e) => setCity(e.target.value)}
+    placeholder="e.g. Ikeja"
+    className="
+      mt-1.5
+      w-full
+      rounded-xl
+      border
+      border-black/10
+      bg-white
+      px-4
+      py-3.5
+      text-[15px]
+      font-medium
+      text-black
+      outline-none
+      transition
+      focus:border-[#A67C00]
+      focus:ring-2
+      focus:ring-[#A67C00]/10
+    "
+  />
+</div>
 
             <div>
               <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
