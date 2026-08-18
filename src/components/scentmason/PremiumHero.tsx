@@ -660,7 +660,7 @@ export default function PremiumHero() {
                     sm:text-[11px]
                   "
                 >
-                  ✓ 30-Day Guarantee
+                  ✓ Money-Back Guaranteed
                 </p>
               </div>
             </div>
