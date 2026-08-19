@@ -24,6 +24,7 @@ type PurchaseRequestBody = {
   oilBottlesTotal?: number;
   oilPrice?: number;
   total?: string | number;
+  willAccept?: boolean;
 };
 
 function removeEmptyValues<T extends Record<string, unknown>>(obj: T) {
@@ -563,6 +564,9 @@ export async function POST(req: NextRequest) {
 
       total:
         body.total || "",
+        
+        willAccept:
+          body.willAccept ? "Yes" : "No",
     };
 
     // ============================================================
