@@ -1,6 +1,7 @@
 "use client";
 
 import PremiumHero from "@/components/scentmason/PremiumHero";
+import PremiumVideoUsecase from "@/components/scentmason/PremiumVideoUsecase";
 import WallMountSection from "@/components/scentmason/WallMountSection";
 import DiffuserEngineeringSecion from "@/components/scentmason/DiffuserEngineeringSection";
 import SpaFeelSection from "@/components/scentmason/SpaFeelSection";
@@ -28,6 +29,7 @@ export default function PremiumPage() {
           SECTION 1 — HERO
       ========================================================= */}
       <PremiumHero />
+      <PremiumVideoUsecase />
 
       {/* =========================================================
     SECTION 3 — WALL MOUNT / TABLETOP
