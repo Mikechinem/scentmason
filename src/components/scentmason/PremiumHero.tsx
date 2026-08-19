@@ -214,7 +214,7 @@ function ProductVisual() {
             sm:text-[21px]
           "
         >
-          60
+          30%
         </span>
 
         <span
@@ -229,7 +229,7 @@ function ProductVisual() {
             sm:text-[10px]
           "
         >
-          DAYS
+          DISCOUNT
         </span>
 
         <span
@@ -244,7 +244,7 @@ function ProductVisual() {
             sm:text-[7px]
           "
         >
-          NO CHARGING
+          GET IT NOW
         </span>
       </div>
 
@@ -567,137 +567,7 @@ export default function PremiumHero() {
 </a>
 </div>
 
-            {/* =================================================
-                SELLING POINTS
-            ================================================= */}
-            <div
-              className="
-                mt-6
-                grid
-                grid-cols-1
-                gap-2.5
-
-                sm:grid-cols-3
-                sm:gap-3
-
-                lg:max-w-[650px]
-              "
-            >
-              {/* Payment */}
-              <div
-                className="
-                  rounded-xl
-                  border
-                  border-[#198754]/20
-                  bg-[#198754]/5
-                  px-3
-                  py-2.5
-                  text-center
-                "
-              >
-                <p
-                  className="
-                    text-[12px]
-                    font-extrabold
-                    uppercase
-                    tracking-[0.01em]
-                    text-[#198754]
-
-                    sm:text-[11px]
-                  "
-                >
-                  ✓ Payment On Delivery
-                </p>
-              </div>
-
-              {/* Free Delivery */}
-              <div
-                className="
-                  rounded-xl
-                  border
-                  border-[#198754]/20
-                  bg-[#198754]/5
-                  px-3
-                  py-2.5
-                  text-center
-                "
-              >
-                <p
-                  className="
-                    text-[12px]
-                    font-extrabold
-                    uppercase
-                    tracking-[0.01em]
-                    text-[#198754]
-
-                    sm:text-[11px]
-                  "
-                >
-                  ✓ Free Delivery
-                </p>
-              </div>
-
-              {/* Guarantee */}
-              <div
-                className="
-                  rounded-xl
-                  border
-                  border-[#198754]/20
-                  bg-[#198754]/5
-                  px-3
-                  py-2.5
-                  text-center
-                "
-              >
-                <p
-                  className="
-                    text-[12px]
-                    font-extrabold
-                    uppercase
-                    tracking-[0.01em]
-                    text-[#198754]
-
-                    sm:text-[11px]
-                  "
-                >
-                  ✓ Money-Back Guaranteed
-                </p>
-              </div>
-            </div>
-
-            {/* =================================================
-                DISCOUNT EMPHASIS
-            ================================================= */}
-            <div
-              className="
-                mt-4
-                flex
-                justify-center
-
-                lg:justify-start
-              "
-            >
-              <span
-                className="
-                  inline-flex
-                  items-center
-                  rounded-lg
-                  bg-red-600
-                  px-4
-                  py-2
-                  text-[12px]
-                  font-extrabold
-                  uppercase
-                  tracking-[0.04em]
-                  text-white
-                  shadow-[0_8px_20px_rgba(220,38,38,0.20)]
-
-                  sm:text-[13px]
-                "
-              >
-                🔥 30% DISCOUNT AVAILABLE NOW
-              </span>
-            </div>
+           
           </div>
         </div>
       </div>

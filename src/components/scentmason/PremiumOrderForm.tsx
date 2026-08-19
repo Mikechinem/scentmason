@@ -77,8 +77,10 @@ export default function PremiumOrderForm() {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [willAccept, setWillAccept] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  
 
   const setPricing = SET_PRICING[sets];
   const oilPricing = OIL_PRICING[oil];
@@ -160,6 +162,13 @@ export default function PremiumOrderForm() {
     if (!cleanName || !cleanPhone || !state || !cleanCity || !cleanAddress) {
       setError(
         "Please fill in all fields so we can confirm your order."
+      );
+      return;
+    }
+
+    if (!willAccept) {
+      setError(
+        "😞Please tick “I WILL ACCEPT” to confirm you’re ready to receive your order. Then submit the form again."
       );
       return;
     }
@@ -271,6 +280,8 @@ export default function PremiumOrderForm() {
           OIL_PRICING[finalOil as OilOption].price,
 
         total: numericValue,
+        
+        willAccept: willAccept,
 
         fbp: getCookie("_fbp"),
         fbc: getCookie("_fbc"),
@@ -429,7 +440,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               mx-auto
               mt-3
               max-w-md
-              text-[14px]
+              text-[16px]
               font-medium
               leading-6
               text-black/55
@@ -457,15 +468,19 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         >
           <p
             className="
-              text-[13px]
+              text-[16px]
               font-bold
               leading-6
               text-red-700
             "
           >
-            IMPORTANT: PLEASE DO NOT fill this form if you
-            don&apos;t have the money for it... OR if you&apos;re
-            travelling in the next 2-4 days.
+            IMPORTANT: ONLY FILL THIS FORM IF YOU&apos;RE READY TO RECEIVE YOUR ORDER.
+
+            Please do not order if you won&apos;t have the money available
+            or if you&apos;ll be travelling within the next 2-4 days.
+
+            After filling this form, click &quot;I WILL ACCEPT&quot; to confirm
+            you&apos;re ready to receive your order.
           </p>
         </div>
 
@@ -476,11 +491,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
         <div className="mt-7">
           <div className="mb-3">
-            <p className="text-[15px] font-bold text-[#1e1008]">
+            <p className="text-[16px] font-bold text-[#1e1008]">
               Choose your package
             </p>
 
-            <p className="mt-1 text-[12px] font-medium text-black/50">
+            <p className="mt-1 text-[14px] font-medium text-black/50">
               Select how many machines you&apos;d like.
             </p>
           </div>
@@ -916,8 +931,37 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
 
         {/* =================================================
-            SUBMIT
+            I'LL ACCEPT-BOX
         ================================================= */}
+        
+        
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50/70 p-4">
+  <label className="flex cursor-pointer items-start gap-3">
+    <input
+      type="checkbox"
+      checked={willAccept}
+      onChange={(e) => {
+        setWillAccept(e.target.checked);
+        if (e.target.checked) {
+          setError("");
+        }
+      }}
+      className="mt-1 h-5 w-5 shrink-0 accent-red-600"
+    />
+
+    <span className="text-[15px] font-bold leading-6 text-gray-800">
+      I WILL ACCEPT — I am ready to receive my order when contacted for
+      delivery confirmation.
+    </span>
+  </label>
+</div>
+        
+        
+        {/* =================================================
+            SUBMIT-BUTTON
+        ================================================= */}
+
+        
 
         <button
           type="submit"

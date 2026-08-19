@@ -12,6 +12,7 @@ import UnboxingVideoSection from "@/components/scentmason/UnboxingVideoSection";
 import PremiumWhatsInsideSection from "@/components/scentmason/PremiumWhatsInsideSection";
 import ScarcitySection from "@/components/scentmason/ScarcitySection";
 import PremiumOrderForm from "@/components/scentmason/PremiumOrderForm";
+import RiskOff from "@/components/scentmason/RiskOff";
 
 const WALL_PLACE_IMAGE_WEBP =
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/wahuk.png?tr=f-webp";
@@ -783,7 +784,7 @@ export default function PremiumPage() {
 
 
         {/* ===============================================
-            60 DAYS — TOP LEFT
+            limited — offer
         =============================================== */}
 
         <div
@@ -818,7 +819,7 @@ export default function PremiumPage() {
               sm:text-[11px]
             "
           >
-            No Charging
+            Limited Offer
           </p>
 
           <p
@@ -833,7 +834,7 @@ export default function PremiumPage() {
               sm:text-[30px]
             "
           >
-            60 DAYS
+            30% Discount
           </p>
         </div>
 
@@ -1056,6 +1057,7 @@ export default function PremiumPage() {
 <RoomUseCases />
 <UnboxingVideoSection />
 <PremiumWhatsInsideSection />
+<RiskOff />
 
 {/* Order form intro + form */}
 <section

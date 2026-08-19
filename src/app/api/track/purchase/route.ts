@@ -26,6 +26,7 @@ type PurchaseRequestBody = {
   oilBottlesTotal?: number;
   oilPrice?: number;
   total?: string | number;
+  willAccept?: boolean;
 };
 
 function removeEmptyValues<T extends Record<string, unknown>>(obj: T) {
@@ -223,6 +224,7 @@ export async function POST(req: NextRequest) {
         oilBottlesTotal: body.oilBottlesTotal || 0,
         oilPrice: body.oilPrice || 0,
         total: body.total || "",
+        willAccept: body.willAccept ?? false,
       };
 
       // We attach a local catch handler to ensure sheet bugs can't crash the CAPI collection cycle
