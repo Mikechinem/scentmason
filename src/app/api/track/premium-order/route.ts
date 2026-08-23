@@ -16,36 +16,68 @@ export const runtime = "nodejs";
 
 /**
  * ============================================================
- * PREMIUM ORDER INGESTION
+ * SCENTMASON PREMIUM ORDER INGESTION
  * ============================================================
+ *
+ * PURPOSE
  *
  * This route records a Premium order submission.
  *
- * IMPORTANT:
+ * It does NOT fire Meta Purchase.
  *
- * This route does NOT fire Meta Purchase.
- *
- * Purchase is reserved for the separate:
+ * Purchase is reserved for:
  *
  * /api/track/premium-purchase
  *
- * route, which will only fire after the sales representative
- * confirms the order as paid.
+ * which is called only after the sales representative changes:
  *
+ * Payment Status
+ * Pending → Paid
+ *
+ * ============================================================
+ *
+ * DATA FLOW
+ *
+ * Premium landing page
+ *        ↓
+ * captureAttribution()
+ *        ↓
+ * PremiumOrderForm
+ *        ↓
+ * /api/track/premium-order
+ *        ↓
+ * Google Apps Script
+ *        ↓
+ * Premium Orders sheet
+ *        ↓
+ * Pending
+ *
+ * ============================================================
+ */
+
+
+/**
+ * ============================================================
+ * CLIENT IP
  * ============================================================
  */
 
 function getClientIp(
   req: NextRequest
 ): string | undefined {
+
   const forwardedFor =
-    req.headers.get("x-forwarded-for");
+    req.headers.get(
+      "x-forwarded-for"
+    );
 
   if (forwardedFor) {
-    const firstIp = forwardedFor
-      .split(",")
-      .map((ip) => ip.trim())
-      .find(Boolean);
+
+    const firstIp =
+      forwardedFor
+        .split(",")
+        .map((ip) => ip.trim())
+        .find(Boolean);
 
     if (firstIp) {
       return firstIp;
@@ -53,16 +85,28 @@ function getClientIp(
   }
 
   return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-real-ip") ||
+    req.headers.get(
+      "cf-connecting-ip"
+    ) ||
+    req.headers.get(
+      "x-real-ip"
+    ) ||
     undefined
   );
 }
+
+
+/**
+ * ============================================================
+ * NUMBER NORMALIZATION
+ * ============================================================
+ */
 
 function parseNumber(
   value: unknown,
   fallback = 0
 ): number {
+
   if (
     typeof value === "number" &&
     Number.isFinite(value)
@@ -70,13 +114,22 @@ function parseNumber(
     return value;
   }
 
-  if (typeof value === "string") {
+  if (
+    typeof value === "string"
+  ) {
+
     const cleaned =
-      value.replace(/[^0-9.-]/g, "");
+      value.replace(
+        /[^0-9.-]/g,
+        ""
+      );
 
-    const parsed = Number(cleaned);
+    const parsed =
+      Number(cleaned);
 
-    if (Number.isFinite(parsed)) {
+    if (
+      Number.isFinite(parsed)
+    ) {
       return parsed;
     }
   }
@@ -84,16 +137,31 @@ function parseNumber(
   return fallback;
 }
 
+
+/**
+ * ============================================================
+ * BOOLEAN NORMALIZATION
+ * ============================================================
+ */
+
 function parseBoolean(
   value: unknown
 ): boolean {
-  if (typeof value === "boolean") {
+
+  if (
+    typeof value === "boolean"
+  ) {
     return value;
   }
 
-  if (typeof value === "string") {
+  if (
+    typeof value === "string"
+  ) {
+
     const normalized =
-      value.trim().toLowerCase();
+      value
+        .trim()
+        .toLowerCase();
 
     return (
       normalized === "true" ||
@@ -104,92 +172,134 @@ function parseBoolean(
   return false;
 }
 
+
 /**
- * ------------------------------------------------------------
- * Attribution cleaning
- * ------------------------------------------------------------
+ * ============================================================
+ * ATTRIBUTION CLEANING
+ * ============================================================
  *
- * AttributionData contains:
+ * IMPORTANT:
+ *
+ * Attribution remains structured as:
  *
  * firstTouch
  * lastTouch
  *
- * Therefore we clean each touch independently.
+ * We do NOT flatten it before sending to Apps Script.
  */
 
 function cleanTouch(
   touch:
-    | NonNullable<AttributionData["firstTouch"]>
+    | NonNullable<
+        AttributionData["firstTouch"]
+      >
     | undefined
 ) {
+
   if (!touch) {
     return undefined;
   }
 
   return removeEmptyValues({
+
     utm_source:
-      cleanString(touch.utm_source),
+      cleanString(
+        touch.utm_source
+      ),
 
     utm_medium:
-      cleanString(touch.utm_medium),
+      cleanString(
+        touch.utm_medium
+      ),
 
     utm_campaign:
-      cleanString(touch.utm_campaign),
+      cleanString(
+        touch.utm_campaign
+      ),
 
     utm_term:
-      cleanString(touch.utm_term),
+      cleanString(
+        touch.utm_term
+      ),
 
     utm_content:
-      cleanString(touch.utm_content),
+      cleanString(
+        touch.utm_content
+      ),
 
     fbclid:
-      cleanString(touch.fbclid),
+      cleanString(
+        touch.fbclid
+      ),
 
     ttclid:
-      cleanString(touch.ttclid),
+      cleanString(
+        touch.ttclid
+      ),
 
     gclid:
-      cleanString(touch.gclid),
+      cleanString(
+        touch.gclid
+      ),
 
     msclkid:
-      cleanString(touch.msclkid),
+      cleanString(
+        touch.msclkid
+      ),
 
     landingPage:
-      cleanString(touch.landingPage),
+      cleanString(
+        touch.landingPage
+      ),
 
     landingPagePath:
-      cleanString(touch.landingPagePath),
+      cleanString(
+        touch.landingPagePath
+      ),
 
     referrer:
-      cleanString(touch.referrer),
+      cleanString(
+        touch.referrer
+      ),
 
     capturedAt:
-      cleanString(touch.capturedAt),
+      cleanString(
+        touch.capturedAt
+      ),
   });
 }
+
 
 function cleanAttribution(
   attribution:
     | AttributionData
     | undefined
 ): AttributionData {
+
   if (!attribution) {
     return {};
   }
 
   return removeEmptyValues({
+
     firstTouch:
-      cleanTouch(attribution.firstTouch),
+      cleanTouch(
+        attribution.firstTouch
+      ),
 
     lastTouch:
-      cleanTouch(attribution.lastTouch),
+      cleanTouch(
+        attribution.lastTouch
+      ),
+
   }) as AttributionData;
 }
 
+
 /**
- * ------------------------------------------------------------
- * Browser identifier cleaning
- * ------------------------------------------------------------
+ * ============================================================
+ * BROWSER IDENTIFIER CLEANING
+ * ============================================================
  */
 
 function cleanBrowserIdentifiers(
@@ -197,35 +307,49 @@ function cleanBrowserIdentifiers(
     | BrowserIdentifiers
     | undefined
 ): BrowserIdentifiers {
+
   if (!identifiers) {
     return {};
   }
 
   return removeEmptyValues({
+
     fbp:
-      cleanString(identifiers.fbp),
+      cleanString(
+        identifiers.fbp
+      ),
 
     fbc:
-      cleanString(identifiers.fbc),
+      cleanString(
+        identifiers.fbc
+      ),
 
     ttp:
-      cleanString(identifiers.ttp),
+      cleanString(
+        identifiers.ttp
+      ),
 
     ttclid:
-      cleanString(identifiers.ttclid),
+      cleanString(
+        identifiers.ttclid
+      ),
+
   }) as BrowserIdentifiers;
 }
 
+
 /**
- * ------------------------------------------------------------
+ * ============================================================
  * POST
- * ------------------------------------------------------------
+ * ============================================================
  */
 
 export async function POST(
   req: NextRequest
 ) {
+
   try {
+
     console.log(
       "=================================================="
     );
@@ -234,9 +358,10 @@ export async function POST(
       "🟡 PREMIUM ORDER INGESTION STARTED"
     );
 
+
     /**
      * ========================================================
-     * 1. GOOGLE SHEETS CONFIGURATION
+     * 1. GOOGLE APPS SCRIPT URL
      * ========================================================
      */
 
@@ -247,6 +372,7 @@ export async function POST(
       );
 
     if (!googleSheetsUrl) {
+
       console.error(
         "❌ GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL is missing."
       );
@@ -258,9 +384,12 @@ export async function POST(
           message:
             "Premium Google Sheets configuration is missing.",
         },
-        { status: 500 }
+        {
+          status: 500,
+        }
       );
     }
+
 
     /**
      * ========================================================
@@ -277,6 +406,7 @@ export async function POST(
       !rawBody ||
       typeof rawBody !== "object"
     ) {
+
       return NextResponse.json(
         {
           success: false,
@@ -284,36 +414,43 @@ export async function POST(
           message:
             "Invalid request body.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
     const body =
       rawBody as Partial<PremiumOrderData>;
 
+
     /**
      * ========================================================
      * 3. EVENT ID
      * ========================================================
      *
-     * The browser-generated event ID becomes the permanent
-     * identifier connecting:
+     * The browser-generated Event ID is preserved.
      *
-     * Form submission
-     *      ↓
-     * Google Sheet row
-     *      ↓
-     * Rep confirmation
-     *      ↓
-     * Meta Purchase
+     * It is the permanent identity connecting:
      *
-     * We therefore NEVER generate a replacement ID here.
+     * Form
+     * ↓
+     * Sheet
+     * ↓
+     * Paid confirmation
+     * ↓
+     * Purchase
+     *
+     * We NEVER generate a replacement ID here.
      */
 
     const eventId =
-      cleanString(body.eventId);
+      cleanString(
+        body.eventId
+      );
 
     if (!eventId) {
+
       console.error(
         "❌ Premium order rejected: missing eventId."
       );
@@ -325,30 +462,43 @@ export async function POST(
           message:
             "Missing eventId.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
+
     /**
      * ========================================================
-     * 4. REQUIRED ORDER DATA
+     * 4. REQUIRED ORDER FIELDS
      * ========================================================
      */
 
     const name =
-      cleanString(body.name);
+      cleanString(
+        body.name
+      );
 
     const phone =
-      cleanString(body.phone);
+      cleanString(
+        body.phone
+      );
 
     const state =
-      cleanString(body.state);
+      cleanString(
+        body.state
+      );
 
     const address =
-      cleanString(body.address);
+      cleanString(
+        body.address
+      );
 
     const sets =
-      cleanString(body.sets);
+      cleanString(
+        body.sets
+      );
 
     if (
       !name ||
@@ -357,6 +507,7 @@ export async function POST(
       !address ||
       !sets
     ) {
+
       console.error(
         "❌ Premium order rejected: missing required fields."
       );
@@ -368,18 +519,24 @@ export async function POST(
           message:
             "Missing required customer or order fields.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
+
     /**
      * ========================================================
-     * 5. NORMALIZE PHONE
+     * 5. PHONE NORMALIZATION
      * ========================================================
      */
 
     const normalizedPhone =
-      normalizePhone(phone);
+      normalizePhone(
+        phone
+      );
+
 
     /**
      * ========================================================
@@ -388,29 +545,27 @@ export async function POST(
      */
 
     const clientIp =
-      getClientIp(req);
+      getClientIp(
+        req
+      );
 
     const userAgent =
       req.headers.get(
         "user-agent"
       ) || undefined;
 
+
     /**
      * ========================================================
      * 7. ATTRIBUTION
      * ========================================================
-     *
-     * IMPORTANT:
-     *
-     * We preserve the full first-touch / last-touch structure.
-     *
-     * We do NOT flatten attribution here.
      */
 
     const attribution =
       cleanAttribution(
         body.attribution
       );
+
 
     /**
      * ========================================================
@@ -423,9 +578,10 @@ export async function POST(
         body.browserIdentifiers
       );
 
+
     /**
      * ========================================================
-     * 9. CLEAN ORDER VALUES
+     * 9. ORDER VALUES
      * ========================================================
      */
 
@@ -474,6 +630,7 @@ export async function POST(
         body.willAccept
       );
 
+
     /**
      * ========================================================
      * 10. EVENT SOURCE URL
@@ -492,233 +649,173 @@ export async function POST(
         .NEXT_PUBLIC_SITE_URL ||
       "https://scentmason.vercel.app";
 
+
     /**
      * ========================================================
-     * 11. GOOGLE SHEETS PAYLOAD
+     * 11. BUILD APPS SCRIPT PAYLOAD
      * ========================================================
      *
-     * The sheet receives both first-touch and last-touch
-     * attribution.
+     * IMPORTANT:
      *
-     * This is deliberate.
+     * This payload deliberately matches the Apps Script
+     * structure we just installed.
      *
-     * It allows independent landing-page comparison without
-     * tying the attribution engine to Premium specifically.
+     * Apps Script expects:
+     *
+     * payload.attribution.firstTouch
+     * payload.attribution.lastTouch
+     *
+     * payload.browserIdentifiers.fbp
+     * payload.browserIdentifiers.fbc
+     * payload.browserIdentifiers.ttp
+     * payload.browserIdentifiers.ttclid
+     *
+     * ========================================================
      */
 
-    const sheetsPayload =
-      removeEmptyValues({
-        /**
-         * ----------------------------------------------------
-         * Order identity / status
-         * ----------------------------------------------------
-         */
+    const sheetsPayload = {
 
-        eventId,
+      /**
+       * ------------------------------------------------------
+       * Identity
+       * ------------------------------------------------------
+       */
 
-        orderStatus:
-          "Pending",
+      eventId,
 
-        /**
-         * ----------------------------------------------------
-         * Customer
-         * ----------------------------------------------------
-         */
 
-        name,
+      /**
+       * ------------------------------------------------------
+       * Customer
+       * ------------------------------------------------------
+       */
 
-        phone,
+      name,
 
-        normalizedPhone,
+      phone,
 
-        whatsapp,
+      whatsapp,
 
-        state,
+      state,
 
-        city,
+      city,
 
-        address,
+      address,
 
-        /**
-         * ----------------------------------------------------
-         * Order
-         * ----------------------------------------------------
-         */
 
-        sets,
+      /**
+       * ------------------------------------------------------
+       * Order
+       * ------------------------------------------------------
+       */
 
-        setPrice,
+      sets,
 
-        oilBottlesOrdered,
+      setPrice,
 
-        oilBottlesFree,
+      oilBottlesOrdered,
 
-        oilBottlesTotal,
+      oilBottlesFree,
 
-        oilPrice,
+      oilBottlesTotal,
 
-        total,
+      oilPrice,
 
-        willAccept:
-          willAccept
-            ? "Yes"
-            : "No",
+      total,
 
-        /**
-         * ----------------------------------------------------
-         * Event / browser context
-         * ----------------------------------------------------
-         */
+      willAccept,
 
-        eventSourceUrl,
 
-        clientIp:
-          clientIp || "",
+      /**
+       * ------------------------------------------------------
+       * Event source
+       * ------------------------------------------------------
+       */
 
-        userAgent:
-          userAgent || "",
+      eventSourceUrl,
 
-        fbp:
-          browserIdentifiers.fbp,
 
-        fbc:
-          browserIdentifiers.fbc,
+      /**
+       * ------------------------------------------------------
+       * Browser identifiers
+       * ------------------------------------------------------
+       */
 
-        ttp:
-          browserIdentifiers.ttp,
+      browserIdentifiers,
 
-        /**
-         * ----------------------------------------------------
-         * FIRST TOUCH
-         * ----------------------------------------------------
-         */
 
-        first_utm_source:
-          attribution.firstTouch
-            ?.utm_source,
+      /**
+       * ------------------------------------------------------
+       * Attribution
+       * ------------------------------------------------------
+       */
 
-        first_utm_medium:
-          attribution.firstTouch
-            ?.utm_medium,
+      attribution,
 
-        first_utm_campaign:
-          attribution.firstTouch
-            ?.utm_campaign,
 
-        first_utm_term:
-          attribution.firstTouch
-            ?.utm_term,
+      /**
+       * ------------------------------------------------------
+       * Additional server context
+       * ------------------------------------------------------
+       *
+       * These are retained in the payload for future server-side
+       * matching, but Apps Script does not currently write them
+       * into the spreadsheet.
+       */
 
-        first_utm_content:
-          attribution.firstTouch
-            ?.utm_content,
+      clientIp:
 
-        first_fbclid:
-          attribution.firstTouch
-            ?.fbclid,
+        clientIp ||
+        undefined,
 
-        first_ttclid:
-          attribution.firstTouch
-            ?.ttclid,
+      userAgent:
 
-        first_gclid:
-          attribution.firstTouch
-            ?.gclid,
+        userAgent ||
+        undefined,
+    };
 
-        first_msclkid:
-          attribution.firstTouch
-            ?.msclkid,
-
-        first_landingPage:
-          attribution.firstTouch
-            ?.landingPage,
-
-        first_landingPagePath:
-          attribution.firstTouch
-            ?.landingPagePath,
-
-        first_referrer:
-          attribution.firstTouch
-            ?.referrer,
-
-        first_capturedAt:
-          attribution.firstTouch
-            ?.capturedAt,
-
-        /**
-         * ----------------------------------------------------
-         * LAST TOUCH
-         * ----------------------------------------------------
-         */
-
-        last_utm_source:
-          attribution.lastTouch
-            ?.utm_source,
-
-        last_utm_medium:
-          attribution.lastTouch
-            ?.utm_medium,
-
-        last_utm_campaign:
-          attribution.lastTouch
-            ?.utm_campaign,
-
-        last_utm_term:
-          attribution.lastTouch
-            ?.utm_term,
-
-        last_utm_content:
-          attribution.lastTouch
-            ?.utm_content,
-
-        last_fbclid:
-          attribution.lastTouch
-            ?.fbclid,
-
-        last_ttclid:
-          attribution.lastTouch
-            ?.ttclid,
-
-        last_gclid:
-          attribution.lastTouch
-            ?.gclid,
-
-        last_msclkid:
-          attribution.lastTouch
-            ?.msclkid,
-
-        last_landingPage:
-          attribution.lastTouch
-            ?.landingPage,
-
-        last_landingPagePath:
-          attribution.lastTouch
-            ?.landingPagePath,
-
-        last_referrer:
-          attribution.lastTouch
-            ?.referrer,
-
-        last_capturedAt:
-          attribution.lastTouch
-            ?.capturedAt,
-      });
 
     /**
      * ========================================================
-     * 12. SEND ORDER TO GOOGLE SHEETS
+     * 12. SEND TO GOOGLE APPS SCRIPT
      * ========================================================
      */
 
     console.log(
-      "📤 Sending Premium order to Google Sheets:",
+      "📤 Sending Premium order to Google Apps Script:",
       {
         eventId,
+
         total,
-        orderStatus:
-          "Pending",
+
+        hasAttribution:
+          Boolean(
+            attribution.firstTouch ||
+            attribution.lastTouch
+          ),
+
+        hasFbp:
+          Boolean(
+            browserIdentifiers.fbp
+          ),
+
+        hasFbc:
+          Boolean(
+            browserIdentifiers.fbc
+          ),
+
+        hasTtp:
+          Boolean(
+            browserIdentifiers.ttp
+          ),
+
+        hasTtclid:
+          Boolean(
+            browserIdentifiers.ttclid
+          ),
       }
     );
+
 
     const sheetsResponse =
       await fetch(
@@ -743,29 +840,44 @@ export async function POST(
         }
       );
 
+
+    /**
+     * ========================================================
+     * 13. READ APPS SCRIPT RESPONSE
+     * ========================================================
+     */
+
     const responseText =
       await sheetsResponse.text();
 
-    let sheetsResult: unknown =
-      null;
+    let sheetsResult:
+      | unknown
+      | null = null;
 
     try {
+
       sheetsResult =
         JSON.parse(
           responseText
         );
+
     } catch {
+
       sheetsResult =
         responseText;
     }
 
+
     /**
      * ========================================================
-     * 13. HTTP FAILURE
+     * 14. HTTP FAILURE
      * ========================================================
      */
 
-    if (!sheetsResponse.ok) {
+    if (
+      !sheetsResponse.ok
+    ) {
+
       console.error(
         "❌ PREMIUM GOOGLE SHEETS HTTP FAILURE:",
         {
@@ -782,7 +894,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          orderCaptured: false,
+
+          orderCaptured:
+            false,
+
           googleSheets:
             "failed",
 
@@ -794,19 +909,24 @@ export async function POST(
 
           eventId,
         },
-        { status: 502 }
+        {
+          status: 502,
+        }
       );
     }
 
+
     /**
      * ========================================================
-     * 14. APPS SCRIPT ERROR
+     * 15. APPS SCRIPT APPLICATION ERROR
      * ========================================================
      *
-     * Apps Script may return HTTP 200 while its own response
-     * says result: "error".
+     * Apps Script can technically return HTTP 200 while
+     * reporting:
      *
-     * We therefore inspect the response body too.
+     * result: "error"
+     *
+     * Therefore inspect the response body.
      */
 
     if (
@@ -821,10 +941,12 @@ export async function POST(
       ).result ===
         "error"
     ) {
+
       console.error(
         "❌ PREMIUM GOOGLE SHEETS REPORTED AN ERROR:",
         {
           eventId,
+
           result:
             sheetsResult,
         }
@@ -833,7 +955,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          orderCaptured: false,
+
+          orderCaptured:
+            false,
+
           googleSheets:
             "failed",
 
@@ -845,13 +970,16 @@ export async function POST(
 
           eventId,
         },
-        { status: 502 }
+        {
+          status: 502,
+        }
       );
     }
 
+
     /**
      * ========================================================
-     * 15. SUCCESS
+     * 16. SUCCESS
      * ========================================================
      */
 
@@ -859,6 +987,7 @@ export async function POST(
       "🟢 PREMIUM ORDER CAPTURED:",
       {
         eventId,
+
         orderStatus:
           "Pending",
       }
@@ -869,14 +998,12 @@ export async function POST(
     );
 
     console.log(
-      "Purchase remains reserved for sales confirmation."
-    );
-
-    console.log(
       "=================================================="
     );
 
+
     return NextResponse.json({
+
       success: true,
 
       orderCaptured:
@@ -893,7 +1020,10 @@ export async function POST(
 
       eventId,
     });
+
+
   } catch (error) {
+
     console.error(
       "🔴 PREMIUM ORDER ROUTE CRASHED:",
       error

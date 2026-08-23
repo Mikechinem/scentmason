@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from "react";
 import { createPortal } from "react-dom";
+import { generateEventId } from "@/lib/tracking/event-id";
 
 type SetOption = "1" | "2" | "3" | "4" | "5";
 type OilOption = "0" | "1" | "2" | "3" | "4" | "5";
@@ -133,211 +134,302 @@ export default function PremiumOrderForm() {
     return undefined;
   };
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  e.preventDefault();
 
-    if (submitting) return;
+  if (submitting) return;
 
-    setError("");
+  setError("");
 
-    const finalSets =
-      (document.getElementById(
-        "premium-hidden-sets"
-      ) as HTMLInputElement)?.value || sets;
+  const finalSets =
+    (document.getElementById(
+      "premium-hidden-sets"
+    ) as HTMLInputElement)?.value || sets;
 
-    const finalOil =
-      (document.getElementById(
-        "premium-hidden-oil"
-      ) as HTMLInputElement)?.value || oil;
+  const finalOil =
+    (document.getElementById(
+      "premium-hidden-oil"
+    ) as HTMLInputElement)?.value || oil;
 
-    const currentTotal =
-      SET_PRICING[finalSets as SetOption].price +
-      OIL_PRICING[finalOil as OilOption].price;
+  const currentTotal =
+    SET_PRICING[finalSets as SetOption].price +
+    OIL_PRICING[finalOil as OilOption].price;
 
-    const cleanPhone = phone.trim();
-    const cleanName = name.trim();
-    const cleanCity = city.trim();
-    const cleanAddress = address.trim();
+  const cleanPhone = phone.trim();
+  const cleanName = name.trim();
+  const cleanCity = city.trim();
+  const cleanAddress = address.trim();
 
-    if (!cleanName || !cleanPhone || !state || !cleanCity || !cleanAddress) {
-      setError(
-        "Please fill in all fields so we can confirm your order."
-      );
-      return;
-    }
+  if (
+    !cleanName ||
+    !cleanPhone ||
+    !state ||
+    !cleanCity ||
+    !cleanAddress
+  ) {
+    setError(
+      "Please fill in all fields so we can confirm your order."
+    );
+    return;
+  }
 
-    if (!willAccept) {
-      setError(
-        "😞Please tick “I WILL ACCEPT” to confirm you’re ready to receive your order. Then submit the form again."
-      );
-      return;
-    }
+  if (!willAccept) {
+    setError(
+      "😞Please tick “I WILL ACCEPT” to confirm you’re ready to receive your order. Then submit the form again."
+    );
+    return;
+  }
 
-    const orderFingerprint = `sm_order_${cleanPhone}_${finalSets}_${finalOil}`;
+  const orderFingerprint =
+    `sm_order_${cleanPhone}_${finalSets}_${finalOil}`;
 
-    if (
-      typeof window !== "undefined" &&
-      localStorage.getItem(orderFingerprint)
-    ) {
-      console.warn(
-        "Duplicate submission blocked. Forwarding customer safely to success view."
-      );
+  if (
+    typeof window !== "undefined" &&
+    localStorage.getItem(orderFingerprint)
+  ) {
+    console.warn(
+      "Duplicate submission blocked. Forwarding customer safely to success view."
+    );
 
-      setSubmitted(true);
-      return;
-    }
+    setSubmitted(true);
+    return;
+  }
 
-    setSubmitting(true);
+  setSubmitting(true);
 
-    const sharedEventId = `sm_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
+  /*
+   * ============================================================
+   * TRACKING ENGINE
+   *
+   * Generate ONE event ID for this order.
+   * This same ID travels through:
+   *
+   * Browser -> Premium Order API -> Google Sheets
+   *
+   * It is NOT a Purchase event ID yet.
+   *
+   * Purchase will happen later when the rep marks the order
+   * as Paid.
+   * ============================================================
+   */
 
-    const currentUrl =
-      typeof window !== "undefined" ? window.location.href : "";
+const sharedEventId =
+  generateEventId("premium");
 
+  const currentUrl =
+    typeof window !== "undefined"
+      ? window.location.href
+      : "";
+
+  /*
+   * ============================================================
+   * REUSABLE ATTRIBUTION ENGINE
+   *
+   * These come from the tracking modules we built.
+   *
+   * Do NOT manually rebuild UTM handling here.
+   * ============================================================
+   */
+
+  let attribution = {};
+  let browserIdentifiers = {};
+
+  if (typeof window !== "undefined") {
     try {
-      const numericValue = Number(currentTotal) || 0;
-
-      if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq(
-          "track",
-          "Purchase",
-          {
-            content_name: "ScentMason Diffuser",
-            value: numericValue,
-            currency: "NGN",
-            num_items: Number(finalSets),
-          },
-          { eventID: sharedEventId }
-        );
-      }
-
-      if (typeof window !== "undefined" && (window as any).ttq) {
-        let cleanTikTokPhone = cleanPhone.replace(/\D/g, "");
-
-        if (cleanTikTokPhone.startsWith("0")) {
-          cleanTikTokPhone = "234" + cleanTikTokPhone.slice(1);
-        } else if (!cleanTikTokPhone.startsWith("234")) {
-          cleanTikTokPhone = "234" + cleanTikTokPhone;
-        }
-
-        cleanTikTokPhone = "+" + cleanTikTokPhone;
-
-        (window as any).ttq.identify({
-          phone_number: cleanTikTokPhone,
-        });
-
-        (window as any).ttq.track(
-          "Purchase",
-          {
-            content_name: "ScentMason Diffuser",
-            content_id: "scentmason_diffuser",
-            value: numericValue,
-            currency: "NGN",
-            quantity: Number(finalSets),
-          },
-          { event_id: sharedEventId }
-        );
-      }
-
-      const addressParts = cleanAddress
-        .split(",")
-        .map((part) => part.trim());
-
-      const extractedCity =
-        addressParts.length > 1
-          ? addressParts[addressParts.length - 2]
-          : addressParts[0] || "";
-
-      const unifiedOrderPayload = {
-        eventName: "Purchase",
-        eventId: sharedEventId,
-        eventSourceUrl: currentUrl,
-        referrer:
-          typeof document !== "undefined"
-            ? document.referrer
-            : undefined,
-
-        name: cleanName,
-        phone: cleanPhone,
-        whatsapp: whatsapp.trim(),
-        state,
-        city: cleanCity,
-        address: cleanAddress,
-
-        sets: finalSets,
-        setPrice:
-          SET_PRICING[finalSets as SetOption].price,
-
-        oilBottlesOrdered: Number(finalOil),
-        oilBottlesFree: finalSets === "5" ? 1 : 0,
-        oilBottlesTotal:
-          Number(finalOil) +
-          (finalSets === "5" ? 1 : 0),
-
-        oilPrice:
-          OIL_PRICING[finalOil as OilOption].price,
-
-        total: numericValue,
-        
-        willAccept: willAccept,
-
-        fbp: getCookie("_fbp"),
-        fbc: getCookie("_fbc"),
-        ttp: getCookie("_ttp"),
-        ttclid: getCookie("ttclid"),
-      };
-
-      const [metaResponse] = await Promise.all([
-        fetch("/api/track/premium-purchase", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(unifiedOrderPayload),
-        }),
-
-        fetch("/api/track/tiktok/purchase", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(unifiedOrderPayload),
-        }).catch((err) => {
-          console.error(
-            "TikTok pipeline async suppression background block:",
-            err
-          );
-
-          return null;
-        }),
-      ]);
-
-      if (!metaResponse || !metaResponse.ok) {
-        throw new Error(
-          "Primary ingestion engine failed"
-        );
-      }
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem(orderFingerprint, "true");
-      }
-
-      setSubmitted(true);
-    } catch (err) {
-      console.error(
-        "Order submission tracking loop exception:",
-        err
+      const {
+        getAttribution,
+      } = await import(
+        "@/lib/tracking/attribution"
       );
 
-      setError(
-        "Something went wrong sending your order. Please call or WhatsApp us on 0706 496 9603 to confirm."
+      const {
+        getBrowserIdentifiers,
+      } = await import(
+        "@/lib/tracking/cookies"
       );
-    } finally {
-      setSubmitting(false);
+
+      /*
+       * Capture any campaign data present on this visit
+       * while preserving the first-touch / last-touch
+       * attribution engine.
+       */
+      attribution = getAttribution();
+
+      browserIdentifiers =
+        getBrowserIdentifiers();
+    } catch (trackingError) {
+      console.warn(
+        "[Premium Order] Tracking context could not be loaded:",
+        trackingError
+      );
     }
   }
+
+  /*
+   * ============================================================
+   * UNIFIED ORDER PAYLOAD
+   *
+   * This is an ORDER, not a Purchase.
+   *
+   * Payment status is intentionally NOT controlled by the
+   * browser. The spreadsheet / sales rep workflow controls it.
+   * ============================================================
+   */
+
+  const unifiedOrderPayload = {
+    eventName: "PremiumOrder",
+
+    eventId: sharedEventId,
+
+    eventSourceUrl: currentUrl,
+
+    referrer:
+      typeof document !== "undefined"
+        ? document.referrer
+        : undefined,
+
+    /*
+     * Customer information
+     */
+    name: cleanName,
+    phone: cleanPhone,
+    whatsapp: whatsapp.trim(),
+
+    state,
+    city: cleanCity,
+    address: cleanAddress,
+
+    /*
+     * Order information
+     */
+    sets: finalSets,
+
+    setPrice:
+      SET_PRICING[
+        finalSets as SetOption
+      ].price,
+
+    oilBottlesOrdered:
+      Number(finalOil),
+
+    oilBottlesFree:
+      finalSets === "5"
+        ? 1
+        : 0,
+
+    oilBottlesTotal:
+      Number(finalOil) +
+      (finalSets === "5"
+        ? 1
+        : 0),
+
+    oilPrice:
+      OIL_PRICING[
+        finalOil as OilOption
+      ].price,
+
+    total:
+      Number(currentTotal) || 0,
+
+    willAccept,
+
+    /*
+     * Reusable attribution data
+     */
+    attribution,
+
+    /*
+     * Browser identifiers
+     *
+     * fbp / fbc are particularly important for
+     * the eventual Meta CAPI Purchase event.
+     */
+    browserIdentifiers,
+  };
+
+  try {
+    /*
+     * ============================================================
+     * CUSTOMER SUBMISSION
+     *
+     * IMPORTANT:
+     *
+     * There is deliberately NO:
+     *
+     * fbq("track", "Purchase")
+     *
+     * ttq.track("Purchase")
+     *
+     * /api/track/premium-purchase
+     *
+     * here.
+     *
+     * Purchase is reserved for the rep-confirmed payment stage.
+     * ============================================================
+     */
+
+    const metaResponse =
+      await fetch(
+        "/api/track/premium-order",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify(
+            unifiedOrderPayload
+          ),
+        }
+      );
+
+    if (!metaResponse.ok) {
+      throw new Error(
+        "Premium order ingestion failed."
+      );
+    }
+
+    /*
+     * TikTok order ingestion can remain part of the
+     * order pipeline, but it must NOT be treated as a
+     * Meta Purchase.
+     *
+     * If your /api/track/tiktok/purchase route is still
+     * specifically a PURCHASE route, do NOT call it here.
+     *
+     * We will connect the appropriate TikTok order/lead
+     * endpoint separately if required.
+     */
+
+    /*
+     * Mark this browser/order combination as submitted
+     * only after the primary order ingestion succeeded.
+     */
+    if (
+      typeof window !== "undefined"
+    ) {
+      localStorage.setItem(
+        orderFingerprint,
+        "true"
+      );
+    }
+
+    setSubmitted(true);
+  } catch (err) {
+    console.error(
+      "Premium order submission error:",
+      err
+    );
+
+    setError(
+      "Something went wrong sending your order. Please call or WhatsApp us on 0706 496 9603 to confirm."
+    );
+  } finally {
+    setSubmitting(false);
+  }
+}
 
   const fallbackSets =
     typeof document !== "undefined"

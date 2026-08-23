@@ -1,5 +1,6 @@
 "use client";
-
+import { useEffect } from "react";
+import { captureAttribution } from "@/lib/tracking/attribution";
 import PremiumHero from "@/components/scentmason/PremiumHero";
 import PremiumVideoUsecase from "@/components/scentmason/PremiumVideoUsecase";
 import WallMountSection from "@/components/scentmason/WallMountSection";
@@ -22,6 +23,10 @@ const WALL_PLACE_IMAGE_PNG =
   "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/wahuk.png";
 
 export default function PremiumPage() {
+  useEffect(() => {
+    captureAttribution();
+  }, []);
+
   return (
     <main>
       <StickyOrderBar />
