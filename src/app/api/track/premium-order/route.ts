@@ -16,41 +16,45 @@ export const runtime = "nodejs";
 
 /**
  * ============================================================
- * SCENTMASON PREMIUM ORDER INGESTION
+ * SCENTMASON PREMIUM ORDER INGESTION + SERVER LEAD
  * ============================================================
  *
- * PURPOSE
+ * FLOW
  *
- * This route records a Premium order submission.
+ * PremiumOrderForm
+ *        ↓
+ * leadEventId generated in browser
+ *        ↓
+ * /api/track/premium-order
+ *        ├──────────────→ Google Apps Script
+ *        │                  ↓
+ *        │               Premium Orders
+ *        │                  ↓
+ *        │               Pending
+ *        │
+ *        └──────────────→ Meta CAPI
+ *                           ↓
+ *                         Lead
  *
- * It does NOT fire Meta Purchase.
+ * Browser Meta Pixel also fires Lead after this route
+ * successfully accepts the order.
  *
- * Purchase is reserved for:
+ * IMPORTANT:
+ *
+ * Browser Lead and Server Lead use the SAME leadEventId.
+ *
+ * This allows Meta to deduplicate the two copies.
+ *
+ * Purchase is NOT fired here.
+ *
+ * Purchase remains reserved for:
  *
  * /api/track/premium-purchase
  *
- * which is called only after the sales representative changes:
+ * after:
  *
  * Payment Status
  * Pending → Paid
- *
- * ============================================================
- *
- * DATA FLOW
- *
- * Premium landing page
- *        ↓
- * captureAttribution()
- *        ↓
- * PremiumOrderForm
- *        ↓
- * /api/track/premium-order
- *        ↓
- * Google Apps Script
- *        ↓
- * Premium Orders sheet
- *        ↓
- * Pending
  *
  * ============================================================
  */
@@ -76,7 +80,9 @@ function getClientIp(
     const firstIp =
       forwardedFor
         .split(",")
-        .map((ip) => ip.trim())
+        .map(
+          (ip) => ip.trim()
+        )
         .find(Boolean);
 
     if (firstIp) {
@@ -111,6 +117,7 @@ function parseNumber(
     typeof value === "number" &&
     Number.isFinite(value)
   ) {
+
     return value;
   }
 
@@ -130,6 +137,7 @@ function parseNumber(
     if (
       Number.isFinite(parsed)
     ) {
+
       return parsed;
     }
   }
@@ -151,6 +159,7 @@ function parseBoolean(
   if (
     typeof value === "boolean"
   ) {
+
     return value;
   }
 
@@ -177,15 +186,6 @@ function parseBoolean(
  * ============================================================
  * ATTRIBUTION CLEANING
  * ============================================================
- *
- * IMPORTANT:
- *
- * Attribution remains structured as:
- *
- * firstTouch
- * lastTouch
- *
- * We do NOT flatten it before sending to Apps Script.
  */
 
 function cleanTouch(
@@ -266,6 +266,7 @@ function cleanTouch(
       cleanString(
         touch.capturedAt
       ),
+
   });
 }
 
@@ -340,6 +341,632 @@ function cleanBrowserIdentifiers(
 
 /**
  * ============================================================
+ * META HELPERS
+ * ============================================================
+ */
+
+function sha256(
+  value: string
+): string {
+
+  /*
+   * Web Crypto is available in Node runtime.
+   *
+   * This helper uses the Node crypto module indirectly through
+   * the global crypto implementation where available.
+   */
+
+  const cryptoModule =
+    require("crypto") as typeof import("crypto");
+
+  return cryptoModule
+    .createHash("sha256")
+    .update(
+      value
+        .trim()
+        .toLowerCase()
+    )
+    .digest("hex");
+}
+
+
+function normalizeNigerianPhone(
+  phone: string
+): string {
+
+  let cleaned =
+    phone.replace(
+      /\D/g,
+      ""
+    );
+
+  if (
+    cleaned.startsWith("0")
+  ) {
+
+    cleaned =
+      "234" +
+      cleaned.slice(1);
+
+  } else if (
+    !cleaned.startsWith("234")
+  ) {
+
+    cleaned =
+      "234" +
+      cleaned;
+  }
+
+  return cleaned;
+}
+
+
+/**
+ * ============================================================
+ * META ACCOUNT DISCOVERY
+ * ============================================================
+ *
+ * Supports the existing multi-Pixel architecture.
+ *
+ * Pixel 1 can fall back to the older single-Pixel environment
+ * variables already used by the project.
+ *
+ * ============================================================
+ */
+
+function getMetaAccounts() {
+
+  const accounts = [
+
+    {
+      id:
+        process.env
+          .NEXT_PUBLIC_META_PIXEL_ID_1 ||
+        process.env
+          .NEXT_PUBLIC_META_PIXEL_ID ||
+        process.env
+          .META_DATASET_ID ||
+        "",
+
+      token:
+        process.env
+          .META_ACCESS_TOKEN_1 ||
+        process.env
+          .META_ACCESS_TOKEN ||
+        process.env
+          .META_CAPI_ACCESS_TOKEN ||
+        "",
+    },
+
+    {
+      id:
+        process.env
+          .NEXT_PUBLIC_META_PIXEL_ID_2 ||
+        "",
+
+      token:
+        process.env
+          .META_ACCESS_TOKEN_2 ||
+        "",
+    },
+
+    {
+      id:
+        process.env
+          .NEXT_PUBLIC_META_PIXEL_ID_3 ||
+        "",
+
+      token:
+        process.env
+          .META_ACCESS_TOKEN_3 ||
+        "",
+    },
+
+  ];
+
+  return accounts.filter(
+    (
+      account
+    ) =>
+      Boolean(
+        account.id &&
+        account.token
+      )
+  );
+}
+
+
+/**
+ * ============================================================
+ * SERVER-SIDE META LEAD
+ * ============================================================
+ */
+
+async function sendMetaLead(
+  req: NextRequest,
+  body: {
+    leadEventId: string;
+    eventSourceUrl: string;
+
+    name: string;
+    phone: string;
+
+    state: string;
+    city: string;
+
+    total: number;
+
+    fbp?: string;
+    fbc?: string;
+
+    attribution:
+      AttributionData;
+
+    browserIdentifiers:
+      BrowserIdentifiers;
+  }
+) {
+
+  const accounts =
+    getMetaAccounts();
+
+  if (
+    accounts.length === 0
+  ) {
+
+    console.warn(
+      "⚠️ Server Lead skipped: no Meta CAPI accounts configured."
+    );
+
+    return {
+
+      status:
+        "not_configured",
+
+      totalAccounts:
+        0,
+
+      successful:
+        0,
+
+      failed:
+        0,
+    };
+  }
+
+
+  const graphVersion =
+    process.env
+      .META_GRAPH_API_VERSION ||
+    "v25.0";
+
+
+  const testEventCode =
+    process.env
+      .META_TEST_EVENT_CODE;
+
+
+  const clientIp =
+    getClientIp(
+      req
+    );
+
+
+  const userAgent =
+    req.headers.get(
+      "user-agent"
+    ) ||
+    undefined;
+
+
+  /**
+   * ----------------------------------------------------------
+   * Phone
+   * ----------------------------------------------------------
+   */
+
+  const normalizedPhone =
+    normalizeNigerianPhone(
+      body.phone
+    );
+
+
+  const hashedPhone =
+    normalizedPhone
+      ? sha256(
+          normalizedPhone
+        )
+      : undefined;
+
+
+  /**
+   * ----------------------------------------------------------
+   * Name
+   * ----------------------------------------------------------
+   */
+
+  const nameParts =
+    body.name
+      .trim()
+      .split(
+        /\s+/
+      );
+
+
+  const firstName =
+    nameParts[0] ||
+    "";
+
+
+  const lastName =
+    nameParts
+      .slice(1)
+      .join(" ");
+
+
+  const hashedFirstName =
+    firstName
+      ? sha256(
+          firstName
+        )
+      : undefined;
+
+
+  const hashedLastName =
+    lastName
+      ? sha256(
+          lastName
+        )
+      : undefined;
+
+
+  /**
+   * ----------------------------------------------------------
+   * Location
+   * ----------------------------------------------------------
+   */
+
+  const hashedState =
+    body.state
+      ? sha256(
+          body.state
+        )
+      : undefined;
+
+
+  const hashedCity =
+    body.city
+      ? sha256(
+          body.city
+        )
+      : undefined;
+
+
+  const hashedCountry =
+    sha256(
+      "ng"
+    );
+
+
+  /**
+   * ----------------------------------------------------------
+   * USER DATA
+   * ----------------------------------------------------------
+   */
+
+  const userData =
+    removeEmptyValues({
+
+      client_ip_address:
+        clientIp,
+
+      client_user_agent:
+        userAgent,
+
+      fbp:
+        body.fbp,
+
+      fbc:
+        body.fbc,
+
+      ph:
+        hashedPhone
+          ? [hashedPhone]
+          : undefined,
+
+      fn:
+        hashedFirstName
+          ? [hashedFirstName]
+          : undefined,
+
+      ln:
+        hashedLastName
+          ? [hashedLastName]
+          : undefined,
+
+      st:
+        hashedState
+          ? [hashedState]
+          : undefined,
+
+      ct:
+        hashedCity
+          ? [hashedCity]
+          : undefined,
+
+      country:
+        [hashedCountry],
+    });
+
+
+  /**
+   * ----------------------------------------------------------
+   * CUSTOM DATA
+   * ----------------------------------------------------------
+   */
+
+  const customData =
+    removeEmptyValues({
+
+      content_name:
+        "ScentMason Premium Order",
+
+      content_category:
+        "Premium",
+
+      value:
+        body.total,
+
+      currency:
+        "NGN",
+    });
+
+
+  /**
+   * ----------------------------------------------------------
+   * META EVENT
+   * ----------------------------------------------------------
+   */
+
+  const eventPayload = {
+
+    data: [
+
+      {
+
+        event_name:
+          "Lead",
+
+        event_time:
+          Math.floor(
+            Date.now() / 1000
+          ),
+
+        /*
+         * CRITICAL:
+         *
+         * This exact ID is also used by the browser Pixel.
+         */
+        event_id:
+          body.leadEventId,
+
+        action_source:
+          "website",
+
+        event_source_url:
+          body.eventSourceUrl,
+
+        user_data:
+          userData,
+
+        custom_data:
+          customData,
+      },
+
+    ],
+
+    ...(testEventCode
+      ? {
+          test_event_code:
+            testEventCode,
+        }
+      : {}),
+  };
+
+
+  /**
+   * ----------------------------------------------------------
+   * SEND TO ALL PIXELS
+   * ----------------------------------------------------------
+   */
+
+  const results =
+    [] as Array<{
+      pixelId: string;
+      success: boolean;
+      status?: number;
+      result?: unknown;
+      error?: string;
+    }>;
+
+
+  for (
+    const account of
+      accounts
+  ) {
+
+    const url =
+      `https://graph.facebook.com/${graphVersion}/${account.id}/events?access_token=${account.token}`;
+
+
+    try {
+
+      const response =
+        await fetch(
+          url,
+          {
+            method:
+              "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify(
+                eventPayload
+              ),
+
+            signal:
+              AbortSignal.timeout(
+                10000
+              ),
+          }
+        );
+
+
+      const result =
+        await response
+          .json()
+          .catch(
+            () => null
+          );
+
+
+      results.push({
+
+        pixelId:
+          account.id,
+
+        success:
+          response.ok,
+
+        status:
+          response.status,
+
+        result,
+
+      });
+
+
+      if (
+        response.ok
+      ) {
+
+        console.log(
+          "✅ SERVER META LEAD SUCCESS:",
+          {
+            pixelId:
+              account.id,
+
+            leadEventId:
+              body.leadEventId,
+
+            status:
+              response.status,
+          }
+        );
+
+      } else {
+
+        console.error(
+          "❌ SERVER META LEAD REJECTED:",
+          {
+            pixelId:
+              account.id,
+
+            leadEventId:
+              body.leadEventId,
+
+            status:
+              response.status,
+
+            result,
+          }
+        );
+      }
+
+
+    } catch (
+      error
+    ) {
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unknown Meta error";
+
+
+      results.push({
+
+        pixelId:
+          account.id,
+
+        success:
+          false,
+
+        error:
+          message,
+
+      });
+
+
+      console.error(
+        "❌ SERVER META LEAD REQUEST FAILED:",
+        {
+          pixelId:
+            account.id,
+
+          leadEventId:
+            body.leadEventId,
+
+          error:
+            message,
+        }
+      );
+    }
+  }
+
+
+  const successful =
+    results.filter(
+      (
+        result
+      ) =>
+        result.success
+    ).length;
+
+
+  const failed =
+    results.length -
+    successful;
+
+
+  return {
+
+    status:
+      successful ===
+      results.length
+        ? "success"
+        : successful > 0
+        ? "partial"
+        : "failed",
+
+    totalAccounts:
+      results.length,
+
+    successful,
+
+    failed,
+
+    results,
+  };
+}
+
+
+/**
+ * ============================================================
  * POST
  * ============================================================
  */
@@ -371,21 +998,32 @@ export async function POST(
           .GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL
       );
 
-    if (!googleSheetsUrl) {
+
+    if (
+      !googleSheetsUrl
+    ) {
 
       console.error(
         "❌ GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL is missing."
       );
 
+
       return NextResponse.json(
         {
-          success: false,
-          orderCaptured: false,
+
+          success:
+            false,
+
+          orderCaptured:
+            false,
+
           message:
             "Premium Google Sheets configuration is missing.",
+
         },
         {
-          status: 500,
+          status:
+            500,
         }
       );
     }
@@ -398,50 +1036,52 @@ export async function POST(
      */
 
     const rawBody =
-      await req.json().catch(
-        () => null
-      );
+      await req
+        .json()
+        .catch(
+          () => null
+        );
+
 
     if (
       !rawBody ||
-      typeof rawBody !== "object"
+      typeof rawBody !==
+        "object"
     ) {
 
       return NextResponse.json(
         {
-          success: false,
-          orderCaptured: false,
+
+          success:
+            false,
+
+          orderCaptured:
+            false,
+
           message:
             "Invalid request body.",
+
         },
         {
-          status: 400,
+          status:
+            400,
         }
       );
     }
 
+
     const body =
-      rawBody as Partial<PremiumOrderData>;
+      rawBody as Partial<
+        PremiumOrderData
+      > & {
+        leadEventId?: string;
+      };
 
 
     /**
      * ========================================================
-     * 3. EVENT ID
+     * 3. ORDER EVENT ID
      * ========================================================
-     *
-     * The browser-generated Event ID is preserved.
-     *
-     * It is the permanent identity connecting:
-     *
-     * Form
-     * ↓
-     * Sheet
-     * ↓
-     * Paid confirmation
-     * ↓
-     * Purchase
-     *
-     * We NEVER generate a replacement ID here.
      */
 
     const eventId =
@@ -449,21 +1089,27 @@ export async function POST(
         body.eventId
       );
 
-    if (!eventId) {
 
-      console.error(
-        "❌ Premium order rejected: missing eventId."
-      );
+    if (
+      !eventId
+    ) {
 
       return NextResponse.json(
         {
-          success: false,
-          orderCaptured: false,
+
+          success:
+            false,
+
+          orderCaptured:
+            false,
+
           message:
             "Missing eventId.",
+
         },
         {
-          status: 400,
+          status:
+            400,
         }
       );
     }
@@ -471,7 +1117,54 @@ export async function POST(
 
     /**
      * ========================================================
-     * 4. REQUIRED ORDER FIELDS
+     * 4. LEAD EVENT ID
+     * ========================================================
+     *
+     * This MUST come from the browser.
+     *
+     * We do not generate a replacement here because the browser
+     * needs to use the exact same ID for its Lead event.
+     */
+
+    const leadEventId =
+      cleanString(
+        body.leadEventId
+      );
+
+
+    if (
+      !leadEventId
+    ) {
+
+      console.error(
+        "❌ Premium order rejected: missing leadEventId."
+      );
+
+
+      return NextResponse.json(
+        {
+
+          success:
+            false,
+
+          orderCaptured:
+            false,
+
+          message:
+            "Missing leadEventId.",
+
+        },
+        {
+          status:
+            400,
+        }
+      );
+    }
+
+
+    /**
+     * ========================================================
+     * 5. REQUIRED ORDER FIELDS
      * ========================================================
      */
 
@@ -480,25 +1173,30 @@ export async function POST(
         body.name
       );
 
+
     const phone =
       cleanString(
         body.phone
       );
+
 
     const state =
       cleanString(
         body.state
       );
 
+
     const address =
       cleanString(
         body.address
       );
 
+
     const sets =
       cleanString(
         body.sets
       );
+
 
     if (
       !name ||
@@ -508,19 +1206,22 @@ export async function POST(
       !sets
     ) {
 
-      console.error(
-        "❌ Premium order rejected: missing required fields."
-      );
-
       return NextResponse.json(
         {
-          success: false,
-          orderCaptured: false,
+
+          success:
+            false,
+
+          orderCaptured:
+            false,
+
           message:
             "Missing required customer or order fields.",
+
         },
         {
-          status: 400,
+          status:
+            400,
         }
       );
     }
@@ -528,7 +1229,7 @@ export async function POST(
 
     /**
      * ========================================================
-     * 5. PHONE NORMALIZATION
+     * 6. NORMALIZE ORDER DATA
      * ========================================================
      */
 
@@ -538,21 +1239,17 @@ export async function POST(
       );
 
 
-    /**
-     * ========================================================
-     * 6. SERVER REQUEST CONTEXT
-     * ========================================================
-     */
-
     const clientIp =
       getClientIp(
         req
       );
 
+
     const userAgent =
       req.headers.get(
         "user-agent"
-      ) || undefined;
+      ) ||
+      undefined;
 
 
     /**
@@ -588,42 +1285,52 @@ export async function POST(
     const whatsapp =
       cleanString(
         body.whatsapp
-      ) || "";
+      ) ||
+      "";
+
 
     const city =
       cleanString(
         body.city
-      ) || "";
+      ) ||
+      "";
+
 
     const setPrice =
       parseNumber(
         body.setPrice
       );
 
+
     const oilBottlesOrdered =
       parseNumber(
         body.oilBottlesOrdered
       );
+
 
     const oilBottlesFree =
       parseNumber(
         body.oilBottlesFree
       );
 
+
     const oilBottlesTotal =
       parseNumber(
         body.oilBottlesTotal
       );
+
 
     const oilPrice =
       parseNumber(
         body.oilPrice
       );
 
+
     const total =
       parseNumber(
         body.total
       );
+
 
     const willAccept =
       parseBoolean(
@@ -647,52 +1354,31 @@ export async function POST(
         ?.landingPage ||
       process.env
         .NEXT_PUBLIC_SITE_URL ||
-      "https://scentmason.vercel.app";
+      "https://www.massonstore.com";
 
 
     /**
      * ========================================================
-     * 11. BUILD APPS SCRIPT PAYLOAD
+     * 11. GOOGLE SHEETS PAYLOAD
      * ========================================================
      *
      * IMPORTANT:
      *
-     * This payload deliberately matches the Apps Script
-     * structure we just installed.
+     * leadEventId is deliberately NOT used as the order Event ID.
      *
-     * Apps Script expects:
-     *
-     * payload.attribution.firstTouch
-     * payload.attribution.lastTouch
-     *
-     * payload.browserIdentifiers.fbp
-     * payload.browserIdentifiers.fbc
-     * payload.browserIdentifiers.ttp
-     * payload.browserIdentifiers.ttclid
-     *
-     * ========================================================
+     * eventId remains the permanent order identity.
      */
 
     const sheetsPayload = {
 
-      /**
-       * ------------------------------------------------------
-       * Identity
-       * ------------------------------------------------------
-       */
-
       eventId,
-
-
-      /**
-       * ------------------------------------------------------
-       * Customer
-       * ------------------------------------------------------
-       */
 
       name,
 
-      phone,
+      phone:
+
+        normalizedPhone ||
+        phone,
 
       whatsapp,
 
@@ -701,13 +1387,6 @@ export async function POST(
       city,
 
       address,
-
-
-      /**
-       * ------------------------------------------------------
-       * Order
-       * ------------------------------------------------------
-       */
 
       sets,
 
@@ -725,66 +1404,31 @@ export async function POST(
 
       willAccept,
 
-
-      /**
-       * ------------------------------------------------------
-       * Event source
-       * ------------------------------------------------------
-       */
-
       eventSourceUrl,
-
-
-      /**
-       * ------------------------------------------------------
-       * Browser identifiers
-       * ------------------------------------------------------
-       */
 
       browserIdentifiers,
 
-
-      /**
-       * ------------------------------------------------------
-       * Attribution
-       * ------------------------------------------------------
-       */
-
       attribution,
 
+      clientIp,
 
-      /**
-       * ------------------------------------------------------
-       * Additional server context
-       * ------------------------------------------------------
-       *
-       * These are retained in the payload for future server-side
-       * matching, but Apps Script does not currently write them
-       * into the spreadsheet.
-       */
-
-      clientIp:
-
-        clientIp ||
-        undefined,
-
-      userAgent:
-
-        userAgent ||
-        undefined,
+      userAgent,
     };
 
 
     /**
      * ========================================================
-     * 12. SEND TO GOOGLE APPS SCRIPT
+     * 12. SEND ORDER TO GOOGLE APPS SCRIPT
      * ========================================================
      */
 
     console.log(
       "📤 Sending Premium order to Google Apps Script:",
       {
+
         eventId,
+
+        leadEventId,
 
         total,
 
@@ -813,6 +1457,7 @@ export async function POST(
           Boolean(
             browserIdentifiers.ttclid
           ),
+
       }
     );
 
@@ -821,7 +1466,9 @@ export async function POST(
       await fetch(
         googleSheetsUrl,
         {
-          method: "POST",
+
+          method:
+            "POST",
 
           headers: {
             "Content-Type":
@@ -850,9 +1497,12 @@ export async function POST(
     const responseText =
       await sheetsResponse.text();
 
+
     let sheetsResult:
       | unknown
-      | null = null;
+      | null =
+      null;
+
 
     try {
 
@@ -870,7 +1520,7 @@ export async function POST(
 
     /**
      * ========================================================
-     * 14. HTTP FAILURE
+     * 14. GOOGLE HTTP FAILURE
      * ========================================================
      */
 
@@ -881,6 +1531,7 @@ export async function POST(
       console.error(
         "❌ PREMIUM GOOGLE SHEETS HTTP FAILURE:",
         {
+
           status:
             sheetsResponse.status,
 
@@ -888,12 +1539,16 @@ export async function POST(
 
           response:
             sheetsResult,
+
         }
       );
 
+
       return NextResponse.json(
         {
-          success: false,
+
+          success:
+            false,
 
           orderCaptured:
             false,
@@ -907,10 +1562,17 @@ export async function POST(
           googleSheetsResult:
             sheetsResult,
 
+          metaLead:
+            "not_fired",
+
           eventId,
+
+          leadEventId,
+
         },
         {
-          status: 502,
+          status:
+            502,
         }
       );
     }
@@ -920,20 +1582,14 @@ export async function POST(
      * ========================================================
      * 15. APPS SCRIPT APPLICATION ERROR
      * ========================================================
-     *
-     * Apps Script can technically return HTTP 200 while
-     * reporting:
-     *
-     * result: "error"
-     *
-     * Therefore inspect the response body.
      */
 
     if (
       sheetsResult &&
       typeof sheetsResult ===
         "object" &&
-      "result" in sheetsResult &&
+      "result" in
+        sheetsResult &&
       (
         sheetsResult as {
           result?: unknown;
@@ -945,16 +1601,21 @@ export async function POST(
       console.error(
         "❌ PREMIUM GOOGLE SHEETS REPORTED AN ERROR:",
         {
+
           eventId,
 
           result:
             sheetsResult,
+
         }
       );
 
+
       return NextResponse.json(
         {
-          success: false,
+
+          success:
+            false,
 
           orderCaptured:
             false,
@@ -968,10 +1629,17 @@ export async function POST(
           googleSheetsResult:
             sheetsResult,
 
+          metaLead:
+            "not_fired",
+
           eventId,
+
+          leadEventId,
+
         },
         {
-          status: 502,
+          status:
+            502,
         }
       );
     }
@@ -979,23 +1647,113 @@ export async function POST(
 
     /**
      * ========================================================
-     * 16. SUCCESS
+     * 16. SERVER META LEAD
+     * ========================================================
+     *
+     * This happens only after the order has been successfully
+     * accepted by Google Sheets.
+     *
+     * If Meta is blocked or unavailable, the order itself
+     * remains successful.
+     */
+
+    let metaLeadResult:
+
+      | Awaited<
+          ReturnType<
+            typeof sendMetaLead
+          >
+        >
+      | undefined;
+
+
+    try {
+
+      metaLeadResult =
+        await sendMetaLead(
+          req,
+          {
+
+            leadEventId,
+
+            eventSourceUrl,
+
+            name,
+
+            phone,
+
+            state,
+
+            city,
+
+            total,
+
+            fbp:
+              browserIdentifiers.fbp,
+
+            fbc:
+              browserIdentifiers.fbc,
+
+            attribution,
+
+            browserIdentifiers,
+          }
+        );
+
+    } catch (
+      metaError
+    ) {
+
+      console.error(
+        "❌ SERVER META LEAD PIPELINE FAILED:",
+        metaError
+      );
+
+      metaLeadResult = {
+
+        status:
+          "failed",
+
+        totalAccounts:
+          0,
+
+        successful:
+          0,
+
+        failed:
+          1,
+      };
+    }
+
+
+    /**
+     * ========================================================
+     * 17. FINAL SUCCESS
      * ========================================================
      */
 
     console.log(
       "🟢 PREMIUM ORDER CAPTURED:",
       {
+
         eventId,
+
+        leadEventId,
 
         orderStatus:
           "Pending",
+
+        metaLead:
+          metaLeadResult?.status,
+
       }
     );
+
 
     console.log(
       "ℹ️ Meta Purchase was NOT fired."
     );
+
 
     console.log(
       "=================================================="
@@ -1004,7 +1762,8 @@ export async function POST(
 
     return NextResponse.json({
 
-      success: true,
+      success:
+        true,
 
       orderCaptured:
         true,
@@ -1015,23 +1774,53 @@ export async function POST(
       googleSheets:
         "success",
 
+      metaLead:
+        metaLeadResult?.status ||
+        "unknown",
+
+      metaLeadAccounts:
+        metaLeadResult?.totalAccounts ||
+        0,
+
+      metaLeadSuccessful:
+        metaLeadResult?.successful ||
+        0,
+
+      metaLeadFailed:
+        metaLeadResult?.failed ||
+        0,
+
+      /*
+       * Useful for tracing this specific Lead across
+       * browser and server.
+       */
+      leadEventId,
+
+      /*
+       * Permanent order identity.
+       */
+      eventId,
+
       metaPurchase:
         "not_fired",
-
-      eventId,
     });
 
 
-  } catch (error) {
+  } catch (
+    error
+  ) {
 
     console.error(
       "🔴 PREMIUM ORDER ROUTE CRASHED:",
       error
     );
 
+
     return NextResponse.json(
       {
-        success: false,
+
+        success:
+          false,
 
         orderCaptured:
           false,
@@ -1043,9 +1832,11 @@ export async function POST(
           error instanceof Error
             ? error.message
             : "Unknown error",
+
       },
       {
-        status: 500,
+        status:
+          500,
       }
     );
   }

@@ -4,6 +4,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { generateEventId } from "@/lib/tracking/event-id";
 import { trackMetaLead } from "@/components/tracking/MetaPixel";
+
 type SetOption = "1" | "2" | "3" | "4" | "5";
 type OilOption = "0" | "1" | "2" | "3" | "4" | "5";
 
@@ -18,7 +19,10 @@ const SET_PRICING: Record<
   "5": { label: "5 Sets", price: 132000, save: 55000 },
 };
 
-const OIL_PRICING: Record<OilOption, { label: string; price: number }> = {
+const OIL_PRICING: Record<
+  OilOption,
+  { label: string; price: number }
+> = {
   "0": { label: "No extra oil", price: 0 },
   "1": { label: "+1 Extra Oil Bottle", price: 10000 },
   "2": { label: "+2 Extra Oil Bottles", price: 17500 },
@@ -81,14 +85,15 @@ export default function PremiumOrderForm() {
   const [willAccept, setWillAccept] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
-  
 
   const setPricing = SET_PRICING[sets];
   const oilPricing = OIL_PRICING[oil];
 
   const freeOilGranted = sets === "5";
-  const totalOilBottles = Number(oil) + (freeOilGranted ? 1 : 0);
-  const total = setPricing.price + oilPricing.price;
+  const totalOilBottles =
+    Number(oil) + (freeOilGranted ? 1 : 0);
+  const total =
+    setPricing.price + oilPricing.price;
 
   useEffect(() => {
     setMounted(true);
@@ -134,355 +139,339 @@ export default function PremiumOrderForm() {
     return undefined;
   };
 
-async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-
-  if (submitting) return;
-
-  setError("");
-
-  const finalSets =
-    (document.getElementById(
-      "premium-hidden-sets"
-    ) as HTMLInputElement)?.value || sets;
-
-  const finalOil =
-    (document.getElementById(
-      "premium-hidden-oil"
-    ) as HTMLInputElement)?.value || oil;
-
-  const currentTotal =
-    SET_PRICING[finalSets as SetOption].price +
-    OIL_PRICING[finalOil as OilOption].price;
-
-  const cleanPhone = phone.trim();
-  const cleanName = name.trim();
-  const cleanCity = city.trim();
-  const cleanAddress = address.trim();
-
-  if (
-    !cleanName ||
-    !cleanPhone ||
-    !state ||
-    !cleanCity ||
-    !cleanAddress
+  async function handleSubmit(
+    e: FormEvent<HTMLFormElement>
   ) {
-    setError(
-      "Please fill in all fields so we can confirm your order."
-    );
-    return;
-  }
+    e.preventDefault();
 
-  if (!willAccept) {
-    setError(
-      "😞Please tick “I WILL ACCEPT” to confirm you’re ready to receive your order. Then submit the form again."
-    );
-    return;
-  }
+    if (submitting) return;
 
-  const orderFingerprint =
-    `sm_order_${cleanPhone}_${finalSets}_${finalOil}`;
+    setError("");
 
-  if (
-    typeof window !== "undefined" &&
-    localStorage.getItem(orderFingerprint)
-  ) {
-    console.warn(
-      "Duplicate submission blocked. Forwarding customer safely to success view."
-    );
+    const finalSets =
+      (document.getElementById(
+        "premium-hidden-sets"
+      ) as HTMLInputElement)?.value || sets;
 
-    setSubmitted(true);
-    return;
-  }
+    const finalOil =
+      (document.getElementById(
+        "premium-hidden-oil"
+      ) as HTMLInputElement)?.value || oil;
 
-  setSubmitting(true);
-
-  /*
-   * ============================================================
-   * TRACKING ENGINE
-   *
-   * Generate ONE event ID for this order.
-   * This same ID travels through:
-   *
-   * Browser -> Premium Order API -> Google Sheets
-   *
-   * It is NOT a Purchase event ID yet.
-   *
-   * Purchase will happen later when the rep marks the order
-   * as Paid.
-   * ============================================================
-   */
-
-const sharedEventId =
-  generateEventId("premium");
-
-  const currentUrl =
-    typeof window !== "undefined"
-      ? window.location.href
-      : "";
-
-  /*
-   * ============================================================
-   * REUSABLE ATTRIBUTION ENGINE
-   *
-   * These come from the tracking modules we built.
-   *
-   * Do NOT manually rebuild UTM handling here.
-   * ============================================================
-   */
-
-  let attribution = {};
-  let browserIdentifiers = {};
-
-  if (typeof window !== "undefined") {
-    try {
-      const {
-        getAttribution,
-      } = await import(
-        "@/lib/tracking/attribution"
-      );
-
-      const {
-        getBrowserIdentifiers,
-      } = await import(
-        "@/lib/tracking/cookies"
-      );
-
-      /*
-       * Capture any campaign data present on this visit
-       * while preserving the first-touch / last-touch
-       * attribution engine.
-       */
-      attribution = getAttribution();
-
-      browserIdentifiers =
-        getBrowserIdentifiers();
-    } catch (trackingError) {
-      console.warn(
-        "[Premium Order] Tracking context could not be loaded:",
-        trackingError
-      );
-    }
-  }
-
-  /*
-   * ============================================================
-   * UNIFIED ORDER PAYLOAD
-   *
-   * This is an ORDER, not a Purchase.
-   *
-   * Payment status is intentionally NOT controlled by the
-   * browser. The spreadsheet / sales rep workflow controls it.
-   * ============================================================
-   */
-
-  const unifiedOrderPayload = {
-    eventName: "PremiumOrder",
-
-    eventId: sharedEventId,
-
-    eventSourceUrl: currentUrl,
-
-    referrer:
-      typeof document !== "undefined"
-        ? document.referrer
-        : undefined,
-
-    /*
-     * Customer information
-     */
-    name: cleanName,
-    phone: cleanPhone,
-    whatsapp: whatsapp.trim(),
-
-    state,
-    city: cleanCity,
-    address: cleanAddress,
-
-    /*
-     * Order information
-     */
-    sets: finalSets,
-
-    setPrice:
+    const currentTotal =
       SET_PRICING[
         finalSets as SetOption
-      ].price,
-
-    oilBottlesOrdered:
-      Number(finalOil),
-
-    oilBottlesFree:
-      finalSets === "5"
-        ? 1
-        : 0,
-
-    oilBottlesTotal:
-      Number(finalOil) +
-      (finalSets === "5"
-        ? 1
-        : 0),
-
-    oilPrice:
+      ].price +
       OIL_PRICING[
         finalOil as OilOption
-      ].price,
+      ].price;
 
-    total:
-      Number(currentTotal) || 0,
+    const cleanPhone = phone.trim();
+    const cleanName = name.trim();
+    const cleanCity = city.trim();
+    const cleanAddress = address.trim();
 
-    willAccept,
-
-    /*
-     * Reusable attribution data
-     */
-    attribution,
-
-    /*
-     * Browser identifiers
-     *
-     * fbp / fbc are particularly important for
-     * the eventual Meta CAPI Purchase event.
-     */
-    browserIdentifiers,
-  };
-
-  try {
-    /*
-     * ============================================================
-     * CUSTOMER SUBMISSION
-     *
-     * IMPORTANT:
-     *
-     * There is deliberately NO:
-     *
-     * fbq("track", "Purchase")
-     *
-     * ttq.track("Purchase")
-     *
-     * /api/track/premium-purchase
-     *
-     * here.
-     *
-     * Purchase is reserved for the rep-confirmed payment stage.
-     * ============================================================
-     */
-
-    const metaResponse =
-      await fetch(
-        "/api/track/premium-order",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify(
-            unifiedOrderPayload
-          ),
-        }
+    if (
+      !cleanName ||
+      !cleanPhone ||
+      !state ||
+      !cleanCity ||
+      !cleanAddress
+    ) {
+      setError(
+        "Please fill in all fields so we can confirm your order."
       );
-
-    if (!metaResponse.ok) {
-      throw new Error(
-        "Premium order ingestion failed."
-      );
+      return;
     }
 
-  /*
- * ============================================================
- * META LEAD
- *
- * The order has now been successfully accepted by the
- * Premium Order API.
- *
- * Fire Lead once, on the browser, to every configured Meta
- * Pixel.
- *
- * This is NOT Purchase.
- *
- * Purchase remains reserved for:
- *
- * Pending → Paid
- *
- * in the Google Sheets sales workflow.
- * ============================================================
- */
+    if (!willAccept) {
+      setError(
+        "😞Please tick “I WILL ACCEPT” to confirm you’re ready to receive your order. Then submit the form again."
+      );
+      return;
+    }
 
-const leadEventId =
-  generateEventId("premium_lead");
+    const orderFingerprint =
+      `sm_order_${cleanPhone}_${finalSets}_${finalOil}`;
 
-const leadTracked =
-  trackMetaLead(
-    leadEventId,
-    {
-      content_name:
-        "ScentMason Premium Order",
+    if (
+      typeof window !== "undefined" &&
+      localStorage.getItem(orderFingerprint)
+    ) {
+      console.warn(
+        "Duplicate submission blocked. Forwarding customer safely to success view."
+      );
 
-      content_category:
-        "Premium",
+      setSubmitted(true);
+      return;
+    }
 
-      value:
+    setSubmitting(true);
+
+    /*
+     * ============================================================
+     * TRACKING ENGINE
+     *
+     * Order Event ID:
+     * Used for the order itself and the later Purchase flow.
+     *
+     * Lead Event ID:
+     * Used by BOTH:
+     *
+     * Browser Meta Pixel -> Lead
+     * Server Meta CAPI   -> Lead
+     *
+     * The same Lead Event ID is intentionally sent to both
+     * destinations so Meta can deduplicate them.
+     * ============================================================
+     */
+
+    const sharedEventId =
+      generateEventId("premium");
+
+    const leadEventId =
+      generateEventId("premium_lead");
+
+    const currentUrl =
+      typeof window !== "undefined"
+        ? window.location.href
+        : "";
+
+    /*
+     * ============================================================
+     * REUSABLE ATTRIBUTION ENGINE
+     * ============================================================
+     */
+
+    let attribution = {};
+    let browserIdentifiers = {};
+
+    if (typeof window !== "undefined") {
+      try {
+        const {
+          getAttribution,
+        } = await import(
+          "@/lib/tracking/attribution"
+        );
+
+        const {
+          getBrowserIdentifiers,
+        } = await import(
+          "@/lib/tracking/cookies"
+        );
+
+        attribution =
+          getAttribution();
+
+        browserIdentifiers =
+          getBrowserIdentifiers();
+      } catch (trackingError) {
+        console.warn(
+          "[Premium Order] Tracking context could not be loaded:",
+          trackingError
+        );
+      }
+    }
+
+    /*
+     * ============================================================
+     * UNIFIED ORDER PAYLOAD
+     *
+     * eventId     = permanent order identity
+     * leadEventId = browser/server Lead identity
+     * ============================================================
+     */
+
+    const unifiedOrderPayload = {
+      eventName: "PremiumOrder",
+
+      eventId: sharedEventId,
+
+      leadEventId,
+
+      eventSourceUrl: currentUrl,
+
+      referrer:
+        typeof document !== "undefined"
+          ? document.referrer
+          : undefined,
+
+      /*
+       * Customer information
+       */
+      name: cleanName,
+      phone: cleanPhone,
+      whatsapp: whatsapp.trim(),
+
+      state,
+      city: cleanCity,
+      address: cleanAddress,
+
+      /*
+       * Order information
+       */
+      sets: finalSets,
+
+      setPrice:
+        SET_PRICING[
+          finalSets as SetOption
+        ].price,
+
+      oilBottlesOrdered:
+        Number(finalOil),
+
+      oilBottlesFree:
+        finalSets === "5"
+          ? 1
+          : 0,
+
+      oilBottlesTotal:
+        Number(finalOil) +
+        (finalSets === "5"
+          ? 1
+          : 0),
+
+      oilPrice:
+        OIL_PRICING[
+          finalOil as OilOption
+        ].price,
+
+      total:
         Number(currentTotal) || 0,
 
-      currency:
-        "NGN",
+      willAccept,
 
-      eventSourceUrl:
-        currentUrl,
+      /*
+       * Reusable attribution data
+       */
+      attribution,
 
-      orderEventId:
-        sharedEventId,
-    }
-  );
+      /*
+       * Browser identifiers
+       */
+      browserIdentifiers,
+    };
 
-if (!leadTracked) {
-  console.warn(
-    "[Premium Order] Meta Lead could not be fired. Order ingestion still succeeded."
-  );
-}
+    try {
+      /*
+       * ============================================================
+       * CUSTOMER SUBMISSION
+       *
+       * NO Purchase event is fired here.
+       *
+       * Purchase remains reserved for the rep-confirmed
+       * payment stage.
+       * ============================================================
+       */
 
-    /*
-     * TikTok order ingestion can remain part of the
-     * order pipeline, but it must NOT be treated as a
-     * Meta Purchase.
-     *
-     * If your /api/track/tiktok/purchase route is still
-     * specifically a PURCHASE route, do NOT call it here.
-     *
-     * We will connect the appropriate TikTok order/lead
-     * endpoint separately if required.
-     */
+      const metaResponse =
+        await fetch(
+          "/api/track/premium-order",
+          {
+            method: "POST",
 
-    /*
-     * Mark this browser/order combination as submitted
-     * only after the primary order ingestion succeeded.
-     */
-    if (
-      typeof window !== "undefined"
-    ) {
-      localStorage.setItem(
-        orderFingerprint,
-        "true"
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify(
+              unifiedOrderPayload
+            ),
+          }
+        );
+
+      const responseData =
+        await metaResponse
+          .json()
+          .catch(() => null);
+
+      if (!metaResponse.ok) {
+        throw new Error(
+          responseData?.message ||
+            "Premium order ingestion failed."
+        );
+      }
+
+      /*
+       * ============================================================
+       * BROWSER META LEAD
+       *
+       * The server has already accepted the order.
+       *
+       * The SAME leadEventId was sent to the server, which used it
+       * for Meta CAPI Lead.
+       *
+       * We now send that exact same ID through the browser Pixel.
+       *
+       * Meta can therefore deduplicate:
+       *
+       * Browser Lead
+       * +
+       * Server Lead
+       *
+       * instead of counting two separate Leads.
+       * ============================================================
+       */
+
+      const leadTracked =
+        trackMetaLead(
+          leadEventId,
+          {
+            content_name:
+              "ScentMason Premium Order",
+
+            content_category:
+              "Premium",
+
+            value:
+              Number(currentTotal) || 0,
+
+            currency:
+              "NGN",
+
+            eventSourceUrl:
+              currentUrl,
+
+            orderEventId:
+              sharedEventId,
+          }
+        );
+
+      if (!leadTracked) {
+        console.warn(
+          "[Premium Order] Browser Meta Lead could not be fired. Server-side Lead was still attempted."
+        );
+      }
+
+      /*
+       * Mark this browser/order combination as submitted
+       * only after the primary order ingestion succeeded.
+       */
+
+      if (
+        typeof window !== "undefined"
+      ) {
+        localStorage.setItem(
+          orderFingerprint,
+          "true"
+        );
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error(
+        "Premium order submission error:",
+        err
       );
+
+      setError(
+        "Something went wrong sending your order. Please call or WhatsApp us on 0706 496 9603 to confirm."
+      );
+    } finally {
+      setSubmitting(false);
     }
-
-    setSubmitted(true);
-  } catch (err) {
-    console.error(
-      "Premium order submission error:",
-      err
-    );
-
-    setError(
-      "Something went wrong sending your order. Please call or WhatsApp us on 0706 496 9603 to confirm."
-    );
-  } finally {
-    setSubmitting(false);
   }
-}
 
   const fallbackSets =
     typeof document !== "undefined"
@@ -499,11 +488,15 @@ if (!leadTracked) {
       : oil;
 
   const selectedPackageLabel =
-    SET_PRICING[fallbackSets as SetOption]?.label ||
+    SET_PRICING[
+      fallbackSets as SetOption
+    ]?.label ||
     "Order Package";
 
   const chosenOilLabel =
-    OIL_PRICING[fallbackOil as OilOption]?.label ||
+    OIL_PRICING[
+      fallbackOil as OilOption
+    ]?.label ||
     "No extra oil";
 
   const successMessageText = `Hello ScentMason, I just successfully completed my order form online!
@@ -518,7 +511,9 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
   const whatsappUrl =
     `https://wa.me/2347064969603?text=` +
-    encodeURIComponent(successMessageText);
+    encodeURIComponent(
+      successMessageText
+    );
 
   return (
     <div
@@ -596,7 +591,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           </p>
         </div>
 
-
         {/* =================================================
             IMPORTANT NOTICE
         ================================================= */}
@@ -629,7 +623,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           </p>
         </div>
 
-
         {/* =================================================
             PACKAGE SELECTION
         ================================================= */}
@@ -649,10 +642,19 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             className="space-y-2"
             id="premium-package-buttons-wrapper"
           >
-            {(Object.keys(SET_PRICING) as SetOption[]).map(
+            {(
+              Object.keys(
+                SET_PRICING
+              ) as SetOption[]
+            ).map(
               (option) => {
-                const data = SET_PRICING[option];
-                const isActive = sets === option;
+                const data =
+                  SET_PRICING[
+                    option
+                  ];
+
+                const isActive =
+                  sets === option;
 
                 return (
                   <button
@@ -662,7 +664,9 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                     data-value={option}
                     data-price={data.price}
                     data-label={data.label}
-                    onClick={() => setSets(option)}
+                    onClick={() =>
+                      setSets(option)
+                    }
                     className={`
                       premium-selectable-btn
                       flex
@@ -689,12 +693,17 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                       </p>
 
                       <p className="mt-0.5 text-[12px] font-medium text-black/45">
-                        Save {formatNaira(data.save)}
+                        Save{" "}
+                        {formatNaira(
+                          data.save
+                        )}
                       </p>
                     </div>
 
                     <p className="text-[15px] font-bold text-[#1e1008]">
-                      {formatNaira(data.price)}
+                      {formatNaira(
+                        data.price
+                      )}
                     </p>
                   </button>
                 );
@@ -702,7 +711,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             )}
           </div>
         </div>
-
 
         {/* =================================================
             EXTRA OIL
@@ -724,10 +732,19 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             className="space-y-2"
             id="premium-oil-buttons-wrapper"
           >
-            {(Object.keys(OIL_PRICING) as OilOption[]).map(
+            {(
+              Object.keys(
+                OIL_PRICING
+              ) as OilOption[]
+            ).map(
               (option) => {
-                const data = OIL_PRICING[option];
-                const isActive = oil === option;
+                const data =
+                  OIL_PRICING[
+                    option
+                  ];
+
+                const isActive =
+                  oil === option;
 
                 return (
                   <button
@@ -736,7 +753,9 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                     data-option-type="oil"
                     data-value={option}
                     data-price={data.price}
-                    onClick={() => setOil(option)}
+                    onClick={() =>
+                      setOil(option)
+                    }
                     className={`
                       premium-selectable-btn
                       flex
@@ -762,9 +781,12 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                     </p>
 
                     <p className="text-[15px] font-bold text-[#1e1008]">
-                      {data.price === 0
+                      {data.price ===
+                      0
                         ? "₦0"
-                        : `+${formatNaira(data.price)}`}
+                        : `+${formatNaira(
+                            data.price
+                          )}`}
                     </p>
                   </button>
                 );
@@ -772,7 +794,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             )}
           </div>
         </div>
-
 
         {/* =================================================
             ORDER SUMMARY
@@ -827,7 +848,9 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               "
               id="premium-display-total"
             >
-              {formatNaira(total)}
+              {formatNaira(
+                total
+              )}
             </p>
           </div>
 
@@ -848,7 +871,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           )}
         </div>
 
-
         {/* =================================================
             CUSTOMER DETAILS
         ================================================= */}
@@ -859,7 +881,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           </p>
 
           <div className="mt-4 space-y-4">
-
             <div>
               <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
                 Full Name
@@ -868,7 +889,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) =>
+                  setName(
+                    e.target.value
+                  )
+                }
                 placeholder="e.g. Chioma Adeyemi"
                 className="
                   mt-1.5
@@ -899,7 +924,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) =>
+                  setPhone(
+                    e.target.value
+                  )
+                }
                 placeholder="08012345678"
                 className="
                   mt-1.5
@@ -930,7 +959,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               <input
                 type="tel"
                 value={whatsapp}
-                onChange={(e) => setWhatsapp(e.target.value)}
+                onChange={(e) =>
+                  setWhatsapp(
+                    e.target.value
+                  )
+                }
                 placeholder="08012345678"
                 className="
                   mt-1.5
@@ -954,14 +987,17 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             </div>
 
             <div>
-
               <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
                 State
               </label>
 
               <select
                 value={state}
-                onChange={(e) => setState(e.target.value)}
+                onChange={(e) =>
+                  setState(
+                    e.target.value
+                  )
+                }
                 className="
                   mt-1.5
                   w-full
@@ -981,46 +1017,57 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                   focus:ring-[#A67C00]/10
                 "
               >
-                <option value="">Select your state</option>
+                <option value="">
+                  Select your state
+                </option>
 
-                {STATES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
+                {STATES.map(
+                  (s) => (
+                    <option
+                      key={s}
+                      value={s}
+                    >
+                      {s}
+                    </option>
+                  )
+                )}
               </select>
             </div>
 
-                    <div>
-  <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
-    Town / City
-  </label>
+            <div>
+              <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
+                Town / City
+              </label>
 
-  <input
-    type="text"
-    value={city}
-    onChange={(e) => setCity(e.target.value)}
-    placeholder="e.g. Ikeja"
-    className="
-      mt-1.5
-      w-full
-      rounded-xl
-      border
-      border-black/10
-      bg-white
-      px-4
-      py-3.5
-      text-[15px]
-      font-medium
-      text-black
-      outline-none
-      transition
-      focus:border-[#A67C00]
-      focus:ring-2
-      focus:ring-[#A67C00]/10
-    "
-  />
-</div>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) =>
+                  setCity(
+                    e.target.value
+                  )
+                }
+                placeholder="e.g. Ikeja"
+                className="
+                  mt-1.5
+                  w-full
+                  rounded-xl
+                  border
+                  border-black/10
+                  bg-white
+                  px-4
+                  py-3.5
+                  text-[15px]
+                  font-medium
+                  text-black
+                  outline-none
+                  transition
+                  focus:border-[#A67C00]
+                  focus:ring-2
+                  focus:ring-[#A67C00]/10
+                "
+              />
+            </div>
 
             <div>
               <label className="text-[12px] font-bold uppercase tracking-wide text-black/50">
@@ -1029,7 +1076,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
               <textarea
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) =>
+                  setAddress(
+                    e.target.value
+                  )
+                }
                 placeholder="House number, street, area, landmark"
                 rows={3}
                 className="
@@ -1052,10 +1103,8 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                 "
               />
             </div>
-
           </div>
         </div>
-
 
         {/* ERROR */}
 
@@ -1074,43 +1123,46 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           </p>
         )}
 
-
         {/* =================================================
             I'LL ACCEPT-BOX
         ================================================= */}
-        
-        
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50/70 p-4">
-  <label className="flex cursor-pointer items-start gap-3">
-    <input
-      type="checkbox"
-      checked={willAccept}
-      onChange={(e) => {
-        setWillAccept(e.target.checked);
-        if (e.target.checked) {
-          setError("");
-        }
-      }}
-      className="mt-1 h-5 w-5 shrink-0 accent-red-600"
-    />
 
-    <span className="text-[15px] font-bold leading-6 text-gray-800">
-      I WILL ACCEPT — I am ready to receive my order when contacted for
-      delivery confirmation.
-    </span>
-  </label>
-</div>
-        
-        
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50/70 p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={willAccept}
+              onChange={(e) => {
+                setWillAccept(
+                  e.target.checked
+                );
+
+                if (
+                  e.target.checked
+                ) {
+                  setError("");
+                }
+              }}
+              className="mt-1 h-5 w-5 shrink-0 accent-red-600"
+            />
+
+            <span className="text-[15px] font-bold leading-6 text-gray-800">
+              I WILL ACCEPT — I am ready to receive my order when contacted for
+              delivery confirmation.
+            </span>
+          </label>
+        </div>
+
         {/* =================================================
             SUBMIT-BUTTON
         ================================================= */}
 
-        
-
         <button
           type="submit"
-          disabled={submitting || !mounted}
+          disabled={
+            submitting ||
+            !mounted
+          }
           id="premium-submit-btn"
           className="
             mt-7
@@ -1142,7 +1194,9 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             ? "Loading..."
             : submitting
               ? "Sending Your Order..."
-              : `YES I WANT THIS NOW — ${formatNaira(total)}`}
+              : `YES I WANT THIS NOW — ${formatNaira(
+                  total
+                )}`}
         </button>
 
         <div className="mt-4 text-center">
@@ -1156,7 +1210,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           </p>
         </div>
       </form>
-
 
       {/* =================================================
           SUCCESS MODAL
@@ -1287,7 +1340,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                   className="h-5 w-5 shrink-0"
                   fill="#ffffff"
                 >
-                  <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95-.137-.17-1.103-1.47-1.103-2.8 0-1.33.7-1.984.95-2.255.246-.27.535-.337.713-.337.178 0 .357-.008.513.008.165.008.387-.063.605.462.224.54.762 1.86.83 1.994.067.135.112.293.022.47-.09.178-.135.288-.27.443-.135.157-.284.35-.405.47-.135.135-.276.282-.118.55.157.27.7 1.155 1.504 1.873 1.04.927 1.917 1.213 2.187 1.348.27.135.428.113.586-.067.157-.18.674-.785.854-1.055.18-.27.36-.225.605-.135.246.09 1.564.738 1.832.872.27.135.45.202.516.315.067.113.067.652-.227 1.483z" />
+                  <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95-.137-.17-1.103-1.47-.95-2.255.246-.27.535-.337.713-.337.178 0 .357-.008.513.008.165.008.387-.063.605.462.224.54.762 1.86.83 1.994.067.135.112.293.022.47-.09.178-.135.288-.27.443-.135.157-.284.35-.405.47-.135.135-.276.282-.118.55.157.27.7 1.155 1.504 1.873 1.04.927 1.917 1.213 2.187 1.348.27.135.428.113.586-.067.157-.18.674-.785.854-1.055.18-.27.36-.225.605-.135.246.09 1.564.738 1.832.872.27.135.45.202.516.315.067.113.067.652-.227 1.483z" />
                 </svg>
 
                 Chat Us On WhatsApp
@@ -1296,7 +1349,6 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           </div>,
           document.body
         )}
-
 
       {/* =================================================
           VANILLA FALLBACK ENGINE
