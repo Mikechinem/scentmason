@@ -3,7 +3,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { generateEventId } from "@/lib/tracking/event-id";
-
+import { trackMetaLead } from "@/components/tracking/MetaPixel";
 type SetOption = "1" | "2" | "3" | "4" | "5";
 type OilOption = "0" | "1" | "2" | "3" | "4" | "5";
 
@@ -390,6 +390,59 @@ const sharedEventId =
         "Premium order ingestion failed."
       );
     }
+
+  /*
+ * ============================================================
+ * META LEAD
+ *
+ * The order has now been successfully accepted by the
+ * Premium Order API.
+ *
+ * Fire Lead once, on the browser, to every configured Meta
+ * Pixel.
+ *
+ * This is NOT Purchase.
+ *
+ * Purchase remains reserved for:
+ *
+ * Pending → Paid
+ *
+ * in the Google Sheets sales workflow.
+ * ============================================================
+ */
+
+const leadEventId =
+  generateEventId("premium_lead");
+
+const leadTracked =
+  trackMetaLead(
+    leadEventId,
+    {
+      content_name:
+        "ScentMason Premium Order",
+
+      content_category:
+        "Premium",
+
+      value:
+        Number(currentTotal) || 0,
+
+      currency:
+        "NGN",
+
+      eventSourceUrl:
+        currentUrl,
+
+      orderEventId:
+        sharedEventId,
+    }
+  );
+
+if (!leadTracked) {
+  console.warn(
+    "[Premium Order] Meta Lead could not be fired. Order ingestion still succeeded."
+  );
+}
 
     /*
      * TikTok order ingestion can remain part of the
