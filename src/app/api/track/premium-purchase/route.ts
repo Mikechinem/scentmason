@@ -6,8 +6,12 @@ export const runtime = "nodejs";
 type PurchaseRequestBody = {
   eventId?: string;
   eventSourceUrl?: string;
+
   fbp?: string;
   fbc?: string;
+  ttp?: string;
+  ttclid?: string;
+
   phone?: string;
   whatsapp?: string;
 
@@ -17,37 +21,76 @@ type PurchaseRequestBody = {
   state?: string;
   city?: string;
   address?: string;
+
   sets?: string | number;
   setPrice?: string | number;
+
   oilBottlesOrdered?: number;
   oilBottlesFree?: number;
   oilBottlesTotal?: number;
   oilPrice?: number;
+
   total?: string | number;
+
   willAccept?: boolean;
+
+  attribution?: Record<string, unknown>;
+  browserIdentifiers?: {
+    fbp?: string;
+    fbc?: string;
+    ttp?: string;
+    ttclid?: string;
+  };
 };
 
-function removeEmptyValues<T extends Record<string, unknown>>(obj: T) {
+type MetaAccount = {
+  id: string;
+  token: string;
+};
+
+type MetaResult = {
+  pixelId: string;
+  ok: boolean;
+  status?: number;
+  result?: unknown;
+  error?: string;
+};
+
+function removeEmptyValues<T extends Record<string, unknown>>(
+  obj: T
+): Partial<T> {
   return Object.fromEntries(
     Object.entries(obj).filter(([, value]) => {
-      if (value === undefined || value === null || value === "") {
+      if (
+        value === undefined ||
+        value === null ||
+        value === ""
+      ) {
         return false;
       }
 
-      if (Array.isArray(value) && value.length === 0) {
+      if (
+        Array.isArray(value) &&
+        value.length === 0
+      ) {
         return false;
       }
 
       return true;
     })
-  );
+  ) as Partial<T>;
 }
 
-function getClientIp(req: NextRequest) {
-  const forwardedFor = req.headers.get("x-forwarded-for");
+function getClientIp(
+  req: NextRequest
+): string | undefined {
+  const forwardedFor =
+    req.headers.get("x-forwarded-for");
 
   if (forwardedFor) {
-    return forwardedFor.split(",")[0]?.trim();
+    return forwardedFor
+      .split(",")[0]
+      ?.trim();
   }
 
   return (
@@ -57,26 +100,45 @@ function getClientIp(req: NextRequest) {
   );
 }
 
-function normalizeNigerianPhone(phone?: string) {
-  if (!phone) return "";
+function normalizeNigerianPhone(
+  phone?: string
+): string {
+  if (!phone) {
+    return "";
+  }
 
-  let cleaned = phone.replace(/\D/g, "");
+  let cleaned =
+    phone.replace(/\D/g, "");
 
-  if (cleaned.startsWith("0")) {
-    cleaned = `234${cleaned.slice(1)}`;
-  } else if (cleaned.startsWith("2340")) {
-    cleaned = `234${cleaned.slice(4)}`;
-  } else if (!cleaned.startsWith("234") && cleaned.length >= 9) {
-    cleaned = `234${cleaned}`;
+  if (
+    cleaned.startsWith("2340")
+  ) {
+    cleaned =
+      `234${cleaned.slice(4)}`;
+  } else if (
+    cleaned.startsWith("0")
+  ) {
+    cleaned =
+      `234${cleaned.slice(1)}`;
+  } else if (
+    !cleaned.startsWith("234") &&
+    cleaned.length >= 9
+  ) {
+    cleaned =
+      `234${cleaned}`;
   }
 
   return cleaned;
 }
 
-function sha256(value: string) {
+function sha256(
+  value: string
+): string {
   return crypto
     .createHash("sha256")
-    .update(value.trim().toLowerCase())
+    .update(
+      value.trim().toLowerCase()
+    )
     .digest("hex");
 }
 
@@ -91,27 +153,30 @@ function getMetaEnv() {
     process.env.META_CAPI_ACCESS_TOKEN;
 
   const graphVersion =
-    process.env.META_GRAPH_API_VERSION || "v25.0";
+    process.env.META_GRAPH_API_VERSION ||
+    "v25.0";
 
   const testEventCode =
     process.env.META_TEST_EVENT_CODE;
+
+  const webhookSecret =
+    process.env.PREMIUM_PURCHASE_WEBHOOK_SECRET;
 
   return {
     datasetId,
     accessToken,
     graphVersion,
     testEventCode,
+    webhookSecret,
   };
 }
 
 /**
  * GET
  *
- * Browser diagnostic endpoint.
+ * Diagnostic endpoint.
  *
- * IMPORTANT:
- * This uses the EXACT same environment variable name
- * that the POST handler uses.
+ * Does NOT expose secret values.
  */
 export async function GET() {
   const {
@@ -119,10 +184,8 @@ export async function GET() {
     accessToken,
     graphVersion,
     testEventCode,
+    webhookSecret,
   } = getMetaEnv();
-
-  const googleSheetsUrl =
-    process.env.GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL;
 
   return NextResponse.json({
     status: "ok",
@@ -131,27 +194,54 @@ export async function GET() {
       "ScentMason Premium Purchase route is active.",
 
     envCheck: {
-      hasDatasetId: Boolean(datasetId),
-      hasAccessToken: Boolean(accessToken),
+      hasDatasetId:
+        Boolean(datasetId),
 
-      hasPremiumGoogleSheetsUrl:
-        Boolean(googleSheetsUrl),
+      hasAccessToken:
+        Boolean(accessToken),
 
       graphVersion,
 
       hasTestEventCode:
         Boolean(testEventCode),
+
+      hasWebhookSecret:
+        Boolean(webhookSecret),
     },
 
-    googleSheetsVariable:
-      "GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL",
+    multiPixelConfiguration: {
+      pixel1:
+        Boolean(
+          process.env.NEXT_PUBLIC_META_PIXEL_ID_1 &&
+            process.env.META_ACCESS_TOKEN_1
+        ),
+
+      pixel2:
+        Boolean(
+          process.env.NEXT_PUBLIC_META_PIXEL_ID_2 &&
+            process.env.META_ACCESS_TOKEN_2
+        ),
+
+      pixel3:
+        Boolean(
+          process.env.NEXT_PUBLIC_META_PIXEL_ID_3 &&
+            process.env.META_ACCESS_TOKEN_3
+        ),
+    },
   });
 }
 
 /**
  * POST
+ *
+ * Called ONLY by the authorized Google Apps Script
+ * after a sales representative changes:
+ *
+ * Pending → Paid
  */
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest
+) {
   try {
     console.log(
       "=================================================="
@@ -170,74 +260,193 @@ export async function POST(req: NextRequest) {
       accessToken,
       graphVersion,
       testEventCode,
+      webhookSecret,
     } = getMetaEnv();
 
-    /**
-     * IMPORTANT:
-     *
-     * This is the ONLY Google Sheets environment variable
-     * used by this route.
-     *
-     * It exactly matches your .env.local:
-     *
-     * GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL
-     */
-    const googleSheetsUrl =
-      process.env.GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL;
+    // ============================================================
+    // 2. WEBHOOK AUTHENTICATION
+    // ============================================================
+
+    const suppliedSecret =
+      req.headers.get(
+        "X-ScentMason-Webhook-Secret"
+      );
+
+    if (
+      !webhookSecret
+    ) {
+      console.error(
+        "❌ PREMIUM PURCHASE WEBHOOK SECRET IS NOT CONFIGURED."
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Purchase webhook is not configured.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
+    if (
+      !suppliedSecret
+    ) {
+      console.error(
+        "❌ PREMIUM PURCHASE REQUEST REJECTED: MISSING WEBHOOK SECRET."
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Unauthorized purchase request.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    const suppliedBuffer =
+      Buffer.from(
+        suppliedSecret,
+        "utf8"
+      );
+
+    const expectedBuffer =
+      Buffer.from(
+        webhookSecret,
+        "utf8"
+      );
+
+    if (
+      suppliedBuffer.length !==
+      expectedBuffer.length
+    ) {
+      console.error(
+        "❌ PREMIUM PURCHASE REQUEST REJECTED: INVALID WEBHOOK SECRET."
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Unauthorized purchase request.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
+    if (
+      !crypto.timingSafeEqual(
+        suppliedBuffer,
+        expectedBuffer
+      )
+    ) {
+      console.error(
+        "❌ PREMIUM PURCHASE REQUEST REJECTED: INVALID WEBHOOK SECRET."
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Unauthorized purchase request.",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
 
     console.log(
-      "📊 Premium Google Sheets webhook configured:",
-      Boolean(googleSheetsUrl)
+      "🔐 Purchase webhook authentication: SUCCESS"
     );
 
     // ============================================================
-    // 2. META PIXEL ACCOUNTS
+    // 3. META ACCOUNTS
     // ============================================================
 
-    const activeAccounts = [
-      {
-        id:
-          process.env.NEXT_PUBLIC_META_PIXEL_ID_1 ||
-          datasetId,
+    const activeAccounts: MetaAccount[] =
+      [
+        {
+          id:
+            process.env
+              .NEXT_PUBLIC_META_PIXEL_ID_1 ||
+            datasetId ||
+            "",
 
-        token:
-          process.env.META_ACCESS_TOKEN_1 ||
-          accessToken,
-      },
+          token:
+            process.env
+              .META_ACCESS_TOKEN_1 ||
+            accessToken ||
+            "",
+        },
 
-      {
-        id:
-          process.env.NEXT_PUBLIC_META_PIXEL_ID_2,
+        {
+          id:
+            process.env
+              .NEXT_PUBLIC_META_PIXEL_ID_2 ||
+            "",
 
-        token:
-          process.env.META_ACCESS_TOKEN_2,
-      },
+          token:
+            process.env
+              .META_ACCESS_TOKEN_2 ||
+            "",
+        },
 
-      {
-        id:
-          process.env.NEXT_PUBLIC_META_PIXEL_ID_3,
+        {
+          id:
+            process.env
+              .NEXT_PUBLIC_META_PIXEL_ID_3 ||
+            "",
 
-        token:
-          process.env.META_ACCESS_TOKEN_3,
-      },
-    ].filter(
-      (
-        account
-      ): account is {
-        id: string;
-        token: string;
-      } =>
-        Boolean(account.id) &&
-        Boolean(account.token)
-    );
+          token:
+            process.env
+              .META_ACCESS_TOKEN_3 ||
+            "",
+        },
+      ].filter(
+        (
+          account
+        ): account is MetaAccount =>
+          Boolean(
+            account.id &&
+              account.token
+          )
+      );
 
     console.log(
       "🎯 Active Meta accounts:",
       activeAccounts.length
     );
 
+    if (
+      activeAccounts.length === 0
+    ) {
+      console.error(
+        "❌ No active Meta Pixel/Dataset accounts configured."
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "No Meta CAPI account is configured.",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
+
     // ============================================================
-    // 3. READ REQUEST BODY
+    // 4. READ REQUEST BODY
     // ============================================================
 
     const body =
@@ -248,18 +457,31 @@ export async function POST(req: NextRequest) {
     console.log(
       "📦 Premium purchase received:",
       {
-        eventId: body.eventId,
-        name: body.name,
-        state: body.state,
-        city: body.city,
-        sets: body.sets,
-        total: body.total,
+        eventId:
+          body.eventId,
+
+        name:
+          body.name,
+
+        state:
+          body.state,
+
+        city:
+          body.city,
+
+        sets:
+          body.sets,
+
+        total:
+          body.total,
       }
     );
 
-    if (!body.eventId) {
+    if (
+      !body.eventId
+    ) {
       console.error(
-        "❌ Premium purchase rejected: missing eventId"
+        "❌ Missing eventId."
       );
 
       return NextResponse.json(
@@ -268,28 +490,49 @@ export async function POST(req: NextRequest) {
           message:
             "Missing eventId for deduplication.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
 
     // ============================================================
-    // 4. BASIC CUSTOMER / ORDER DATA
+    // 5. BASIC EVENT DATA
     // ============================================================
 
-    const eventName = "Purchase";
+    const eventName =
+      "Purchase";
 
     const eventId =
       body.eventId;
 
     const userAgent =
-      req.headers.get("user-agent") ||
+      req.headers.get(
+        "user-agent"
+      ) ||
       undefined;
 
     const clientIp =
       getClientIp(req);
 
     // ============================================================
-    // 5. PHONE NORMALIZATION
+    // 6. BROWSER IDENTIFIERS
+    // ============================================================
+
+    const browserIdentifiers =
+      body.browserIdentifiers ||
+      {};
+
+    const fbp =
+      body.fbp ||
+      browserIdentifiers.fbp;
+
+    const fbc =
+      body.fbc ||
+      browserIdentifiers.fbc;
+
+    // ============================================================
+    // 7. PHONE NORMALIZATION
     // ============================================================
 
     const normalizedPhone =
@@ -299,11 +542,13 @@ export async function POST(req: NextRequest) {
 
     const hashedPhone =
       normalizedPhone
-        ? sha256(normalizedPhone)
+        ? sha256(
+            normalizedPhone
+          )
         : undefined;
 
     // ============================================================
-    // 6. NAME
+    // 8. NAME
     // ============================================================
 
     const nameParts =
@@ -330,7 +575,7 @@ export async function POST(req: NextRequest) {
         : undefined;
 
     // ============================================================
-    // 7. STATE
+    // 9. STATE
     // ============================================================
 
     const hashedState =
@@ -339,22 +584,15 @@ export async function POST(req: NextRequest) {
         : undefined;
 
     // ============================================================
-    // 8. COUNTRY
+    // 10. COUNTRY
     // ============================================================
 
     const hashedCountry =
       sha256("ng");
 
     // ============================================================
-    // 9. CITY
+    // 11. CITY
     // ============================================================
-
-    /**
-     * Premium form explicitly sends city.
-     *
-     * If city is somehow missing, fall back to extracting
-     * it from the address.
-     */
 
     const rawCity =
       body.city ||
@@ -371,7 +609,8 @@ export async function POST(req: NextRequest) {
                 part.trim()
             );
 
-        return addressParts.length > 1
+        return addressParts.length >
+          1
           ? addressParts[
               addressParts.length - 2
             ]
@@ -384,7 +623,7 @@ export async function POST(req: NextRequest) {
         : undefined;
 
     // ============================================================
-    // 10. META USER DATA
+    // 12. META USER DATA
     // ============================================================
 
     const userData =
@@ -395,11 +634,9 @@ export async function POST(req: NextRequest) {
         client_user_agent:
           userAgent,
 
-        fbp:
-          body.fbp,
+        fbp,
 
-        fbc:
-          body.fbc,
+        fbc,
 
         ph:
           hashedPhone
@@ -431,13 +668,13 @@ export async function POST(req: NextRequest) {
       });
 
     // ============================================================
-    // 11. META VALUE
+    // 13. PURCHASE VALUE
     // ============================================================
 
     const rawValue =
       String(
-        body.total ||
-          body.customData?.value ||
+        body.total ??
+          body.customData?.value ??
           "0"
       );
 
@@ -454,8 +691,58 @@ export async function POST(req: NextRequest) {
           )
         : 0;
 
+    if (
+      !Number.isFinite(
+        numericValue
+      ) ||
+      numericValue < 0
+    ) {
+      console.error(
+        "❌ Invalid Purchase value:",
+        rawValue
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Invalid Purchase value.",
+          eventId,
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
     // ============================================================
-    // 12. META EVENT PAYLOAD
+    // 14. META CUSTOM DATA
+    // ============================================================
+
+    const customData =
+      removeEmptyValues({
+        content_name:
+          "ScentMason Diffuser",
+
+        content_type:
+          "product",
+
+        num_items:
+          Number(
+            body.sets
+          ) || 1,
+
+        ...body.customData,
+
+        currency:
+          "NGN",
+
+        value:
+          numericValue,
+      });
+
+    // ============================================================
+    // 15. META EVENT PAYLOAD
     // ============================================================
 
     const eventPayload = {
@@ -479,35 +766,23 @@ export async function POST(req: NextRequest) {
             body.eventSourceUrl ||
             process.env
               .NEXT_PUBLIC_SITE_URL ||
-            "https://scentmason.vercel.app",
+            "https://www.massonstore.com",
 
           user_data:
             userData,
 
           custom_data:
-            removeEmptyValues({
-              content_name:
-                "ScentMason Diffuser",
-
-              content_type:
-                "product",
-
-              num_items:
-                Number(
-                  body.sets
-                ) || 1,
-
-              ...body.customData,
-
-              currency:
-                "NGN",
-
-              value:
-                numericValue,
-            }),
+            customData,
         },
       ],
 
+      /*
+       * During our controlled Meta verification,
+       * this is included when configured.
+       *
+       * Remove META_TEST_EVENT_CODE from production
+       * environment variables after testing.
+       */
       ...(testEventCode
         ? {
             test_event_code:
@@ -516,91 +791,52 @@ export async function POST(req: NextRequest) {
         : {}),
     };
 
-    // ============================================================
-    // 13. GOOGLE SHEETS PAYLOAD
-    // ============================================================
+    console.log(
+      "📦 Meta Purchase prepared:",
+      {
+        eventName,
 
-    const sheetsPayload = {
-      eventId:
-        body.eventId || "",
+        eventId,
 
-      name:
-        body.name || "",
+        value:
+          numericValue,
 
-      phone:
-        body.phone || "",
+        currency:
+          "NGN",
 
-      whatsapp:
-        body.whatsapp || "",
+        testEvent:
+          Boolean(
+            testEventCode
+          ),
 
-      state:
-        body.state || "",
-
-      city:
-        body.city ||
-        rawCity ||
-        "",
-
-      address:
-        body.address || "",
-
-      sets:
-        body.sets || "",
-
-      setPrice:
-        body.setPrice || "",
-
-      oilBottlesOrdered:
-        body.oilBottlesOrdered || 0,
-
-      oilBottlesFree:
-        body.oilBottlesFree || 0,
-
-      oilBottlesTotal:
-        body.oilBottlesTotal || 0,
-
-      oilPrice:
-        body.oilPrice || 0,
-
-      total:
-        body.total || "",
-        
-        willAccept:
-          body.willAccept ? "Yes" : "No",
-    };
+        activePixelCount:
+          activeAccounts.length,
+      }
+    );
 
     // ============================================================
-    // 14. GOOGLE SHEETS
+    // 16. SEND PURCHASE TO ALL CONFIGURED META ACCOUNTS
     // ============================================================
 
-    let sheetsSuccess =
-      false;
+    const metaResults: MetaResult[] =
+      [];
 
-    let sheetsStatus:
-      number | null =
-      null;
+    for (
+      const account of
+        activeAccounts
+    ) {
+      const metaUrl =
+        `https://graph.facebook.com/${graphVersion}/${account.id}/events?access_token=${account.token}`;
 
-    let sheetsResult:
-      unknown = null;
-
-    if (!googleSheetsUrl) {
-      console.error(
-        "❌ PREMIUM GOOGLE SHEETS URL IS MISSING."
-      );
-
-      console.error(
-        "Expected environment variable:",
-        "GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL"
-      );
-    } else {
       try {
         console.log(
-          "📤 Sending premium order to NEW Google Sheet..."
+          "📤 Sending Purchase to Meta:",
+          account.id
         );
 
-        const sheetsResponse =
+        const response =
           await fetch(
-            googleSheetsUrl,
+            metaUrl,
             {
               method:
                 "POST",
@@ -612,254 +848,171 @@ export async function POST(req: NextRequest) {
 
               body:
                 JSON.stringify(
-                  sheetsPayload
+                  eventPayload
                 ),
 
-              /**
-               * Google Apps Script can sometimes take
-               * several seconds to respond.
-               */
               signal:
                 AbortSignal.timeout(
-                  15000
+                  10000
                 ),
             }
           );
 
-        sheetsStatus =
-          sheetsResponse.status;
-
-        const responseText =
-          await sheetsResponse.text();
-
-        try {
-          sheetsResult =
-            JSON.parse(
-              responseText
+        const result =
+          await response
+            .json()
+            .catch(
+              () => null
             );
-        } catch {
-          sheetsResult =
-            responseText;
-        }
 
-        sheetsSuccess =
-          sheetsResponse.ok;
+        const metaResult:
+          MetaResult = {
+            pixelId:
+              account.id,
 
-        if (sheetsSuccess) {
+            ok:
+              response.ok,
+
+            status:
+              response.status,
+
+            result,
+          };
+
+        metaResults.push(
+          metaResult
+        );
+
+        if (
+          response.ok
+        ) {
           console.log(
-            "✅ PREMIUM GOOGLE SHEETS: SUCCESS",
+            "✅ META CAPI SUCCESS:",
             {
-              status:
-                sheetsStatus,
+              pixelId:
+                account.id,
 
-              eventId:
-                body.eventId,
-            }
-          );
+              status:
+                response.status,
+
+              result,
+          });
         } else {
           console.error(
-            "❌ PREMIUM GOOGLE SHEETS: FAILED",
+            "❌ META CAPI REJECTED:",
             {
-              status:
-                sheetsStatus,
+              pixelId:
+                account.id,
 
-              response:
-                sheetsResult,
+              status:
+                response.status,
+
+              result,
             }
           );
         }
-      } catch (sheetError) {
+      } catch (
+        metaError
+      ) {
+        const errorMessage =
+          metaError instanceof Error
+            ? metaError.message
+            : "Unknown Meta error";
+
         console.error(
-          "❌ PREMIUM GOOGLE SHEETS CONNECTION FAILED:",
-          sheetError
+          "⚠️ META CAPI CONNECTION FAILED:",
+          {
+            pixelId:
+              account.id,
+
+            error:
+              errorMessage,
+          }
         );
+
+        metaResults.push({
+          pixelId:
+            account.id,
+
+          ok:
+            false,
+
+          error:
+            errorMessage,
+        });
       }
     }
 
     // ============================================================
-    // 15. META CAPI
+    // 17. META RESULT SUMMARY
     // ============================================================
 
-    let metaSuccess =
-      false;
-
-    const metaResults: Array<{
-      pixelId: string;
-      ok: boolean;
-      status?: number;
-      result?: unknown;
-      error?: string;
-    }> = [];
-
-    if (activeAccounts.length === 0) {
-      console.error(
-        "⚠️ No active Meta accounts configured."
-      );
-    } else {
-      console.log(
-        "📤 Sending Purchase event to Meta CAPI..."
+    const successfulMetaAccounts =
+      metaResults.filter(
+        (
+          result
+        ) =>
+          result.ok
       );
 
-      const capiPromises =
-        activeAccounts.map(
-          async (
-            account
-          ) => {
-            const metaUrl =
-              `https://graph.facebook.com/${graphVersion}/${account.id}/events?access_token=${account.token}`;
+    const failedMetaAccounts =
+      metaResults.filter(
+        (
+          result
+        ) =>
+          !result.ok
+      );
 
-            try {
-              const response =
-                await fetch(
-                  metaUrl,
-                  {
-                    method:
-                      "POST",
+    const allMetaAccountsSucceeded =
+      metaResults.length > 0 &&
+      failedMetaAccounts.length ===
+        0;
 
-                    headers: {
-                      "Content-Type":
-                        "application/json",
-                    },
+    const someMetaAccountsSucceeded =
+      successfulMetaAccounts.length >
+      0;
 
-                    body:
-                      JSON.stringify(
-                        eventPayload
-                      ),
+    console.log(
+      "📊 META PURCHASE RESULT:",
+      {
+        totalAccounts:
+          metaResults.length,
 
-                    /**
-                     * Do not allow a Meta network
-                     * problem to hang the order form.
-                     */
-                    signal:
-                      AbortSignal.timeout(
-                        10000
-                      ),
-                  }
-                );
+        successful:
+          successfulMetaAccounts.length,
 
-              const result =
-                await response
-                  .json()
-                  .catch(
-                    () => null
-                  );
+        failed:
+          failedMetaAccounts.length,
 
-              const resultRecord =
-                {
-                  pixelId:
-                    account.id,
+        allSucceeded:
+          allMetaAccountsSucceeded,
 
-                  ok:
-                    response.ok,
-
-                  status:
-                    response.status,
-
-                  result,
-                };
-
-              metaResults.push(
-                resultRecord
-              );
-
-              if (response.ok) {
-                console.log(
-                  "✅ META CAPI SUCCESS:",
-                  account.id
-                );
-              } else {
-                console.error(
-                  "❌ META CAPI REJECTED:",
-                  {
-                    pixelId:
-                      account.id,
-
-                    status:
-                      response.status,
-
-                    result,
-                  }
-                );
-              }
-
-              return response.ok;
-            } catch (metaError) {
-              const errorMessage =
-                metaError instanceof Error
-                  ? metaError.message
-                  : "Unknown Meta error";
-
-              console.error(
-                "⚠️ META CAPI CONNECTION FAILED:",
-                {
-                  pixelId:
-                    account.id,
-
-                  error:
-                    errorMessage,
-                }
-              );
-
-              metaResults.push({
-                pixelId:
-                  account.id,
-
-                ok: false,
-
-                error:
-                  errorMessage,
-              });
-
-              return false;
-            }
-          }
-        );
-
-      const capiResults =
-        await Promise.all(
-          capiPromises
-        );
-
-      metaSuccess =
-        capiResults.some(
-          Boolean
-        );
-    }
+        eventId,
+      }
+    );
 
     // ============================================================
-    // 16. FINAL ORDER INGESTION DECISION
+    // 18. FINAL RESPONSE
     // ============================================================
 
-    /**
-     * IMPORTANT:
+    /*
+     * Important:
      *
-     * Meta failure is NOT considered an order-form failure.
+     * This endpoint is called after the order has already
+     * been marked Paid in the operational spreadsheet.
      *
-     * Google Sheets is the operational order record.
+     * Therefore we return success only when every configured
+     * Meta account accepted the Purchase.
      *
-     * Therefore:
-     *
-     * Google Sheet success = successful order ingestion.
-     *
-     * Meta can fail temporarily without causing the
-     * customer to see "Primary ingestion engine failed".
+     * If one Pixel fails, Apps Script will mark Purchase
+     * Status as Failed, allowing us to retry deliberately.
      */
 
-    if (sheetsSuccess) {
+    if (
+      allMetaAccountsSucceeded
+    ) {
       console.log(
-        "🟢 PREMIUM ORDER INGESTION SUCCESSFUL"
-      );
-
-      console.log(
-        "Google Sheets:",
-        "SUCCESS"
-      );
-
-      console.log(
-        "Meta CAPI:",
-        metaSuccess
-          ? "SUCCESS"
-          : "FAILED / UNAVAILABLE"
+        "🟢 PREMIUM PURCHASE SUCCESSFUL ON ALL META ACCOUNTS"
       );
 
       console.log(
@@ -874,62 +1027,87 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
 
-        orderCaptured:
-          true,
+        purchase:
+          "sent",
 
-        googleSheets:
-          "success",
-
-        metaCapi:
-          metaSuccess
-            ? "success"
-            : "unavailable",
+        eventName,
 
         eventId,
+
+        value:
+          numericValue,
+
+        currency:
+          "NGN",
+
+        metaAccounts:
+          metaResults.map(
+            (
+              result
+            ) => ({
+              pixelId:
+                result.pixelId,
+
+              success:
+                result.ok,
+
+              status:
+                result.status,
+            })
+          ),
       });
     }
 
-    // ============================================================
-    // 17. GOOGLE SHEETS FAILURE
-    // ============================================================
-
     console.error(
-      "🔴 PREMIUM ORDER INGESTION FAILED."
-    );
+      "🔴 PREMIUM PURCHASE DID NOT SUCCEED ON ALL META ACCOUNTS.",
+      {
+        eventId,
 
-    console.error(
-      "The new Google Sheet did not confirm receipt."
-    );
+        successful:
+          successfulMetaAccounts.length,
 
-    console.log(
-      "=================================================="
+        failed:
+          failedMetaAccounts.length,
+      }
     );
 
     return NextResponse.json(
       {
         success: false,
 
-        orderCaptured:
-          false,
-
-        message:
-          "Premium order could not be written to the Google Sheet.",
-
-        googleSheets:
-          "failed",
-
-        googleSheetsStatus:
-          sheetsStatus,
-
-        googleSheetsResult:
-          sheetsResult,
-
-        metaCapi:
-          metaSuccess
-            ? "success"
+        purchase:
+          someMetaAccountsSucceeded
+            ? "partial"
             : "failed",
 
+        eventName,
+
         eventId,
+
+        value:
+          numericValue,
+
+        currency:
+          "NGN",
+
+        metaAccounts:
+          metaResults.map(
+            (
+              result
+            ) => ({
+              pixelId:
+                result.pixelId,
+
+              success:
+                result.ok,
+
+              status:
+                result.status,
+
+              error:
+                result.error,
+            })
+          ),
       },
       {
         status: 502,
@@ -945,13 +1123,13 @@ export async function POST(req: NextRequest) {
       {
         success: false,
 
-        orderCaptured:
-          false,
+        purchase:
+          "failed",
 
         error:
           error instanceof Error
             ? error.message
-            : "Unknown server error",
+            : "Unknown error",
       },
       {
         status: 500,
