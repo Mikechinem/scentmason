@@ -1,5 +1,4 @@
-﻿// src/components/tracking/MetaPixel.tsx
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import Script from "next/script";
@@ -18,9 +17,7 @@ declare global {
 const pixelIds = [
   process.env.NEXT_PUBLIC_META_PIXEL_ID_1 ||
     process.env.NEXT_PUBLIC_META_PIXEL_ID,
-
   process.env.NEXT_PUBLIC_META_PIXEL_ID_2,
-
   process.env.NEXT_PUBLIC_META_PIXEL_ID_3,
 ].filter(Boolean) as string[];
 
@@ -32,121 +29,124 @@ const testEventCode =
   process.env.NEXT_PUBLIC_META_TEST_EVENT_CODE;
 
 // ============================================================
-// REUSABLE META LEAD TRACKER
-// ============================================================
-//
-// This is intentionally exported so forms/components can use
-// the same Meta Pixel implementation.
-//
-// IMPORTANT:
-// - Lead is a browser event.
-// - It is NOT the Purchase event.
-// - Purchase remains server-side and is triggered only after
-//   Payment Status changes from Pending → Paid.
+// SHARED BROWSER EVENT TRACKER
 // ============================================================
 
-export function trackMetaLead(
+function trackMetaStandardEvent(
+  eventName: "Lead" | "CompleteRegistration",
   eventId: string,
   parameters?: Record<string, unknown>
 ) {
-  if (
-    typeof window === "undefined"
-  ) {
+  if (typeof window === "undefined") {
     console.warn(
-      "[Meta Pixel] Lead tracking skipped: window unavailable."
+      `[Meta Pixel] ${eventName} tracking skipped: window unavailable.`
     );
-
     return false;
   }
 
-  if (
-    !window.fbq
-  ) {
+  if (!window.fbq) {
     console.error(
-      "[Meta Pixel] Lead tracking failed: fbq is unavailable."
+      `[Meta Pixel] ${eventName} tracking failed: fbq is unavailable.`
     );
-
     return false;
   }
 
-  if (
-    !eventId
-  ) {
+  if (!eventId) {
     console.error(
-      "[Meta Pixel] Lead tracking failed: missing eventId."
+      `[Meta Pixel] ${eventName} tracking failed: missing eventId.`
     );
-
     return false;
   }
 
-  /*
-   * Use trackSingle so every configured Pixel receives
-   * the Lead explicitly.
-   *
-   * This keeps the multi-Pixel architecture intact.
-   */
+  pixelIds.forEach((pixelId) => {
+    const options = testEventCode
+      ? {
+          eventID: eventId,
+          testEventCode,
+        }
+      : {
+          eventID: eventId,
+        };
 
-  pixelIds.forEach(
-    (pixelId) => {
-      const options =
-        testEventCode
-          ? {
-              eventID: eventId,
-              testEventCode,
-            }
-          : {
-              eventID: eventId,
-            };
-
-      window.fbq!(
-        "trackSingle",
-        pixelId,
-        "Lead",
-        parameters || {},
-        options
-      );
-    }
-  );
+    window.fbq!(
+      "trackSingle",
+      pixelId,
+      eventName,
+      parameters || {},
+      options
+    );
+  });
 
   console.log(
-    "[Meta Pixel] Lead fired.",
+    `[Meta Pixel] ${eventName} fired.`,
     {
       eventId,
-      pixelCount:
-        pixelIds.length,
-      testMode:
-        Boolean(testEventCode),
+      pixelCount: pixelIds.length,
+      testMode: Boolean(testEventCode),
     }
   );
 
   return true;
 }
 
+// ============================================================
+// META LEAD TRACKER
+// ============================================================
+
+export function trackMetaLead(
+  eventId: string,
+  parameters?: Record<string, unknown>
+) {
+  return trackMetaStandardEvent(
+    "Lead",
+    eventId,
+    parameters
+  );
+}
+
+// ============================================================
+// META COMPLETE REGISTRATION TRACKER
+// ============================================================
+//
+// This is intentionally separate from Lead.
+//
+// IMPORTANT:
+// - It uses its OWN event ID.
+// - It does NOT replace Lead.
+// - It does NOT replace Purchase.
+// - It supports the Sales campaign using
+//   CompleteRegistration as an earlier optimization signal.
+//
+
+export function trackMetaCompleteRegistration(
+  eventId: string,
+  parameters?: Record<string, unknown>
+) {
+  return trackMetaStandardEvent(
+    "CompleteRegistration",
+    eventId,
+    parameters
+  );
+}
 
 // ============================================================
 // META PIXEL COMPONENT
 // ============================================================
 
 export default function MetaPixel() {
-
   useEffect(() => {
-
     console.log(
       "⚙️ [Meta Pixel] Component mounted. Active tracking IDs:",
       pixelIds
     );
 
-    if (
-      testEventCode
-    ) {
+    if (testEventCode) {
       console.log(
         `[Meta Pixel] Active Testing Session! Route Code matched: ${testEventCode}`
       );
     }
 
-    if (
-      pixelIds.length === 0
-    ) {
+    if (pixelIds.length === 0) {
       console.warn(
         "⚠️ [Meta Pixel] Tracking aborted: No pixel IDs discovered in environment variables."
       );
@@ -154,155 +154,97 @@ export default function MetaPixel() {
       return;
     }
 
-    const midEngagementTime =
-      15000;
-
-    const highEngagementTime =
-      30000;
+    const midEngagementTime = 15000;
+    const highEngagementTime = 30000;
 
     // ========================================================
     // MID ENGAGEMENT — 15 SECONDS
     // ========================================================
 
-    const midTimer =
-      setTimeout(
-        () => {
+    const midTimer = setTimeout(() => {
+      if (window.fbq) {
+        pixelIds.forEach((id) => {
+          const options = testEventCode
+            ? { testEventCode }
+            : undefined;
 
-          if (
-            window.fbq
-          ) {
+          window.fbq!(
+            "trackSingleCustom",
+            id,
+            "MidEngagementReader",
+            {
+              timeSpent: "15s",
+              page: window.location.pathname,
+            },
+            options
+          );
+        });
 
-            pixelIds.forEach(
-              (id) => {
-
-                const options =
-                  testEventCode
-                    ? {
-                        testEventCode,
-                      }
-                    : undefined;
-
-                window.fbq!(
-                  "trackSingleCustom",
-                  id,
-                  "MidEngagementReader",
-                  {
-                    timeSpent:
-                      "15s",
-
-                    page:
-                      window.location.pathname,
-                  },
-                  options
-                );
-              }
-            );
-
-            console.log(
-              `[Meta Pixel] Fired 'MidEngagementReader'. Production-Safe Mode: ${!testEventCode}`
-            );
-
-          } else {
-
-            console.error(
-              "❌ [Meta Pixel] 15s reached, but window.fbq is missing."
-            );
-          }
-
-        },
-        midEngagementTime
-      );
-
+        console.log(
+          `[Meta Pixel] Fired 'MidEngagementReader'. Production-Safe Mode: ${!testEventCode}`
+        );
+      } else {
+        console.error(
+          "❌ [Meta Pixel] 15s reached, but window.fbq is missing."
+        );
+      }
+    }, midEngagementTime);
 
     // ========================================================
     // HIGH ENGAGEMENT — 30 SECONDS
     // ========================================================
 
-    const highTimer =
-      setTimeout(
-        () => {
+    const highTimer = setTimeout(() => {
+      if (window.fbq) {
+        pixelIds.forEach((id) => {
+          const options = testEventCode
+            ? { testEventCode }
+            : undefined;
 
-          if (
-            window.fbq
-          ) {
+          window.fbq!(
+            "trackSingleCustom",
+            id,
+            "HighEngagementReader",
+            {
+              timeSpent: "30s",
+              page: window.location.pathname,
+            },
+            options
+          );
+        });
 
-            pixelIds.forEach(
-              (id) => {
-
-                const options =
-                  testEventCode
-                    ? {
-                        testEventCode,
-                      }
-                    : undefined;
-
-                window.fbq!(
-                  "trackSingleCustom",
-                  id,
-                  "HighEngagementReader",
-                  {
-                    timeSpent:
-                      "30s",
-
-                    page:
-                      window.location.pathname,
-                  },
-                  options
-                );
-              }
-            );
-
-            console.log(
-              `[Meta Pixel] Fired 'HighEngagementReader'. Production-Safe Mode: ${!testEventCode}`
-            );
-
-          } else {
-
-            console.error(
-              "❌ [Meta Pixel] 30s reached, but window.fbq is missing."
-            );
-          }
-
-        },
-        highEngagementTime
-      );
-
+        console.log(
+          `[Meta Pixel] Fired 'HighEngagementReader'. Production-Safe Mode: ${!testEventCode}`
+        );
+      } else {
+        console.error(
+          "❌ [Meta Pixel] 30s reached, but window.fbq is missing."
+        );
+      }
+    }, highEngagementTime);
 
     return () => {
-
-      clearTimeout(
-        midTimer
-      );
-
-      clearTimeout(
-        highTimer
-      );
+      clearTimeout(midTimer);
+      clearTimeout(highTimer);
     };
-
   }, []);
 
-
-  if (
-    pixelIds.length === 0
-  ) {
+  if (pixelIds.length === 0) {
     return null;
   }
-
 
   // ==========================================================
   // PIXEL INITIALIZATION
   // ==========================================================
 
-  const initScripts =
-    pixelIds
-      .map(
-        (id) => `
-          fbq('set', 'autoConfig', false, '${id}');
-          fbq('init', '${id}');
-        `
-      )
-      .join("\n");
-
+  const initScripts = pixelIds
+    .map(
+      (id) => `
+        fbq('set', 'autoConfig', false, '${id}');
+        fbq('init', '${id}');
+      `
+    )
+    .join("\n");
 
   return (
     <>
@@ -391,24 +333,19 @@ export default function MetaPixel() {
         }}
       />
 
-      {pixelIds.map(
-        (id) => (
-          <noscript
-            key={id}
-          >
-            <img
-              height="1"
-              width="1"
-              style={{
-                display:
-                  "none",
-              }}
-              src={`https://www.facebook.com/tr?id=${id}&ev=PageView&noscript=1`}
-              alt=""
-            />
-          </noscript>
-        )
-      )}
+      {pixelIds.map((id) => (
+        <noscript key={id}>
+          <img
+            height="1"
+            width="1"
+            style={{
+              display: "none",
+            }}
+            src={`https://www.facebook.com/tr?id=${id}&ev=PageView&noscript=1`}
+            alt=""
+          />
+        </noscript>
+      ))}
     </>
   );
 }

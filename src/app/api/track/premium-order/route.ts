@@ -14,130 +14,56 @@ import type {
 
 export const runtime = "nodejs";
 
-/**
- * ============================================================
- * SCENTMASON PREMIUM ORDER INGESTION + SERVER LEAD
- * ============================================================
- *
- * FLOW
- *
- * PremiumOrderForm
- *        ↓
- * leadEventId generated in browser
- *        ↓
- * /api/track/premium-order
- *        ├──────────────→ Google Apps Script
- *        │                  ↓
- *        │               Premium Orders
- *        │                  ↓
- *        │               Pending
- *        │
- *        └──────────────→ Meta CAPI
- *                           ↓
- *                         Lead
- *
- * Browser Meta Pixel also fires Lead after this route
- * successfully accepts the order.
- *
- * IMPORTANT:
- *
- * Browser Lead and Server Lead use the SAME leadEventId.
- *
- * This allows Meta to deduplicate the two copies.
- *
- * Purchase is NOT fired here.
- *
- * Purchase remains reserved for:
- *
- * /api/track/premium-purchase
- *
- * after:
- *
- * Payment Status
- * Pending → Paid
- *
- * ============================================================
- */
-
-
-/**
- * ============================================================
- * CLIENT IP
- * ============================================================
- */
+// ============================================================
+// CLIENT IP
+// ============================================================
 
 function getClientIp(
   req: NextRequest
 ): string | undefined {
-
   const forwardedFor =
-    req.headers.get(
-      "x-forwarded-for"
-    );
+    req.headers.get("x-forwarded-for");
 
   if (forwardedFor) {
+    const firstIp = forwardedFor
+      .split(",")
+      .map((ip) => ip.trim())
+      .find(Boolean);
 
-    const firstIp =
-      forwardedFor
-        .split(",")
-        .map(
-          (ip) => ip.trim()
-        )
-        .find(Boolean);
-
-    if (firstIp) {
-      return firstIp;
-    }
+    if (firstIp) return firstIp;
   }
 
   return (
-    req.headers.get(
-      "cf-connecting-ip"
-    ) ||
-    req.headers.get(
-      "x-real-ip"
-    ) ||
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-real-ip") ||
     undefined
   );
 }
 
-
-/**
- * ============================================================
- * NUMBER NORMALIZATION
- * ============================================================
- */
+// ============================================================
+// NORMALIZATION
+// ============================================================
 
 function parseNumber(
   value: unknown,
   fallback = 0
 ): number {
-
   if (
     typeof value === "number" &&
     Number.isFinite(value)
   ) {
-
     return value;
   }
 
-  if (
-    typeof value === "string"
-  ) {
+  if (typeof value === "string") {
+    const cleaned = value.replace(
+      /[^0-9.-]/g,
+      ""
+    );
 
-    const cleaned =
-      value.replace(
-        /[^0-9.-]/g,
-        ""
-      );
+    const parsed = Number(cleaned);
 
-    const parsed =
-      Number(cleaned);
-
-    if (
-      Number.isFinite(parsed)
-    ) {
-
+    if (Number.isFinite(parsed)) {
       return parsed;
     }
   }
@@ -145,32 +71,17 @@ function parseNumber(
   return fallback;
 }
 
-
-/**
- * ============================================================
- * BOOLEAN NORMALIZATION
- * ============================================================
- */
-
 function parseBoolean(
   value: unknown
 ): boolean {
-
-  if (
-    typeof value === "boolean"
-  ) {
-
+  if (typeof value === "boolean") {
     return value;
   }
 
-  if (
-    typeof value === "string"
-  ) {
-
-    const normalized =
-      value
-        .trim()
-        .toLowerCase();
+  if (typeof value === "string") {
+    const normalized = value
+      .trim()
+      .toLowerCase();
 
     return (
       normalized === "true" ||
@@ -181,12 +92,9 @@ function parseBoolean(
   return false;
 }
 
-
-/**
- * ============================================================
- * ATTRIBUTION CLEANING
- * ============================================================
- */
+// ============================================================
+// ATTRIBUTION
+// ============================================================
 
 function cleanTouch(
   touch:
@@ -195,279 +103,148 @@ function cleanTouch(
       >
     | undefined
 ) {
-
-  if (!touch) {
-    return undefined;
-  }
+  if (!touch) return undefined;
 
   return removeEmptyValues({
-
-    utm_source:
-      cleanString(
-        touch.utm_source
-      ),
-
-    utm_medium:
-      cleanString(
-        touch.utm_medium
-      ),
-
-    utm_campaign:
-      cleanString(
-        touch.utm_campaign
-      ),
-
-    utm_term:
-      cleanString(
-        touch.utm_term
-      ),
-
-    utm_content:
-      cleanString(
-        touch.utm_content
-      ),
-
-    fbclid:
-      cleanString(
-        touch.fbclid
-      ),
-
-    ttclid:
-      cleanString(
-        touch.ttclid
-      ),
-
-    gclid:
-      cleanString(
-        touch.gclid
-      ),
-
-    msclkid:
-      cleanString(
-        touch.msclkid
-      ),
-
-    landingPage:
-      cleanString(
-        touch.landingPage
-      ),
-
-    landingPagePath:
-      cleanString(
-        touch.landingPagePath
-      ),
-
-    referrer:
-      cleanString(
-        touch.referrer
-      ),
-
-    capturedAt:
-      cleanString(
-        touch.capturedAt
-      ),
-
+    utm_source: cleanString(touch.utm_source),
+    utm_medium: cleanString(touch.utm_medium),
+    utm_campaign: cleanString(touch.utm_campaign),
+    utm_term: cleanString(touch.utm_term),
+    utm_content: cleanString(touch.utm_content),
+    fbclid: cleanString(touch.fbclid),
+    ttclid: cleanString(touch.ttclid),
+    gclid: cleanString(touch.gclid),
+    msclkid: cleanString(touch.msclkid),
+    landingPage: cleanString(touch.landingPage),
+    landingPagePath: cleanString(
+      touch.landingPagePath
+    ),
+    referrer: cleanString(touch.referrer),
+    capturedAt: cleanString(touch.capturedAt),
   });
 }
-
 
 function cleanAttribution(
   attribution:
     | AttributionData
     | undefined
 ): AttributionData {
-
-  if (!attribution) {
-    return {};
-  }
+  if (!attribution) return {};
 
   return removeEmptyValues({
-
-    firstTouch:
-      cleanTouch(
-        attribution.firstTouch
-      ),
-
-    lastTouch:
-      cleanTouch(
-        attribution.lastTouch
-      ),
-
+    firstTouch: cleanTouch(
+      attribution.firstTouch
+    ),
+    lastTouch: cleanTouch(
+      attribution.lastTouch
+    ),
   }) as AttributionData;
 }
 
-
-/**
- * ============================================================
- * BROWSER IDENTIFIER CLEANING
- * ============================================================
- */
+// ============================================================
+// BROWSER IDENTIFIERS
+// ============================================================
 
 function cleanBrowserIdentifiers(
   identifiers:
     | BrowserIdentifiers
     | undefined
 ): BrowserIdentifiers {
-
-  if (!identifiers) {
-    return {};
-  }
+  if (!identifiers) return {};
 
   return removeEmptyValues({
-
-    fbp:
-      cleanString(
-        identifiers.fbp
-      ),
-
-    fbc:
-      cleanString(
-        identifiers.fbc
-      ),
-
-    ttp:
-      cleanString(
-        identifiers.ttp
-      ),
-
-    ttclid:
-      cleanString(
-        identifiers.ttclid
-      ),
-
+    fbp: cleanString(identifiers.fbp),
+    fbc: cleanString(identifiers.fbc),
+    ttp: cleanString(identifiers.ttp),
+    ttclid: cleanString(
+      identifiers.ttclid
+    ),
   }) as BrowserIdentifiers;
 }
 
-
-/**
- * ============================================================
- * META HELPERS
- * ============================================================
- */
+// ============================================================
+// META HELPERS
+// ============================================================
 
 function sha256(
   value: string
 ): string {
-
-  /*
-   * Web Crypto is available in Node runtime.
-   *
-   * This helper uses the Node crypto module indirectly through
-   * the global crypto implementation where available.
-   */
-
   const cryptoModule =
     require("crypto") as typeof import("crypto");
 
   return cryptoModule
     .createHash("sha256")
     .update(
-      value
-        .trim()
-        .toLowerCase()
+      value.trim().toLowerCase()
     )
     .digest("hex");
 }
 
-
 function normalizeNigerianPhone(
   phone: string
 ): string {
+  let cleaned = phone.replace(
+    /\D/g,
+    ""
+  );
 
-  let cleaned =
-    phone.replace(
-      /\D/g,
-      ""
-    );
-
-  if (
-    cleaned.startsWith("0")
-  ) {
-
+  if (cleaned.startsWith("0")) {
     cleaned =
       "234" +
       cleaned.slice(1);
-
   } else if (
     !cleaned.startsWith("234")
   ) {
-
     cleaned =
-      "234" +
-      cleaned;
+      "234" + cleaned;
   }
 
   return cleaned;
 }
 
-
-/**
- * ============================================================
- * META ACCOUNT DISCOVERY
- * ============================================================
- *
- * Supports the existing multi-Pixel architecture.
- *
- * Pixel 1 can fall back to the older single-Pixel environment
- * variables already used by the project.
- *
- * ============================================================
- */
+// ============================================================
+// META ACCOUNT DISCOVERY
+// ============================================================
 
 function getMetaAccounts() {
-
   const accounts = [
-
     {
       id:
-        process.env
-          .NEXT_PUBLIC_META_PIXEL_ID_1 ||
-        process.env
-          .NEXT_PUBLIC_META_PIXEL_ID ||
-        process.env
-          .META_DATASET_ID ||
+        process.env.NEXT_PUBLIC_META_PIXEL_ID_1 ||
+        process.env.NEXT_PUBLIC_META_PIXEL_ID ||
+        process.env.META_DATASET_ID ||
         "",
 
       token:
-        process.env
-          .META_ACCESS_TOKEN_1 ||
-        process.env
-          .META_ACCESS_TOKEN ||
-        process.env
-          .META_CAPI_ACCESS_TOKEN ||
+        process.env.META_ACCESS_TOKEN_1 ||
+        process.env.META_ACCESS_TOKEN ||
+        process.env.META_CAPI_ACCESS_TOKEN ||
         "",
     },
 
     {
       id:
-        process.env
-          .NEXT_PUBLIC_META_PIXEL_ID_2 ||
+        process.env.NEXT_PUBLIC_META_PIXEL_ID_2 ||
         "",
 
       token:
-        process.env
-          .META_ACCESS_TOKEN_2 ||
+        process.env.META_ACCESS_TOKEN_2 ||
         "",
     },
 
     {
       id:
-        process.env
-          .NEXT_PUBLIC_META_PIXEL_ID_3 ||
+        process.env.NEXT_PUBLIC_META_PIXEL_ID_3 ||
         "",
 
       token:
-        process.env
-          .META_ACCESS_TOKEN_3 ||
+        process.env.META_ACCESS_TOKEN_3 ||
         "",
     },
-
   ];
 
   return accounts.filter(
-    (
-      account
-    ) =>
+    (account) =>
       Boolean(
         account.id &&
         account.token
@@ -475,17 +252,27 @@ function getMetaAccounts() {
   );
 }
 
+// ============================================================
+// SERVER META STANDARD EVENT
+// ============================================================
+//
+// Used for BOTH:
+//   Lead
+//   CompleteRegistration
+//
+// Each event has its own event ID.
+// Browser and server copies of the SAME event share that ID.
+// Lead and CompleteRegistration NEVER share an ID.
+//
 
-/**
- * ============================================================
- * SERVER-SIDE META LEAD
- * ============================================================
- */
-
-async function sendMetaLead(
+async function sendMetaStandardEvent(
   req: NextRequest,
   body: {
-    leadEventId: string;
+    eventName:
+      | "Lead"
+      | "CompleteRegistration";
+
+    eventId: string;
     eventSourceUrl: string;
 
     name: string;
@@ -506,208 +293,140 @@ async function sendMetaLead(
       BrowserIdentifiers;
   }
 ) {
-
   const accounts =
     getMetaAccounts();
 
-  if (
-    accounts.length === 0
-  ) {
-
+  if (accounts.length === 0) {
     console.warn(
-      "⚠️ Server Lead skipped: no Meta CAPI accounts configured."
+      `⚠️ Server ${body.eventName} skipped: no Meta CAPI accounts configured.`
     );
 
     return {
-
-      status:
-        "not_configured",
-
-      totalAccounts:
-        0,
-
-      successful:
-        0,
-
-      failed:
-        0,
+      status: "not_configured",
+      totalAccounts: 0,
+      successful: 0,
+      failed: 0,
     };
   }
 
-
   const graphVersion =
-    process.env
-      .META_GRAPH_API_VERSION ||
+    process.env.META_GRAPH_API_VERSION ||
     "v25.0";
 
-
   const testEventCode =
-    process.env
-      .META_TEST_EVENT_CODE;
-
+    process.env.META_TEST_EVENT_CODE;
 
   const clientIp =
-    getClientIp(
-      req
-    );
-
+    getClientIp(req);
 
   const userAgent =
     req.headers.get(
       "user-agent"
-    ) ||
-    undefined;
+    ) || undefined;
 
-
-  /**
-   * ----------------------------------------------------------
-   * Phone
-   * ----------------------------------------------------------
-   */
+  // ----------------------------------------------------------
+  // PHONE
+  // ----------------------------------------------------------
 
   const normalizedPhone =
     normalizeNigerianPhone(
       body.phone
     );
 
-
   const hashedPhone =
     normalizedPhone
-      ? sha256(
-          normalizedPhone
-        )
+      ? sha256(normalizedPhone)
       : undefined;
 
-
-  /**
-   * ----------------------------------------------------------
-   * Name
-   * ----------------------------------------------------------
-   */
+  // ----------------------------------------------------------
+  // NAME
+  // ----------------------------------------------------------
 
   const nameParts =
     body.name
       .trim()
-      .split(
-        /\s+/
-      );
-
+      .split(/\s+/);
 
   const firstName =
-    nameParts[0] ||
-    "";
-
+    nameParts[0] || "";
 
   const lastName =
     nameParts
       .slice(1)
       .join(" ");
 
-
   const hashedFirstName =
     firstName
-      ? sha256(
-          firstName
-        )
+      ? sha256(firstName)
       : undefined;
-
 
   const hashedLastName =
     lastName
-      ? sha256(
-          lastName
-        )
+      ? sha256(lastName)
       : undefined;
 
-
-  /**
-   * ----------------------------------------------------------
-   * Location
-   * ----------------------------------------------------------
-   */
+  // ----------------------------------------------------------
+  // LOCATION
+  // ----------------------------------------------------------
 
   const hashedState =
     body.state
-      ? sha256(
-          body.state
-        )
+      ? sha256(body.state)
       : undefined;
-
 
   const hashedCity =
     body.city
-      ? sha256(
-          body.city
-        )
+      ? sha256(body.city)
       : undefined;
 
-
   const hashedCountry =
-    sha256(
-      "ng"
-    );
+    sha256("ng");
 
-
-  /**
-   * ----------------------------------------------------------
-   * USER DATA
-   * ----------------------------------------------------------
-   */
+  // ----------------------------------------------------------
+  // USER DATA
+  // ----------------------------------------------------------
 
   const userData =
     removeEmptyValues({
-
       client_ip_address:
         clientIp,
 
       client_user_agent:
         userAgent,
 
-      fbp:
-        body.fbp,
+      fbp: body.fbp,
 
-      fbc:
-        body.fbc,
+      fbc: body.fbc,
 
-      ph:
-        hashedPhone
-          ? [hashedPhone]
-          : undefined,
+      ph: hashedPhone
+        ? [hashedPhone]
+        : undefined,
 
-      fn:
-        hashedFirstName
-          ? [hashedFirstName]
-          : undefined,
+      fn: hashedFirstName
+        ? [hashedFirstName]
+        : undefined,
 
-      ln:
-        hashedLastName
-          ? [hashedLastName]
-          : undefined,
+      ln: hashedLastName
+        ? [hashedLastName]
+        : undefined,
 
-      st:
-        hashedState
-          ? [hashedState]
-          : undefined,
+      st: hashedState
+        ? [hashedState]
+        : undefined,
 
-      ct:
-        hashedCity
-          ? [hashedCity]
-          : undefined,
+      ct: hashedCity
+        ? [hashedCity]
+        : undefined,
 
-      country:
-        [hashedCountry],
+      country: [hashedCountry],
     });
 
-
-  /**
-   * ----------------------------------------------------------
-   * CUSTOM DATA
-   * ----------------------------------------------------------
-   */
+  // ----------------------------------------------------------
+  // CUSTOM DATA
+  // ----------------------------------------------------------
 
   const customData =
     removeEmptyValues({
-
       content_name:
         "ScentMason Premium Order",
 
@@ -721,21 +440,15 @@ async function sendMetaLead(
         "NGN",
     });
 
-
-  /**
-   * ----------------------------------------------------------
-   * META EVENT
-   * ----------------------------------------------------------
-   */
+  // ----------------------------------------------------------
+  // META EVENT
+  // ----------------------------------------------------------
 
   const eventPayload = {
-
     data: [
-
       {
-
         event_name:
-          "Lead",
+          body.eventName,
 
         event_time:
           Math.floor(
@@ -745,10 +458,11 @@ async function sendMetaLead(
         /*
          * CRITICAL:
          *
-         * This exact ID is also used by the browser Pixel.
+         * Browser and CAPI copies of THIS event
+         * use this exact same event ID.
          */
         event_id:
-          body.leadEventId,
+          body.eventId,
 
         action_source:
           "website",
@@ -762,7 +476,6 @@ async function sendMetaLead(
         custom_data:
           customData,
       },
-
     ],
 
     ...(testEventCode
@@ -773,12 +486,9 @@ async function sendMetaLead(
       : {}),
   };
 
-
-  /**
-   * ----------------------------------------------------------
-   * SEND TO ALL PIXELS
-   * ----------------------------------------------------------
-   */
+  // ----------------------------------------------------------
+  // SEND TO ALL CONFIGURED PIXELS
+  // ----------------------------------------------------------
 
   const results =
     [] as Array<{
@@ -789,53 +499,37 @@ async function sendMetaLead(
       error?: string;
     }>;
 
-
-  for (
-    const account of
-      accounts
-  ) {
-
+  for (const account of accounts) {
     const url =
       `https://graph.facebook.com/${graphVersion}/${account.id}/events?access_token=${account.token}`;
 
-
     try {
-
       const response =
-        await fetch(
-          url,
-          {
-            method:
-              "POST",
+        await fetch(url, {
+          method: "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-            body:
-              JSON.stringify(
-                eventPayload
-              ),
+          body:
+            JSON.stringify(
+              eventPayload
+            ),
 
-            signal:
-              AbortSignal.timeout(
-                10000
-              ),
-          }
-        );
-
+          signal:
+            AbortSignal.timeout(
+              10000
+            ),
+        });
 
       const result =
         await response
           .json()
-          .catch(
-            () => null
-          );
-
+          .catch(() => null);
 
       results.push({
-
         pixelId:
           account.id,
 
@@ -846,38 +540,31 @@ async function sendMetaLead(
           response.status,
 
         result,
-
       });
 
-
-      if (
-        response.ok
-      ) {
-
+      if (response.ok) {
         console.log(
-          "✅ SERVER META LEAD SUCCESS:",
+          `✅ SERVER META ${body.eventName} SUCCESS:`,
           {
             pixelId:
               account.id,
 
-            leadEventId:
-              body.leadEventId,
+            eventId:
+              body.eventId,
 
             status:
               response.status,
           }
         );
-
       } else {
-
         console.error(
-          "❌ SERVER META LEAD REJECTED:",
+          `❌ SERVER META ${body.eventName} REJECTED:`,
           {
             pixelId:
               account.id,
 
-            leadEventId:
-              body.leadEventId,
+            eventId:
+              body.eventId,
 
             status:
               response.status,
@@ -886,20 +573,13 @@ async function sendMetaLead(
           }
         );
       }
-
-
-    } catch (
-      error
-    ) {
-
+    } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : "Unknown Meta error";
 
-
       results.push({
-
         pixelId:
           account.id,
 
@@ -908,18 +588,16 @@ async function sendMetaLead(
 
         error:
           message,
-
       });
 
-
       console.error(
-        "❌ SERVER META LEAD REQUEST FAILED:",
+        `❌ SERVER META ${body.eventName} REQUEST FAILED:`,
         {
           pixelId:
             account.id,
 
-          leadEventId:
-            body.leadEventId,
+          eventId:
+            body.eventId,
 
           error:
             message,
@@ -928,23 +606,17 @@ async function sendMetaLead(
     }
   }
 
-
   const successful =
     results.filter(
-      (
-        result
-      ) =>
+      (result) =>
         result.success
     ).length;
-
 
   const failed =
     results.length -
     successful;
 
-
   return {
-
     status:
       successful ===
       results.length
@@ -964,19 +636,14 @@ async function sendMetaLead(
   };
 }
 
-
-/**
- * ============================================================
- * POST
- * ============================================================
- */
+// ============================================================
+// POST
+// ============================================================
 
 export async function POST(
   req: NextRequest
 ) {
-
   try {
-
     console.log(
       "=================================================="
     );
@@ -985,12 +652,9 @@ export async function POST(
       "🟡 PREMIUM ORDER INGESTION STARTED"
     );
 
-
-    /**
-     * ========================================================
-     * 1. GOOGLE APPS SCRIPT URL
-     * ========================================================
-     */
+    // ========================================================
+    // 1. GOOGLE APPS SCRIPT URL
+    // ========================================================
 
     const googleSheetsUrl =
       cleanString(
@@ -998,205 +662,141 @@ export async function POST(
           .GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL
       );
 
-
-    if (
-      !googleSheetsUrl
-    ) {
-
+    if (!googleSheetsUrl) {
       console.error(
         "❌ GOOGLE_SHEETS_PREMIUMPAGE_WEBHOOK_URL is missing."
       );
 
-
       return NextResponse.json(
         {
-
-          success:
-            false,
-
-          orderCaptured:
-            false,
-
+          success: false,
+          orderCaptured: false,
           message:
             "Premium Google Sheets configuration is missing.",
-
         },
-        {
-          status:
-            500,
-        }
+        { status: 500 }
       );
     }
 
-
-    /**
-     * ========================================================
-     * 2. READ REQUEST BODY
-     * ========================================================
-     */
+    // ========================================================
+    // 2. READ REQUEST BODY
+    // ========================================================
 
     const rawBody =
       await req
         .json()
-        .catch(
-          () => null
-        );
-
+        .catch(() => null);
 
     if (
       !rawBody ||
-      typeof rawBody !==
-        "object"
+      typeof rawBody !== "object"
     ) {
-
       return NextResponse.json(
         {
-
-          success:
-            false,
-
-          orderCaptured:
-            false,
-
+          success: false,
+          orderCaptured: false,
           message:
             "Invalid request body.",
-
         },
-        {
-          status:
-            400,
-        }
+        { status: 400 }
       );
     }
-
 
     const body =
       rawBody as Partial<
         PremiumOrderData
       > & {
         leadEventId?: string;
+        completeRegistrationEventId?: string;
       };
 
-
-    /**
-     * ========================================================
-     * 3. ORDER EVENT ID
-     * ========================================================
-     */
+    // ========================================================
+    // 3. ORDER EVENT ID
+    // ========================================================
 
     const eventId =
-      cleanString(
-        body.eventId
-      );
+      cleanString(body.eventId);
 
-
-    if (
-      !eventId
-    ) {
-
+    if (!eventId) {
       return NextResponse.json(
         {
-
-          success:
-            false,
-
-          orderCaptured:
-            false,
-
+          success: false,
+          orderCaptured: false,
           message:
             "Missing eventId.",
-
         },
-        {
-          status:
-            400,
-        }
+        { status: 400 }
       );
     }
 
-
-    /**
-     * ========================================================
-     * 4. LEAD EVENT ID
-     * ========================================================
-     *
-     * This MUST come from the browser.
-     *
-     * We do not generate a replacement here because the browser
-     * needs to use the exact same ID for its Lead event.
-     */
+    // ========================================================
+    // 4. LEAD EVENT ID
+    // ========================================================
 
     const leadEventId =
       cleanString(
         body.leadEventId
       );
 
-
-    if (
-      !leadEventId
-    ) {
-
+    if (!leadEventId) {
       console.error(
         "❌ Premium order rejected: missing leadEventId."
       );
 
-
       return NextResponse.json(
         {
-
-          success:
-            false,
-
-          orderCaptured:
-            false,
-
+          success: false,
+          orderCaptured: false,
           message:
             "Missing leadEventId.",
-
         },
-        {
-          status:
-            400,
-        }
+        { status: 400 }
       );
     }
 
+    // ========================================================
+    // 5. COMPLETE REGISTRATION EVENT ID
+    // ========================================================
 
-    /**
-     * ========================================================
-     * 5. REQUIRED ORDER FIELDS
-     * ========================================================
-     */
+    const completeRegistrationEventId =
+      cleanString(
+        body.completeRegistrationEventId
+      );
+
+    if (!completeRegistrationEventId) {
+      console.error(
+        "❌ Premium order rejected: missing completeRegistrationEventId."
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          orderCaptured: false,
+          message:
+            "Missing completeRegistrationEventId.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // ========================================================
+    // 6. REQUIRED ORDER FIELDS
+    // ========================================================
 
     const name =
-      cleanString(
-        body.name
-      );
-
+      cleanString(body.name);
 
     const phone =
-      cleanString(
-        body.phone
-      );
-
+      cleanString(body.phone);
 
     const state =
-      cleanString(
-        body.state
-      );
-
+      cleanString(body.state);
 
     const address =
-      cleanString(
-        body.address
-      );
-
+      cleanString(body.address);
 
     const sets =
-      cleanString(
-        body.sets
-      );
-
+      cleanString(body.sets);
 
     if (
       !name ||
@@ -1205,144 +805,102 @@ export async function POST(
       !address ||
       !sets
     ) {
-
       return NextResponse.json(
         {
-
-          success:
-            false,
-
-          orderCaptured:
-            false,
-
+          success: false,
+          orderCaptured: false,
           message:
             "Missing required customer or order fields.",
-
         },
-        {
-          status:
-            400,
-        }
+        { status: 400 }
       );
     }
 
-
-    /**
-     * ========================================================
-     * 6. NORMALIZE ORDER DATA
-     * ========================================================
-     */
+    // ========================================================
+    // 7. NORMALIZE ORDER DATA
+    // ========================================================
 
     const normalizedPhone =
-      normalizePhone(
-        phone
-      );
-
+      normalizePhone(phone);
 
     const clientIp =
-      getClientIp(
-        req
-      );
-
+      getClientIp(req);
 
     const userAgent =
       req.headers.get(
         "user-agent"
-      ) ||
-      undefined;
+      ) || undefined;
 
-
-    /**
-     * ========================================================
-     * 7. ATTRIBUTION
-     * ========================================================
-     */
+    // ========================================================
+    // 8. ATTRIBUTION
+    // ========================================================
 
     const attribution =
       cleanAttribution(
         body.attribution
       );
 
-
-    /**
-     * ========================================================
-     * 8. BROWSER IDENTIFIERS
-     * ========================================================
-     */
+    // ========================================================
+    // 9. BROWSER IDENTIFIERS
+    // ========================================================
 
     const browserIdentifiers =
       cleanBrowserIdentifiers(
         body.browserIdentifiers
       );
 
-
-    /**
-     * ========================================================
-     * 9. ORDER VALUES
-     * ========================================================
-     */
+    // ========================================================
+    // 10. ORDER VALUES
+    // ========================================================
 
     const whatsapp =
       cleanString(
         body.whatsapp
-      ) ||
-      "";
-
+      ) || "";
 
     const city =
       cleanString(
         body.city
-      ) ||
-      "";
-
+      ) || "";
 
     const setPrice =
       parseNumber(
         body.setPrice
       );
 
-
     const oilBottlesOrdered =
       parseNumber(
         body.oilBottlesOrdered
       );
-
 
     const oilBottlesFree =
       parseNumber(
         body.oilBottlesFree
       );
 
-
     const oilBottlesTotal =
       parseNumber(
         body.oilBottlesTotal
       );
-
 
     const oilPrice =
       parseNumber(
         body.oilPrice
       );
 
-
     const total =
       parseNumber(
         body.total
       );
-
 
     const willAccept =
       parseBoolean(
         body.willAccept
       );
 
-
-    /**
-     * ========================================================
-     * 10. EVENT SOURCE URL
-     * ========================================================
-     */
+    // ========================================================
+    // 11. EVENT SOURCE URL
+    // ========================================================
 
     const eventSourceUrl =
       cleanString(
@@ -1356,27 +914,16 @@ export async function POST(
         .NEXT_PUBLIC_SITE_URL ||
       "https://www.massonstore.com";
 
-
-    /**
-     * ========================================================
-     * 11. GOOGLE SHEETS PAYLOAD
-     * ========================================================
-     *
-     * IMPORTANT:
-     *
-     * leadEventId is deliberately NOT used as the order Event ID.
-     *
-     * eventId remains the permanent order identity.
-     */
+    // ========================================================
+    // 12. GOOGLE SHEETS PAYLOAD
+    // ========================================================
 
     const sheetsPayload = {
-
       eventId,
 
       name,
 
       phone:
-
         normalizedPhone ||
         phone,
 
@@ -1415,20 +962,18 @@ export async function POST(
       userAgent,
     };
 
-
-    /**
-     * ========================================================
-     * 12. SEND ORDER TO GOOGLE APPS SCRIPT
-     * ========================================================
-     */
+    // ========================================================
+    // 13. SEND ORDER TO GOOGLE APPS SCRIPT
+    // ========================================================
 
     console.log(
       "📤 Sending Premium order to Google Apps Script:",
       {
-
         eventId,
 
         leadEventId,
+
+        completeRegistrationEventId,
 
         total,
 
@@ -1457,18 +1002,14 @@ export async function POST(
           Boolean(
             browserIdentifiers.ttclid
           ),
-
       }
     );
-
 
     const sheetsResponse =
       await fetch(
         googleSheetsUrl,
         {
-
-          method:
-            "POST",
+          method: "POST",
 
           headers: {
             "Content-Type":
@@ -1487,51 +1028,35 @@ export async function POST(
         }
       );
 
-
-    /**
-     * ========================================================
-     * 13. READ APPS SCRIPT RESPONSE
-     * ========================================================
-     */
+    // ========================================================
+    // 14. READ APPS SCRIPT RESPONSE
+    // ========================================================
 
     const responseText =
       await sheetsResponse.text();
 
-
     let sheetsResult:
       | unknown
-      | null =
-      null;
-
+      | null = null;
 
     try {
-
       sheetsResult =
         JSON.parse(
           responseText
         );
-
     } catch {
-
       sheetsResult =
         responseText;
     }
 
+    // ========================================================
+    // 15. GOOGLE HTTP FAILURE
+    // ========================================================
 
-    /**
-     * ========================================================
-     * 14. GOOGLE HTTP FAILURE
-     * ========================================================
-     */
-
-    if (
-      !sheetsResponse.ok
-    ) {
-
+    if (!sheetsResponse.ok) {
       console.error(
         "❌ PREMIUM GOOGLE SHEETS HTTP FAILURE:",
         {
-
           status:
             sheetsResponse.status,
 
@@ -1539,19 +1064,14 @@ export async function POST(
 
           response:
             sheetsResult,
-
         }
       );
 
-
       return NextResponse.json(
         {
+          success: false,
 
-          success:
-            false,
-
-          orderCaptured:
-            false,
+          orderCaptured: false,
 
           googleSheets:
             "failed",
@@ -1565,31 +1085,28 @@ export async function POST(
           metaLead:
             "not_fired",
 
+          metaCompleteRegistration:
+            "not_fired",
+
           eventId,
 
           leadEventId,
 
+          completeRegistrationEventId,
         },
-        {
-          status:
-            502,
-        }
+        { status: 502 }
       );
     }
 
-
-    /**
-     * ========================================================
-     * 15. APPS SCRIPT APPLICATION ERROR
-     * ========================================================
-     */
+    // ========================================================
+    // 16. APPS SCRIPT APPLICATION ERROR
+    // ========================================================
 
     if (
       sheetsResult &&
       typeof sheetsResult ===
         "object" &&
-      "result" in
-        sheetsResult &&
+      "result" in sheetsResult &&
       (
         sheetsResult as {
           result?: unknown;
@@ -1597,28 +1114,20 @@ export async function POST(
       ).result ===
         "error"
     ) {
-
       console.error(
         "❌ PREMIUM GOOGLE SHEETS REPORTED AN ERROR:",
         {
-
           eventId,
-
           result:
             sheetsResult,
-
         }
       );
 
-
       return NextResponse.json(
         {
+          success: false,
 
-          success:
-            false,
-
-          orderCaptured:
-            false,
+          orderCaptured: false,
 
           googleSheets:
             "failed",
@@ -1632,49 +1141,41 @@ export async function POST(
           metaLead:
             "not_fired",
 
+          metaCompleteRegistration:
+            "not_fired",
+
           eventId,
 
           leadEventId,
 
+          completeRegistrationEventId,
         },
-        {
-          status:
-            502,
-        }
+        { status: 502 }
       );
     }
 
-
-    /**
-     * ========================================================
-     * 16. SERVER META LEAD
-     * ========================================================
-     *
-     * This happens only after the order has been successfully
-     * accepted by Google Sheets.
-     *
-     * If Meta is blocked or unavailable, the order itself
-     * remains successful.
-     */
+    // ========================================================
+    // 17. SERVER META LEAD
+    // ========================================================
 
     let metaLeadResult:
-
       | Awaited<
           ReturnType<
-            typeof sendMetaLead
+            typeof sendMetaStandardEvent
           >
         >
       | undefined;
 
-
     try {
-
       metaLeadResult =
-        await sendMetaLead(
+        await sendMetaStandardEvent(
           req,
           {
+            eventName:
+              "Lead",
 
-            leadEventId,
+            eventId:
+              leadEventId,
 
             eventSourceUrl,
 
@@ -1699,46 +1200,92 @@ export async function POST(
             browserIdentifiers,
           }
         );
-
-    } catch (
-      metaError
-    ) {
-
+    } catch (metaError) {
       console.error(
         "❌ SERVER META LEAD PIPELINE FAILED:",
         metaError
       );
 
       metaLeadResult = {
-
-        status:
-          "failed",
-
-        totalAccounts:
-          0,
-
-        successful:
-          0,
-
-        failed:
-          1,
+        status: "failed",
+        totalAccounts: 0,
+        successful: 0,
+        failed: 1,
       };
     }
 
+    // ========================================================
+    // 18. SERVER META COMPLETE REGISTRATION
+    // ========================================================
 
-    /**
-     * ========================================================
-     * 17. FINAL SUCCESS
-     * ========================================================
-     */
+    let metaCompleteRegistrationResult:
+      | Awaited<
+          ReturnType<
+            typeof sendMetaStandardEvent
+          >
+        >
+      | undefined;
+
+    try {
+      metaCompleteRegistrationResult =
+        await sendMetaStandardEvent(
+          req,
+          {
+            eventName:
+              "CompleteRegistration",
+
+            eventId:
+              completeRegistrationEventId,
+
+            eventSourceUrl,
+
+            name,
+
+            phone,
+
+            state,
+
+            city,
+
+            total,
+
+            fbp:
+              browserIdentifiers.fbp,
+
+            fbc:
+              browserIdentifiers.fbc,
+
+            attribution,
+
+            browserIdentifiers,
+          }
+        );
+    } catch (metaError) {
+      console.error(
+        "❌ SERVER META COMPLETE REGISTRATION PIPELINE FAILED:",
+        metaError
+      );
+
+      metaCompleteRegistrationResult = {
+        status: "failed",
+        totalAccounts: 0,
+        successful: 0,
+        failed: 1,
+      };
+    }
+
+    // ========================================================
+    // 19. FINAL SUCCESS
+    // ========================================================
 
     console.log(
       "🟢 PREMIUM ORDER CAPTURED:",
       {
-
         eventId,
 
         leadEventId,
+
+        completeRegistrationEventId,
 
         orderStatus:
           "Pending",
@@ -1746,27 +1293,23 @@ export async function POST(
         metaLead:
           metaLeadResult?.status,
 
+        metaCompleteRegistration:
+          metaCompleteRegistrationResult?.status,
       }
     );
-
 
     console.log(
       "ℹ️ Meta Purchase was NOT fired."
     );
 
-
     console.log(
       "=================================================="
     );
 
-
     return NextResponse.json({
+      success: true,
 
-      success:
-        true,
-
-      orderCaptured:
-        true,
+      orderCaptured: true,
 
       orderStatus:
         "Pending",
@@ -1790,40 +1333,42 @@ export async function POST(
         metaLeadResult?.failed ||
         0,
 
-      /*
-       * Useful for tracing this specific Lead across
-       * browser and server.
-       */
+      metaCompleteRegistration:
+        metaCompleteRegistrationResult?.status ||
+        "unknown",
+
+      metaCompleteRegistrationAccounts:
+        metaCompleteRegistrationResult?.totalAccounts ||
+        0,
+
+      metaCompleteRegistrationSuccessful:
+        metaCompleteRegistrationResult?.successful ||
+        0,
+
+      metaCompleteRegistrationFailed:
+        metaCompleteRegistrationResult?.failed ||
+        0,
+
       leadEventId,
 
-      /*
-       * Permanent order identity.
-       */
+      completeRegistrationEventId,
+
       eventId,
 
       metaPurchase:
         "not_fired",
     });
-
-
-  } catch (
-    error
-  ) {
-
+  } catch (error) {
     console.error(
       "🔴 PREMIUM ORDER ROUTE CRASHED:",
       error
     );
 
-
     return NextResponse.json(
       {
+        success: false,
 
-        success:
-          false,
-
-        orderCaptured:
-          false,
+        orderCaptured: false,
 
         message:
           "Premium order could not be processed.",
@@ -1832,12 +1377,8 @@ export async function POST(
           error instanceof Error
             ? error.message
             : "Unknown error",
-
       },
-      {
-        status:
-          500,
-      }
+      { status: 500 }
     );
   }
 }
