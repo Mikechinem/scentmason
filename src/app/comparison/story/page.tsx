@@ -8,9 +8,11 @@ import WallOrTable from "@/components/scentmason/WallOrTable";
 import StoryExperience from "@/components/scentmason/StoryExperience";
 import StoryConvenience from "@/components/scentmason/StoryConvenience";
 import StoryBattery from "@/components/scentmason/StoryBattery";
+import HealthFriendlyFragrance from "@/components/scentmason/HealthFriendlyFragrance";
 import StorySocialProof from "@/components/scentmason/StorySocialProof";
 import StoryOffer from "@/components/scentmason/StoryOffer";
 import StoryOrderForm from "@/components/scentmason/StoryOrderForm";
+
 
 export default function StoryPage() {
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function StoryPage() {
       <StoryConvenience />
 
       <StoryBattery />
+      <HealthFriendlyFragrance />
 
       <StorySocialProof />
 
