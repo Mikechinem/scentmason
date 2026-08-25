@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { captureAttribution } from "@/lib/tracking/attribution";
 
 import StoryHero from "@/components/scentmason/StoryHero";
-import PremiumVideoUsecase from "@/components/scentmason/PremiumVideoUsecase";
+import WallOrTable from "@/components/scentmason/WallOrTable";
 import StoryExperience from "@/components/scentmason/StoryExperience";
 import StoryConvenience from "@/components/scentmason/StoryConvenience";
 import StoryBattery from "@/components/scentmason/StoryBattery";
@@ -20,7 +20,7 @@ export default function StoryPage() {
   return (
     <main>
       <StoryHero />
-      <PremiumVideoUsecase />
+      <WallOrTable />
       <StoryExperience />
 
 

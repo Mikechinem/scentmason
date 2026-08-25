@@ -1,7 +1,7 @@
 import OrderForm3 from "@/components/scentmason/OrderForm3";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
-import DiffuserGraveyard from "@/components/scentmason/DiffuserGraveyard";
-import ScarcitySection from "@/components/scentmason/ScarcitySection";
+
+
 
 
 const useCases = [
@@ -210,7 +210,7 @@ export default function RechargeableDiffuserPage() {
 
 
             <CTAButton />
-        <DiffuserGraveyard />
+        
 
         
       </section>
@@ -393,7 +393,7 @@ export default function RechargeableDiffuserPage() {
               added to your order.
             </p>
           </div>
-        <ScarcitySection />
+      
           <OrderForm3 />
         </div>
       </section>
