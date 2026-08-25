@@ -9,6 +9,10 @@ import {
 import { captureAttribution } from "@/lib/tracking/attribution";
 import { getBrowserIdentifiers } from "@/lib/tracking/cookies";
 
+import {
+  trackMetaCompleteRegistration,
+} from "@/components/tracking/MetaPixel";
+
 type PackageOption = {
   id: string;
   name: string;
@@ -362,7 +366,7 @@ export default function StoryOrderForm() {
 
       /*
        * =====================================================
-       * SUBMIT
+       * SUBMIT ORDER
        * =====================================================
        */
 
@@ -399,10 +403,68 @@ export default function StoryOrderForm() {
 
       /*
        * =====================================================
-       * SUCCESS
+       * BROWSER COMPLETE REGISTRATION
        *
-       * The API has confirmed the order was
-       * successfully processed.
+       * IMPORTANT:
+       *
+       * This is intentionally fired ONLY after
+       * the Story API confirms successful processing.
+       *
+       * The exact same event ID is already sent
+       * to Story CAPI, allowing Meta to deduplicate
+       * the browser and server versions of the event.
+       *
+       * Story intentionally does NOT fire Purchase.
+       * =====================================================
+       */
+
+      trackMetaCompleteRegistration(
+        completeRegistrationEventId,
+        {
+          content_name:
+            selectedPackage.name,
+
+          content_ids: [
+            selectedPackage.id,
+          ],
+
+          content_type:
+            "product",
+
+          value:
+            Number(total) || 0,
+
+          currency:
+            "NGN",
+
+          num_items:
+            selectedPackage.machines,
+
+          total_oils:
+            totalOils,
+
+          extra_oil_quantity:
+            selectedOil.quantity,
+        }
+      );
+
+      console.log(
+        "[ScentMason Story] Browser CompleteRegistration fired.",
+        {
+          eventId:
+            completeRegistrationEventId,
+
+          package:
+            selectedPackage.name,
+
+          value:
+            total,
+        }
+      );
+
+      /*
+       * =====================================================
+       * SUCCESS
        * =====================================================
        */
 
@@ -438,6 +500,7 @@ export default function StoryOrderForm() {
         {/* =====================================================
             HEADER
         ===================================================== */}
+
         <div className="mx-auto max-w-3xl text-center">
 
           <p className="text-[13px] font-extrabold uppercase tracking-[0.16em] text-[#A67C00]">
@@ -463,6 +526,7 @@ export default function StoryOrderForm() {
           {/* ===================================================
               PACKAGE OPTIONS
           =================================================== */}
+
           <div className="grid gap-4 md:grid-cols-2">
 
             {PACKAGES.map((pkg) => {
@@ -567,6 +631,7 @@ export default function StoryOrderForm() {
           {/* ===================================================
               EXTRA OIL
           =================================================== */}
+
           <div className="mt-6 rounded-3xl border border-black/10 bg-white p-6 sm:p-7">
 
             <div>
@@ -636,6 +701,7 @@ export default function StoryOrderForm() {
           {/* ===================================================
               ORDER SUMMARY
           =================================================== */}
+
           <div className="mt-6 rounded-3xl bg-black p-6 text-white sm:p-8">
 
             <p className="text-[13px] font-extrabold uppercase tracking-[0.14em] text-white/45">
@@ -709,6 +775,7 @@ export default function StoryOrderForm() {
           {/* ===================================================
               CUSTOMER DETAILS
           =================================================== */}
+
           <div className="mt-6 rounded-3xl bg-white p-6 sm:p-8">
 
             <h3 className="text-[24px] font-black text-black">
@@ -883,6 +950,7 @@ export default function StoryOrderForm() {
           {/* ===================================================
               ACCEPTANCE CHECKBOX
           =================================================== */}
+
           <label className="mt-6 flex cursor-pointer items-start gap-4 rounded-2xl border border-black/10 bg-white p-5">
 
             <input
@@ -915,6 +983,7 @@ export default function StoryOrderForm() {
           {/* ===================================================
               SUBMIT
           =================================================== */}
+
           <button
             type="submit"
             disabled={isSubmitting}
@@ -962,21 +1031,22 @@ export default function StoryOrderForm() {
               border
               border-black/5
               bg-white
-              p-6
+              p-7
               text-center
               text-black
               shadow-2xl
-              sm:p-7
+              sm:p-8
             "
           >
 
             {/* SUCCESS ICON */}
+
             <div
               className="
                 mx-auto
                 flex
-                h-14
-                w-14
+                h-16
+                w-16
                 items-center
                 justify-center
                 rounded-full
@@ -990,7 +1060,7 @@ export default function StoryOrderForm() {
                 viewBox="0 0 24 24"
                 strokeWidth={3}
                 stroke="currentColor"
-                className="h-7 w-7"
+                className="h-8 w-8"
                 aria-hidden="true"
               >
                 <path
@@ -1002,15 +1072,34 @@ export default function StoryOrderForm() {
             </div>
 
             {/* TITLE */}
+
             <h3
               id="story-order-success-title"
-              className="mt-4 text-[22px] font-black tracking-tight"
+              className="
+                mt-5
+                text-[26px]
+                font-black
+                leading-[1.1]
+                tracking-tight
+                sm:text-[28px]
+              "
             >
               Order Received Successfully! ✅
             </h3>
 
             {/* PERSONAL MESSAGE */}
-            <p className="mt-2 px-2 text-[15px] font-medium leading-relaxed text-black/70">
+
+            <p
+              className="
+                mt-3
+                px-1
+                text-[17px]
+                font-medium
+                leading-[1.55]
+                text-black/70
+                sm:text-[18px]
+              "
+            >
               Thank you{" "}
               <span className="font-bold text-black">
                 {form.name.split(" ")[0]}
@@ -1019,18 +1108,27 @@ export default function StoryOrderForm() {
             </p>
 
             {/* WHAT NEXT */}
+
             <div
               className="
-                mt-5
+                mt-6
                 rounded-xl
                 border
                 border-amber-200
                 bg-amber-50/80
-                p-4
+                p-5
                 text-left
               "
             >
-              <p className="text-[13px] font-bold leading-relaxed text-amber-950">
+              <p
+                className="
+                  text-[16px]
+                  font-bold
+                  leading-[1.55]
+                  text-amber-950
+                  sm:text-[17px]
+                "
+              >
                 ⚠️ WHAT NEXT? A ScentMason customer care
                 representative will call you shortly on{" "}
                 <span className="font-extrabold underline">
@@ -1042,6 +1140,7 @@ export default function StoryOrderForm() {
             </div>
 
             {/* WHATSAPP CTA */}
+
             <a
               href={whatsappUrl}
               target="_blank"
@@ -1049,6 +1148,7 @@ export default function StoryOrderForm() {
               className="
                 mt-6
                 flex
+                min-h-[58px]
                 w-full
                 items-center
                 justify-center
@@ -1058,7 +1158,7 @@ export default function StoryOrderForm() {
                 px-6
                 py-4
                 text-center
-                text-[16px]
+                text-[18px]
                 font-bold
                 text-white
                 shadow-md
@@ -1073,14 +1173,24 @@ export default function StoryOrderForm() {
                 fill="#ffffff"
                 aria-hidden="true"
               >
-                <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95-.137-.17-.203-.28-.203-.47 0-.178.067-.337.178-.47.135-.157.284-.35.405-.47.135-.135.276-.282.118-.55-.157-.27-.7-1.155-1.504-1.873-1.04-.927-1.917-1.213-2.187-1.348-.27-.135-.428-.113-.586.067-.157.18-.674.785-.854 1.055-.18.27-.36.225-.605.135-.246-.09-1.564-.738-1.832-.872-.27-.135-.45-.202-.516-.315-.067-.113-.067-.652.227-1.483.295-.83 1.452-1.59 2.31-1.762.797-.158 1.5-.225 3.193.42 2.726 1.04 4.484 3.78 4.62 3.95.137.17 1.103 1.47.95 2.255-.246.27-.535.337-.713.337-.178 0-.357.008-.513-.008-.165-.008-.387.063-.605-.462-.224-.54-.762-1.86-.83-1.994-.067-.135-.112-.293-.022-.47.09-.178.135-.288.27-.443.135-.157.284-.35.405-.47.135-.135.276-.282.118-.55-.157-.27-.7-1.155-1.504-1.873-1.04-.927-1.917-1.213-2.187-1.348-.27-.135-.428-.113-.586.067-.157.18-.674.785-.854 1.055-.18.27-.36.225-.605.135-.246-.09-1.564-.738-1.832-.872-.27-.135-.45-.202-.516-.315-.067-.113-.067-.652.227-1.483.295-.83 1.452-1.59 2.31-1.762.797-.158 1.5-.225 3.193.42 2.726 1.04 4.484 3.78 4.62 3.95.137.17 1.103 1.47.95 2.255-.246.27-.535.337-.713.337-.178 0-.357.008-.513-.008-.165-.008-.387.063-.605-.462-.224-.54-.762-1.86-.83-1.994-.067-.135-.112-.293-.022-.47.09-.178.135-.288.27-.443.135-.157.284-.35.405-.47.135-.135.276-.282.118-.55-.157-.27-.7-1.155-1.504-1.873-1.04-.927-1.917-1.213-2.187-1.348-.27-.135-.428-.113-.586.067-.157.18-.674.785-.854 1.055-.18.27-.36.225-.605.135-.246-.09-1.564-.738-1.832-.872-.27-.135-.45-.202-.516-.315-.067-.113-.067-.652.227-1.483z" />
+                <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95.137-.17 1.103-1.47.95-2.255-.246.27-.535.337-.713.337-.178 0-.357.008-.513-.008-.165-.008-.387.063-.605-.462-.224-.54-.762-1.86-.83-1.994-.067-.135-.112-.293-.022-.47.09-.178.135-.288.27-.443.135-.157.284-.35.405-.47.135-.135.276-.282.118-.55-.157-.27-.7-1.155-1.504-1.873-1.04-.927-1.917-1.213-2.187-1.348-.27-.135-.428-.113-.586.067-.157.18-.674.785-.854 1.055-.18.27-.36.225-.605.135-.246-.09-1.564-.738-1.832-.872-.27-.135-.45-.202-.516-.315-.067-.113-.067-.652.227-1.483.295-.83 1.452-1.59 2.31-1.762.797-.158 1.5-.225 3.193.42 2.726 1.04 4.484 3.78 4.62 3.95.137.17 1.103 1.47.95 2.255-.246.27-.535.337-.713.337-.178 0-.357.008-.513-.008-.165-.008-.387.063-.605-.462-.224-.54-.762-1.86-.83-1.994-.067-.135-.112-.293-.022-.47.09-.178.135-.288.27-.443.135-.157.284-.35.405-.47.135-.135.276-.282.118-.55-.157-.27-.7-1.155-1.504-1.873-1.04-.927-1.917-1.213-2.187-1.348-.27-.135-.428-.113-.586.067-.157.18-.674.785-.854 1.055-.18.27-.36.225-.605.135-.246-.09-1.564-.738-1.832-.872-.27-.135-.45-.202-.516-.315-.067-.113-.067-.652.227-1.483z" />
               </svg>
 
               Chat Us On WhatsApp
             </a>
 
             {/* SMALL REASSURANCE */}
-            <p className="mt-3 text-[12px] font-medium leading-relaxed text-black/40">
+
+            <p
+              className="
+                mt-4
+                text-[14px]
+                font-medium
+                leading-[1.55]
+                text-black/45
+                sm:text-[15px]
+              "
+            >
               You don't need to make any payment now.
               Your order will be confirmed before dispatch.
             </p>
