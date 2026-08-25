@@ -2,13 +2,13 @@
 import { useEffect } from "react";
 import { captureAttribution } from "@/lib/tracking/attribution";
 import PremiumHero from "@/components/scentmason/PremiumHero";
+import UpStickyOrderBar from "@/components/scentmason/UpStickyOrderBar";
 import PremiumVideoUsecase from "@/components/scentmason/PremiumVideoUsecase";
 import WallMountSection from "@/components/scentmason/WallMountSection";
 import DiffuserEngineeringSecion from "@/components/scentmason/DiffuserEngineeringSection";
 import SpaFeelSection from "@/components/scentmason/SpaFeelSection";
 import TestimonialsSection from "@/components/scentmason/TestimonialsSection";
 import RoomUseCases from "@/components/scentmason/RoomUseCases";
-import StickyOrderBar from "@/components/scentmason/StickyOrderBar";
 import LuxurySpaceBar from "@/components/scentmason/LuxurySpaceBar";
 import UnboxingVideoSection from "@/components/scentmason/UnboxingVideoSection";
 import PremiumWhatsInsideSection from "@/components/scentmason/PremiumWhatsInsideSection";
@@ -29,7 +29,7 @@ export default function PremiumPage() {
 
   return (
     <main>
-      <StickyOrderBar />
+<UpStickyOrderBar />
       {/* =========================================================
           SECTION 1 — HERO
       ========================================================= */}
