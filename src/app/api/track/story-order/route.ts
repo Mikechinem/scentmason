@@ -6,6 +6,8 @@ export const runtime = "nodejs";
 type BrowserIdentifiers = {
   fbp?: string;
   fbc?: string;
+  ttp?: string;
+  ttclid?: string;
 };
 
 type TouchData = {
@@ -63,7 +65,7 @@ type StoryOrderBody = {
 
   tracking?: {
     sharedEventId?: string;
-
+    leadEventId?: string;
     completeRegistrationEventId?: string;
 
     attribution?: {
@@ -84,14 +86,11 @@ type StoryOrderBody = {
 function cleanValue(
   value: unknown
 ): string | undefined {
-  if (
-    typeof value !== "string"
-  ) {
+  if (typeof value !== "string") {
     return undefined;
   }
 
-  const cleaned =
-    value.trim();
+  const cleaned = value.trim();
 
   return cleaned || undefined;
 }
@@ -100,32 +99,28 @@ function removeEmptyValues<
   T extends Record<string, unknown>
 >(obj: T) {
   return Object.fromEntries(
-    Object.entries(obj).filter(
-      ([, value]) => {
-        if (
-          value === undefined ||
-          value === null ||
-          value === ""
-        ) {
-          return false;
-        }
-
-        if (
-          Array.isArray(value) &&
-          value.length === 0
-        ) {
-          return false;
-        }
-
-        return true;
+    Object.entries(obj).filter(([, value]) => {
+      if (
+        value === undefined ||
+        value === null ||
+        value === ""
+      ) {
+        return false;
       }
-    )
+
+      if (
+        Array.isArray(value) &&
+        value.length === 0
+      ) {
+        return false;
+      }
+
+      return true;
+    })
   );
 }
 
-function sha256(
-  value: string
-) {
+function sha256(value: string) {
   return crypto
     .createHash("sha256")
     .update(
@@ -133,19 +128,6 @@ function sha256(
     )
     .digest("hex");
 }
-
-/* =========================================================
-   NIGERIAN PHONE NORMALIZATION
-
-   Meta expects the phone number without
-   spaces, + sign or leading zero.
-
-   Example:
-
-   08012345678
-        ↓
-   2348012345678
-========================================================= */
 
 function normalizeNigerianPhone(
   phone?: string
@@ -155,45 +137,28 @@ function normalizeNigerianPhone(
   }
 
   let cleaned =
-    phone.replace(
-      /\D/g,
-      ""
-    );
+    phone.replace(/\D/g, "");
 
-  if (
-    cleaned.startsWith("234")
-  ) {
+  if (cleaned.startsWith("234")) {
     return cleaned;
   }
 
-  if (
-    cleaned.startsWith("0")
-  ) {
-    return `234${cleaned.slice(
-      1
-    )}`;
+  if (cleaned.startsWith("0")) {
+    return `234${cleaned.slice(1)}`;
   }
 
-  if (
-    cleaned.length >= 9
-  ) {
+  if (cleaned.length >= 9) {
     return `234${cleaned}`;
   }
 
   return cleaned;
 }
 
-/* =========================================================
-   CLIENT IP
-========================================================= */
-
 function getClientIp(
   req: NextRequest
 ) {
   const forwardedFor =
-    req.headers.get(
-      "x-forwarded-for"
-    );
+    req.headers.get("x-forwarded-for");
 
   if (forwardedFor) {
     return forwardedFor
@@ -202,12 +167,8 @@ function getClientIp(
   }
 
   return (
-    req.headers.get(
-      "cf-connecting-ip"
-    ) ||
-    req.headers.get(
-      "x-real-ip"
-    ) ||
+    req.headers.get("cf-connecting-ip") ||
+    req.headers.get("x-real-ip") ||
     undefined
   );
 }
@@ -218,27 +179,20 @@ function getClientIp(
 
 function getMetaEnvironment() {
   const defaultDatasetId =
-    process.env
-      .META_DATASET_ID ||
-    process.env
-      .META_PIXEL_ID ||
-    process.env
-      .NEXT_PUBLIC_META_PIXEL_ID;
+    process.env.META_DATASET_ID ||
+    process.env.META_PIXEL_ID ||
+    process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
   const defaultAccessToken =
-    process.env
-      .META_ACCESS_TOKEN ||
-    process.env
-      .META_CAPI_ACCESS_TOKEN;
+    process.env.META_ACCESS_TOKEN ||
+    process.env.META_CAPI_ACCESS_TOKEN;
 
   const graphVersion =
-    process.env
-      .META_GRAPH_API_VERSION ||
+    process.env.META_GRAPH_API_VERSION ||
     "v25.0";
 
   const testEventCode =
-    process.env
-      .META_TEST_EVENT_CODE;
+    process.env.META_TEST_EVENT_CODE;
 
   return {
     defaultDatasetId,
@@ -249,7 +203,7 @@ function getMetaEnvironment() {
 }
 
 /* =========================================================
-   GET — HEALTH CHECK
+   GET
 ========================================================= */
 
 export async function GET() {
@@ -267,14 +221,10 @@ export async function GET() {
 
     envCheck: {
       hasDefaultMetaDataset:
-        Boolean(
-          defaultDatasetId
-        ),
+        Boolean(defaultDatasetId),
 
       hasDefaultMetaToken:
-        Boolean(
-          defaultAccessToken
-        ),
+        Boolean(defaultAccessToken),
 
       hasStoryGoogleSheetsUrl:
         Boolean(
@@ -283,6 +233,29 @@ export async function GET() {
         ),
 
       graphVersion,
+    },
+
+    multiPixelConfiguration: {
+      pixel1:
+        Boolean(
+          process.env
+            .NEXT_PUBLIC_META_PIXEL_ID_1 &&
+          process.env.META_ACCESS_TOKEN_1
+        ),
+
+      pixel2:
+        Boolean(
+          process.env
+            .NEXT_PUBLIC_META_PIXEL_ID_2 &&
+          process.env.META_ACCESS_TOKEN_2
+        ),
+
+      pixel3:
+        Boolean(
+          process.env
+            .NEXT_PUBLIC_META_PIXEL_ID_3 &&
+          process.env.META_ACCESS_TOKEN_3
+        ),
     },
   });
 }
@@ -295,17 +268,12 @@ export async function POST(
   req: NextRequest
 ) {
   try {
-    /* =====================================================
-       ENVIRONMENT
-    ===================================================== */
-
     const {
       defaultDatasetId,
       defaultAccessToken,
       graphVersion,
       testEventCode,
-    } =
-      getMetaEnvironment();
+    } = getMetaEnvironment();
 
     const googleSheetsUrl =
       process.env
@@ -315,21 +283,15 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           message:
             "Missing Story Google Sheets webhook URL.",
         },
-        {
-          status: 500,
-        }
+        { status: 500 }
       );
     }
 
     /* =====================================================
-       META ACCOUNTS
-
-       Supports the same multi-pixel architecture
-       used by the existing ScentMason tracking system.
+       ACTIVE META ACCOUNTS
     ===================================================== */
 
     const activeAccounts = [
@@ -340,8 +302,7 @@ export async function POST(
           defaultDatasetId,
 
         token:
-          process.env
-            .META_ACCESS_TOKEN_1 ||
+          process.env.META_ACCESS_TOKEN_1 ||
           defaultAccessToken,
       },
 
@@ -351,8 +312,7 @@ export async function POST(
             .NEXT_PUBLIC_META_PIXEL_ID_2,
 
         token:
-          process.env
-            .META_ACCESS_TOKEN_2,
+          process.env.META_ACCESS_TOKEN_2,
       },
 
       {
@@ -361,8 +321,7 @@ export async function POST(
             .NEXT_PUBLIC_META_PIXEL_ID_3,
 
         token:
-          process.env
-            .META_ACCESS_TOKEN_3,
+          process.env.META_ACCESS_TOKEN_3,
       },
     ].filter(
       (
@@ -383,87 +342,73 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           message:
             "Missing Meta environment variables.",
         },
-        {
-          status: 500,
-        }
+        { status: 500 }
       );
     }
 
     /* =====================================================
-       READ REQUEST
+       READ BODY
     ===================================================== */
 
     const body =
       (await req
         .json()
-        .catch(
-          () => ({})
-        )) as StoryOrderBody;
+        .catch(() => ({}))) as StoryOrderBody;
 
-    const order =
-      body.order;
-
-    const customer =
-      body.customer;
-
-    const tracking =
-      body.tracking;
+    const order = body.order;
+    const customer = body.customer;
+    const tracking = body.tracking;
 
     /* =====================================================
-       BASIC VALIDATION
+       VALIDATION
     ===================================================== */
 
-    if (
-      !order ||
-      !customer
-    ) {
+    if (!order || !customer) {
       return NextResponse.json(
         {
           success: false,
-
           message:
             "Missing order or customer data.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    if (
-      !tracking?.sharedEventId
-    ) {
+    if (!tracking?.sharedEventId) {
       return NextResponse.json(
         {
           success: false,
-
           message:
             "Missing shared event ID.",
         },
+        { status: 400 }
+      );
+    }
+
+    if (!tracking.leadEventId) {
+      return NextResponse.json(
         {
-          status: 400,
-        }
+          success: false,
+          message:
+            "Missing Lead event ID.",
+        },
+        { status: 400 }
       );
     }
 
     if (
-      !tracking
-        .completeRegistrationEventId
+      !tracking.completeRegistrationEventId
     ) {
       return NextResponse.json(
         {
           success: false,
-
           message:
             "Missing CompleteRegistration event ID.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
@@ -477,70 +422,62 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-
           message:
             "Missing required customer information.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
-    if (
-      customer.willAccept !== true
-    ) {
+    if (customer.willAccept !== true) {
       return NextResponse.json(
         {
           success: false,
-
           message:
             "Customer has not confirmed order acceptance.",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
     /* =====================================================
-       ORDER VALUES
+       ORDER DATA
     ===================================================== */
 
     const packagePrice =
-      Number(
-        order.packagePrice || 0
-      );
+      Number(order.packagePrice || 0);
 
     const extraOilPrice =
-      Number(
-        order.extraOilPrice || 0
-      );
+      Number(order.extraOilPrice || 0);
 
     const total =
-      Number(
-        order.total || 0
-      );
+      Number(order.total || 0);
 
     const machines =
-      Number(
-        order.machines || 0
-      );
+      Number(order.machines || 0);
 
     const includedOils =
-      Number(
-        order.includedOils || 0
-      );
+      Number(order.includedOils || 0);
 
     const extraOilQuantity =
-      Number(
-        order.extraOilQuantity || 0
-      );
+      Number(order.extraOilQuantity || 0);
 
     const totalOils =
-      Number(
-        order.totalOils || 0
+      Number(order.totalOils || 0);
+
+    if (
+      !Number.isFinite(total) ||
+      total <= 0
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Invalid order total.",
+        },
+        { status: 400 }
       );
+    }
 
     /* =====================================================
        CUSTOMER DATA
@@ -553,9 +490,7 @@ export async function POST(
 
     const hashedPhone =
       normalizedPhone
-        ? sha256(
-            normalizedPhone
-          )
+        ? sha256(normalizedPhone)
         : undefined;
 
     const nameParts =
@@ -573,30 +508,22 @@ export async function POST(
 
     const hashedFirstName =
       firstName
-        ? sha256(
-            firstName
-          )
+        ? sha256(firstName)
         : undefined;
 
     const hashedLastName =
       lastName
-        ? sha256(
-            lastName
-          )
+        ? sha256(lastName)
         : undefined;
 
     const hashedState =
       customer.state
-        ? sha256(
-            customer.state
-          )
+        ? sha256(customer.state)
         : undefined;
 
     const hashedCity =
       customer.city
-        ? sha256(
-            customer.city
-          )
+        ? sha256(customer.city)
         : undefined;
 
     const hashedCountry =
@@ -604,21 +531,10 @@ export async function POST(
 
     /* =====================================================
        BROWSER IDENTIFIERS
-
-       These come from:
-
-       getBrowserIdentifiers()
-
-       in StoryOrderForm.tsx
-
-       We do NOT try to recreate them
-       from fbclid.
     ===================================================== */
 
     const browserIdentifiers =
-      tracking
-        .browserIdentifiers ||
-      {};
+      tracking.browserIdentifiers || {};
 
     const fbp =
       cleanValue(
@@ -630,25 +546,29 @@ export async function POST(
         browserIdentifiers.fbc
       );
 
+    const ttp =
+      cleanValue(
+        browserIdentifiers.ttp
+      );
+
+    const ttclid =
+      cleanValue(
+        browserIdentifiers.ttclid
+      );
+
     /* =====================================================
-       USER AGENT / IP
+       USER DATA
     ===================================================== */
 
     const userAgent =
       cleanValue(
         tracking.userAgent
       ) ||
-      req.headers.get(
-        "user-agent"
-      ) ||
+      req.headers.get("user-agent") ||
       undefined;
 
     const clientIp =
       getClientIp(req);
-
-    /* =====================================================
-       META USER DATA
-    ===================================================== */
 
     const commonUserData =
       removeEmptyValues({
@@ -672,9 +592,7 @@ export async function POST(
           ? [hashedCity]
           : undefined,
 
-        country: [
-          hashedCountry,
-        ],
+        country: [hashedCountry],
 
         client_ip_address:
           clientIp,
@@ -688,7 +606,7 @@ export async function POST(
       });
 
     /* =====================================================
-       EVENT SOURCE URL
+       EVENT URL / TIME
     ===================================================== */
 
     const eventSourceUrl =
@@ -697,40 +615,57 @@ export async function POST(
       ) ||
       "https://www.massonstore.com/comparison/story";
 
-    /* =====================================================
-       COMPLETE REGISTRATION
-
-       IMPORTANT:
-
-       Story submits ONLY:
-
-       CompleteRegistration
-
-       NO Lead
-       NO Purchase
-    ===================================================== */
-
-    const eventId =
-      tracking
-        .completeRegistrationEventId;
-
     const eventTime =
       Math.floor(
         Date.now() / 1000
       );
 
-    const metaEvent = {
-      event_name:
-        "CompleteRegistration",
+    /* =====================================================
+       SHARED CUSTOM DATA
+    ===================================================== */
 
-      event_time:
-        eventTime,
+    const customData = {
+      currency:
+        order.currency || "NGN",
+
+      value: total,
+
+      content_name:
+        order.packageName ||
+        "ScentMason Story Offer",
+
+      content_category:
+        "ScentMason",
+
+      content_type:
+        "product",
+
+      content_ids: [
+        order.packageId ||
+          "story-offer",
+      ],
+
+      num_items: machines,
+
+      total_oils: totalOils,
+
+      extra_oil_quantity:
+        extraOilQuantity,
+    };
+
+    /* =====================================================
+       LEAD
+    ===================================================== */
+
+    const leadEvent = {
+      event_name: "Lead",
+
+      event_time: eventTime,
 
       event_id:
-        eventId,
+        tracking.leadEventId,
 
-      action_source:
-        "website",
+      action_source: "website",
 
       event_source_url:
         eventSourceUrl,
@@ -738,37 +673,39 @@ export async function POST(
       user_data:
         commonUserData,
 
-      custom_data: {
-        currency:
-          order.currency ||
-          "NGN",
+      custom_data:
+        customData,
+    };
 
-        value:
-          total,
+    /* =====================================================
+       COMPLETE REGISTRATION
+    ===================================================== */
 
-        content_name:
-          order.packageName ||
-          "ScentMason Story Offer",
+    const completeRegistrationEvent = {
+      event_name:
+        "CompleteRegistration",
 
-        content_category:
-          "ScentMason",
+      event_time: eventTime,
 
-        content_type:
-          "product",
+      event_id:
+        tracking.completeRegistrationEventId,
 
-        content_ids: [
-          order.packageId ||
-            "story-offer",
-        ],
+      action_source: "website",
 
-        num_items:
-          machines,
-      },
+      event_source_url:
+        eventSourceUrl,
+
+      user_data:
+        commonUserData,
+
+      custom_data:
+        customData,
     };
 
     const metaPayload = {
       data: [
-        metaEvent,
+        leadEvent,
+        completeRegistrationEvent,
       ],
 
       ...(testEventCode
@@ -784,42 +721,31 @@ export async function POST(
     ===================================================== */
 
     const firstTouch =
-      tracking
-        .attribution
-        ?.firstTouch ||
-      {};
+      tracking.attribution
+        ?.firstTouch || {};
 
     const lastTouch =
-      tracking
-        .attribution
-        ?.lastTouch ||
-      {};
+      tracking.attribution
+        ?.lastTouch || {};
 
     /* =====================================================
        GOOGLE SHEETS PAYLOAD
-
-       This is the schema the NEW Story Apps Script
-       will receive.
+       
+       IMPORTANT:
+       Browser identifiers are explicitly preserved here.
     ===================================================== */
 
     const sheetsPayload = {
       eventId:
         tracking.sharedEventId,
 
-      completeRegistrationEventId:
-        tracking
-          .completeRegistrationEventId,
-
       eventName:
-        "CompleteRegistration",
+        "Lead + CompleteRegistration",
 
       sourcePage:
-        body.sourcePage ||
-        "story",
+        body.sourcePage || "story",
 
       eventSourceUrl,
-
-      /* CUSTOMER */
 
       name:
         customer.name.trim(),
@@ -828,8 +754,7 @@ export async function POST(
         customer.phone.trim(),
 
       whatsapp:
-        customer.whatsapp?.trim() ||
-        "",
+        customer.whatsapp?.trim() || "",
 
       state:
         customer.state.trim(),
@@ -840,21 +765,15 @@ export async function POST(
       address:
         customer.address.trim(),
 
-      /* PACKAGE */
-
       packageId:
-        order.packageId ||
-        "",
+        order.packageId || "",
 
       packageName:
-        order.packageName ||
-        "",
+        order.packageName || "",
 
       machines,
 
       packagePrice,
-
-      /* OILS */
 
       includedOils,
 
@@ -864,97 +783,75 @@ export async function POST(
 
       totalOils,
 
-      /* TOTAL */
-
       total,
 
       currency:
-        order.currency ||
-        "NGN",
+        order.currency || "NGN",
 
       willAccept:
         customer.willAccept
           ? "Yes"
           : "No",
 
+      /* BROWSER IDENTIFIERS */
+
+      fbp: fbp || "",
+
+      fbc: fbc || "",
+
+      ttp: ttp || "",
+
+      ttclid: ttclid || "",
+
       /* ATTRIBUTION */
 
       utm_source:
-        firstTouch
-          .utm_source ||
-        "",
+        firstTouch.utm_source || "",
 
       utm_medium:
-        firstTouch
-          .utm_medium ||
-        "",
+        firstTouch.utm_medium || "",
 
       utm_campaign:
-        firstTouch
-          .utm_campaign ||
-        "",
+        firstTouch.utm_campaign || "",
 
       utm_term:
-        firstTouch
-          .utm_term ||
-        "",
+        firstTouch.utm_term || "",
 
       utm_content:
-        firstTouch
-          .utm_content ||
-        "",
+        firstTouch.utm_content || "",
 
       fbclid:
-        firstTouch
-          .fbclid ||
-        "",
-
-      ttclid:
-        firstTouch
-          .ttclid ||
-        "",
+        firstTouch.fbclid || "",
 
       gclid:
-        firstTouch
-          .gclid ||
-        "",
+        firstTouch.gclid || "",
 
       msclkid:
-        firstTouch
-          .msclkid ||
-        "",
+        firstTouch.msclkid || "",
 
       landingPage:
-        firstTouch
-          .landingPage ||
-        "",
+        firstTouch.landingPage || "",
 
       landingPagePath:
-        firstTouch
-          .landingPagePath ||
-        "",
+        firstTouch.landingPagePath || "",
 
       referrer:
-        firstTouch
-          .referrer ||
+        lastTouch.referrer ||
+        firstTouch.referrer ||
         "",
 
       firstTouch:
-        JSON.stringify(
-          firstTouch
-        ),
+        JSON.stringify(firstTouch),
 
       lastTouch:
-        JSON.stringify(
-          lastTouch
-        ),
+        JSON.stringify(lastTouch),
 
       submittedAt:
         new Date().toISOString(),
     };
 
     /* =====================================================
-       GOOGLE SHEETS REQUEST
+       GOOGLE SHEETS
     ===================================================== */
 
     const sheetsPromise =
@@ -974,65 +871,40 @@ export async function POST(
             ),
         }
       )
-        .then(
-          async (
-            response
-          ) => {
-            const responseText =
-              await response
-                .text()
-                .catch(
-                  () => ""
-                );
+        .then(async (response) => {
+          const responseText =
+            await response
+              .text()
+              .catch(() => "");
 
-            if (
-              !response.ok
-            ) {
-              console.error(
-                "Story Google Sheets returned an error:",
-                response.status,
-                responseText
-              );
-            }
+          return {
+            ok: response.ok,
+            status:
+              response.status,
+            body:
+              responseText,
+          };
+        })
+        .catch((error) => {
+          console.error(
+            "Story Google Sheets synchronization failed:",
+            error
+          );
 
-            return {
-              ok:
-                response.ok,
-
-              status:
-                response.status,
-
-              body:
-                responseText,
-            };
-          }
-        )
-        .catch(
-          (error) => {
-            console.error(
-              "Story Google Sheets synchronization failed:",
-              error
-            );
-
-            return {
-              ok: false,
-
-              status: 0,
-
-              body: "",
-            };
-          }
-        );
+          return {
+            ok: false,
+            status: 0,
+            body: "",
+          };
+        });
 
     /* =====================================================
-       META CAPI REQUESTS
+       META CAPI
     ===================================================== */
 
     const capiPromises =
       activeAccounts.map(
-        async (
-          account
-        ) => {
+        async (account) => {
           const metaUrl =
             `https://graph.facebook.com/${graphVersion}/${account.id}/events?access_token=${account.token}`;
 
@@ -1052,24 +924,18 @@ export async function POST(
                     JSON.stringify(
                       metaPayload
                     ),
+
+                  signal:
+                    AbortSignal.timeout(
+                      10000
+                    ),
                 }
               );
 
             const json =
               await response
                 .json()
-                .catch(
-                  () => null
-                );
-
-            if (
-              !response.ok
-            ) {
-              console.error(
-                `Story Meta CAPI failed for dataset ${account.id}:`,
-                json
-              );
-            }
+                .catch(() => null);
 
             return {
               ok:
@@ -1078,11 +944,14 @@ export async function POST(
               datasetId:
                 account.id,
 
+              status:
+                response.status,
+
               json,
             };
           } catch (error) {
             console.error(
-              `Story Meta CAPI request failed for dataset ${account.id}:`,
+              `Story Meta CAPI request failed for ${account.id}:`,
               error
             );
 
@@ -1092,49 +961,27 @@ export async function POST(
               datasetId:
                 account.id,
 
+              status: 0,
+
               json: null,
             };
           }
         }
       );
 
-    /* =====================================================
-       FIRE BOTH SYSTEMS
-    ===================================================== */
-
     const [
       sheetsResult,
       ...capiResults
-    ] =
-      await Promise.all([
-        sheetsPromise,
-        ...capiPromises,
-      ]);
+    ] = await Promise.all([
+      sheetsPromise,
+      ...capiPromises,
+    ]);
 
     /* =====================================================
-       META RESULT
+       REQUIRE SHEET
     ===================================================== */
 
-    const metaSucceeded =
-      capiResults.some(
-        (
-          result
-        ) =>
-          result.ok
-      );
-
-    /* =====================================================
-       IMPORTANT:
-
-       The order must not be silently reported as
-       successful if the Google Sheet failed.
-
-       We need the operational order record.
-    ===================================================== */
-
-    if (
-      !sheetsResult.ok
-    ) {
+    if (!sheetsResult.ok) {
       console.error(
         "Story order was not written to Google Sheets:",
         sheetsResult
@@ -1147,24 +994,29 @@ export async function POST(
           message:
             "Your order could not be saved. Please try again.",
 
-          eventId,
+          eventId:
+            tracking.sharedEventId,
 
           sheetSaved: false,
-
-          metaTracked:
-            metaSucceeded,
         },
-        {
-          status: 500,
-        }
+        { status: 500 }
       );
     }
 
-    if (
-      !metaSucceeded
-    ) {
+    /* =====================================================
+       REQUIRE META CAPI
+    ===================================================== */
+
+    const allMetaSucceeded =
+      capiResults.length > 0 &&
+      capiResults.every(
+        (result) =>
+          result.ok
+      );
+
+    if (!allMetaSucceeded) {
       console.error(
-        "Story CompleteRegistration failed across all Meta accounts:",
+        "Story Lead + CompleteRegistration did not succeed across all configured Meta accounts:",
         capiResults
       );
 
@@ -1175,7 +1027,8 @@ export async function POST(
           message:
             "Your order was saved, but tracking could not be completed.",
 
-          eventId,
+          eventId:
+            tracking.sharedEventId,
 
           sheetSaved: true,
 
@@ -1184,9 +1037,7 @@ export async function POST(
           metaResults:
             capiResults,
         },
-        {
-          status: 500,
-        }
+        { status: 500 }
       );
     }
 
@@ -1201,15 +1052,25 @@ export async function POST(
         message:
           "Story order captured successfully.",
 
-        eventId,
+        eventId:
+          tracking.sharedEventId,
+
+        leadEventId:
+          tracking.leadEventId,
+
+        completeRegistrationEventId:
+          tracking.completeRegistrationEventId,
 
         sheetSaved: true,
 
         metaTracked: true,
+
+        events: [
+          "Lead",
+          "CompleteRegistration",
+        ],
       },
-      {
-        status: 200,
-      }
+      { status: 200 }
     );
   } catch (error) {
     console.error(
@@ -1226,9 +1087,7 @@ export async function POST(
             ? error.message
             : "Unknown tracking error",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
