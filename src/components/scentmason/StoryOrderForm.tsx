@@ -83,6 +83,16 @@ const OIL_OPTIONS: OilOption[] = [
   { quantity: 5, price: 42500 },
 ];
 
+const STATES = [
+  "Abia", "Abuja (FCT)", "Adamawa", "Akwa Ibom", "Anambra",
+  "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River",
+  "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe",
+  "Imo", "Kaduna", "Kano", "Sokoto", "Kogi", "Kwara",
+  "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun",
+  "Oyo", "Plateau", "Rivers",
+];
+
+
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG")}`;
 }
@@ -745,9 +755,8 @@ export default function StoryOrderForm() {
                       State
                     </label>
 
-                    <input
+                    <select
                       id="story-state"
-                      type="text"
                       value={form.state}
                       onChange={(e) =>
                         updateField(
@@ -755,10 +764,19 @@ export default function StoryOrderForm() {
                           e.target.value
                         )
                       }
-                      placeholder="e.g. Lagos"
                       autoComplete="address-level1"
-                      className="w-full rounded-xl border border-black/15 bg-white px-4 py-4 text-[16px] font-medium outline-none transition focus:border-[#A67C00]"
-                    />
+                      className="w-full appearance-none rounded-xl border border-black/15 bg-white px-4 py-4 text-[16px] font-medium outline-none transition focus:border-[#A67C00]"
+                    >
+                      <option value="" disabled>
+                        Select your state
+                      </option>
+
+                      {STATES.map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
@@ -880,43 +898,79 @@ export default function StoryOrderForm() {
 
       {status === "success" && (
         <div
-          className="fixed inset-0 z-[9999] flex min-h-screen items-center justify-center bg-black/80 px-5 py-8 backdrop-blur-sm"
+          className="fixed inset-0 z-[9999999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           aria-labelledby="story-order-success-title"
         >
-          <div className="w-full max-w-xl rounded-[32px] bg-white p-8 text-center shadow-[0_30px_100px_rgba(0,0,0,0.35)] sm:p-12">
-
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-600 text-4xl font-black text-white shadow-lg">
-              ✓
+          <div className="relative w-full max-w-md rounded-2xl border border-black/5 bg-white p-6 text-center text-black shadow-2xl sm:p-8">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={3}
+                stroke="currentColor"
+                className="h-7 w-7"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4.5 12.75l6 6 9-13.5"
+                />
+              </svg>
             </div>
 
-            <p className="mt-7 text-[13px] font-extrabold uppercase tracking-[0.18em] text-[#A67C00]">
+            <p className="mt-5 text-[13px] font-black uppercase tracking-[0.18em] text-[#A67C00]">
               Order Confirmed
             </p>
 
-            <h2
+            <h3
               id="story-order-success-title"
-              className="mt-3 text-[34px] font-black leading-[1.05] tracking-[-0.03em] text-black sm:text-[44px]"
+              className="mt-3 text-[30px] font-black leading-[1.08] tracking-tight text-black sm:text-[34px]"
             >
-              Your order has been received!
-            </h2>
+              Order Received Successfully! ✅
+            </h3>
 
-            <p className="mx-auto mt-5 max-w-lg text-[18px] font-semibold leading-[1.55] text-black/65 sm:text-[20px]">
-              Thank you for choosing ScentMason. We'll contact you shortly
-              to confirm your details and arrange delivery.
+            <p className="mt-3 px-2 text-[16px] font-black leading-relaxed text-black/80 sm:text-[17px]">
+              Thank you{" "}
+              <span className="font-black text-black">
+                {form.name.split(" ")[0]}
+              </span>
+              , if you want your order delivered faster,
+              please inform us on WhatsApp.
             </p>
 
-            <div className="mt-7 rounded-2xl bg-[#f7f5ef] px-5 py-4">
-              <p className="text-[15px] font-bold text-black/70">
-                Please keep your phone available.
-              </p>
-
-              <p className="mt-1 text-[14px] font-medium text-black/45">
-                Payment is made when your order arrives.
+            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-left">
+              <p className="text-[14px] font-black leading-relaxed text-amber-950 sm:text-[15px]">
+                ⚠️ WHAT NEXT? A ScentMason customer care
+                representative will call you shortly on{" "}
+                <span className="font-black underline">
+                  {form.phone}
+                </span>{" "}
+                to verify your destination details before
+                your order is delivered.
               </p>
             </div>
 
+            <a
+              href={`https://wa.me/2347064969603?text=${encodeURIComponent(
+                `Hello ScentMason, I just placed an order for ${selectedPackage.name}. My name is ${form.name}.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 text-center text-[17px] font-black text-white shadow-md transition-all hover:scale-[1.01] active:scale-100"
+            >
+              <svg
+                viewBox="0 0 32 32"
+                className="h-5 w-5 shrink-0"
+                fill="#ffffff"
+                aria-hidden="true"
+              >
+                <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95-.137-.17-1.103-1.47-1.103-2.8 0-1.33.7-1.984.95-2.255.246-.27.535-.337.713-.337.178 0 .357 0 .513.008.165.008.387-.063.605.462.224.54.762 1.86.83 1.994.067.135.112.293.022.47-.09.178-.135.288-.27.443-.135.157-.284.35-.405.47-.135.135-.276.282-.118.55.157.27.7 1.155 1.504 1.873 1.04.927 1.917 1.213 2.187 1.348.27.135.428.113.586-.067.157-.18.674-.785.854-1.055.18-.27.36-.225.605-.135.246.09 1.564.738 1.832.872.27.135.45.202.516.315.067.113.067.652-.227 1.483z" />
+              </svg>
+              Chat Us On WhatsApp
+            </a>
           </div>
         </div>
       )}
