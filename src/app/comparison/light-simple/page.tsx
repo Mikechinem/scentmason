@@ -1,5 +1,7 @@
 import OrderForm3 from "@/components/scentmason/OrderForm3";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
+import MininDiffuserGraveyard from "@/components/scentmason/MiniDiffuserGraveyard";
+import MiniDiffuserGraveyard from "@/components/scentmason/MiniDiffuserGraveyard";
 
 
 
@@ -278,7 +280,7 @@ export default function RechargeableDiffuserPage() {
         </div>
       </section>
 
-    
+    <MiniDiffuserGraveyard />
 
       {/* Why you'll love it */}
       <section className="bg-white px-4 py-14 text-center">
@@ -335,6 +337,8 @@ export default function RechargeableDiffuserPage() {
     <CTAButton label="I Want This Now" />
   </div>
 </section>
+      
+      
       {/* Unboxing video */}
       <section className="px-4 py-10 text-center">
         <h2 className="mt-4 text-[28px] font-bold tracking-tight text-black leading-tight sm:text
