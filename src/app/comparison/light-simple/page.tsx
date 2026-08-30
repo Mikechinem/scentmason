@@ -53,11 +53,6 @@ const testimonials = [
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/man_diff2.png?updatedAt=1782326017349",
   },
   
-  {
-    name: "Benson Ode",
-    text: "Ordered 2 sets for my apartment. Best decision — every room now smells consistent and clean.",
-    avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/man_diff1.png",
-  },
 ];
 
 function WhatsAppButton() {
@@ -105,10 +100,7 @@ export default function RechargeableDiffuserPage() {
         <p className="inline-block rounded-full bg-[#FAF7F2] px-4 py-1.5 text-[16px] font-bold uppercase tracking-wider text-[#3B1F0E] border border-[#3B1F0E]/10">
           Aromatherapy Diffuser (Rechargeable)
         </p>
-
-        <h1 className="mx-auto mt-4 max-w-[620px] text-[25px] font-normal leading-9 tracking-tight text-black sm:text-[28px]">
-          The diffuser that <span className="font-bold">makes your home smell luxurious</span> like a <br></br>5-star hotel without you remembering to spray all the time.
-        </h1>
+      
 <div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
   <img
     src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915"
@@ -116,6 +108,9 @@ export default function RechargeableDiffuserPage() {
     className="h-auto w-full object-cover"
   />
 </div>
+<h1 className="mx-auto mt-4 max-w-[620px] text-[25px] font-normal leading-9 tracking-tight text-black sm:text-[28px]">
+          The diffuser that <span className="font-bold">makes your home smell luxurious</span> like a <br></br>5-star hotel without you remembering to spray all the time.
+        </h1>
 <div className="mx-auto mt-5 max-w-[520px] rounded-xl border border-black/[0.06] bg-black/[0.02] p-4 text-center">
   <p className="mt-1 text-[18px] font-medium text-amber-600">
     Just set it once and enjoy luxury scent all days all nights.
