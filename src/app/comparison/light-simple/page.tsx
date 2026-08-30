@@ -340,23 +340,6 @@ export default function RechargeableDiffuserPage() {
   </div>
 </section>
       
-      
-      {/* Unboxing video */}
-      <section className="px-4 py-10 text-center">
-        <h2 className="mt-4 text-[28px] font-bold tracking-tight text-black leading-tight sm:text
-        text-[36px]">See It In Action</h2>
-
-        <div className="mx-auto mt-6 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
-          <video
-            controls
-            poster="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/prd_image_dark.png?updatedAt=1780838530529"
-            className="h-auto w-full"
-          >
-            <source src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/diffus_unbox_woman.MOV/ik-video.mp4?updatedAt=1781957688695" type="video/mp4" />
-          </video>
-        </div>
-      </section>
-
 
       {/* What's inside */}
       <section className="px-4 py-10 text-center">
