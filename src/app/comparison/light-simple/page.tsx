@@ -154,7 +154,7 @@ export default function RechargeableDiffuserPage() {
           </div>
 
           <p className="mt-5 text-[20px] font-medium text-black/50 line-through">
-            ₦45,000
+            ₦38,000
           </p>
 
           <p className="mt-1 text-[36px] font-bold text-[#3B1F0E]">
