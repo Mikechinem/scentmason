@@ -1,6 +1,6 @@
 import OrderForm3 from "@/components/scentmason/OrderForm3";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
-import MininDiffuserGraveyard from "@/components/scentmason/MiniDiffuserGraveyard";
+import XVideoUsecase from "@/components/scentmason/XVideoUsecase";
 import MiniDiffuserGraveyard from "@/components/scentmason/MiniDiffuserGraveyard";
 
 
@@ -41,32 +41,18 @@ const testimonials = [
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/man_diff3.png",
   },
   {
-    name: "Sefunmi",
-    text: "Best purchase I've made this year! My guests always ask what I use, and it looks so fine sitting on my console table. Delivery was fast too.",
-    avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/womn_diff2.png",
-  },
-  {
     name: " Mrs Tolu Martins",
     text: "Simple setup, clean look, and the fragrance throw is strong without being overpowering. Worth every naira.",
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/womandiff4.png",
   },
-  {
-    name: "Chamun Ishaya",
-    text: "My salon smells amazing now. Clients keep asking what I use and I just point at the machine on the wall.",
-    avatar: "https://ik.imagekit.io/j1e78ujalr/sm12.2.png?updatedAt=1773233437317",
-  },
+  
   
   {
     name: "Ibrahim Sule",
     text: "Bought this for my shop. Customers comment on the smell before they even say hello. Good investment.",
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/man_diff2.png?updatedAt=1782326017349",
   },
- 
-  {
-    name: "Blessing Achebe",
-    text: "I was skeptical about rechargeable diffusers but this one actually delivers. My bedroom smells incredible every night.",
-    avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/womandif6.png",
-  },
+  
   {
     name: "Benson Ode",
     text: "Ordered 2 sets for my apartment. Best decision — every room now smells consistent and clean.",
@@ -131,16 +117,26 @@ export default function RechargeableDiffuserPage() {
   />
 </div>
 <div className="mx-auto mt-5 max-w-[520px] rounded-xl border border-black/[0.06] bg-black/[0.02] p-4 text-center">
-  <p className="text-[16px] font-semibold leading-relaxed text-black">
-    No drilling. No plugging in. No remembering.
-  </p>
-  <p className="mt-1 text-[15px] font-medium text-amber-600">
+  <p className="mt-1 text-[18px] font-medium text-amber-600">
     Just set it once and enjoy luxury scent all days all nights.
   </p>
 </div>
 
         <CTAButton />
       </section>
+
+<section className="py-12">
+  <div className="mx-auto max-w-xl px-4">
+    <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
+  Imagine coming home to a fresh-smelling house. All Day. Every Day. Without the constant spraying.
+</h2>
+
+    <XVideoUsecase
+      src="https://res.cloudinary.com/doatbjjtn/video/upload/v1788080744/M0811_2_vhfx8n.mp4"
+      className="mt-6"
+    />
+  </div>
+</section>
 
       {/* Pricing highlight */}
       <section className="px-4 py-10">
@@ -185,6 +181,20 @@ export default function RechargeableDiffuserPage() {
         </div>
       </section>
 
+      <section className="py-12">
+  <div className="mx-auto max-w-xl px-4">
+    <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
+  Place it anywhere you want...works automatically without you remembering to spray.
+</h2>
+
+    <XVideoUsecase
+      src="https://res.cloudinary.com/doatbjjtn/video/upload/v1788076713/0811_3_vk4c8z.mp4"
+    />
+  </div>
+</section>
+
+
+
       {/* No more bad odour */}
       <section className="px-4 py-10 text-center">
        <h2 className="mx-auto max-w-[600px] text-[23px] font-bold leading-9 tracking-tight text-black">
@@ -209,28 +219,20 @@ export default function RechargeableDiffuserPage() {
             className="h-auto w-full object-cover"
           />
         </div>
+     </section>
 
-
-            <CTAButton />
-        
-
-        
-      </section>
-
-      {/* Spa vibe */}
-      <section className="px-4 py-10 text-center">
-        <h2 className="mx-auto max-w-[600px] text-[23px] font-normal leading-9 tracking-tight text-black/80">
-  It automatically transforms your space into a <span className="font-bold text-black text-[24px]">5-star luxury spa</span> using a sleek, sculptural design—<span className="font-bold text-amber-600">no manual spraying, no tracking, zero effort.</span>
+<section className="py-12">
+  <div className="mx-auto max-w-xl px-4">
+    <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
+  No need to driil your wall or chase bad smell up and down
 </h2>
 
-        <div className="mx-auto mt-6 w-full max-w-[560px] overflow-hidden rounded-2xl border border-black/10">
-          <img
-            src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/model_girl_prd_real.png?updatedAt=1781024869003"
-            alt="ScentMason diffuser styled in a home setting"
-            className="h-auto w-full object-cover"
-          />
-        </div>
-      </section>
+    <XVideoUsecase
+      src="https://res.cloudinary.com/doatbjjtn/video/upload/v1788080752/M0821_wva946.mp4"
+    />
+  </div>
+</section>
+
 
       {/* Testimonials - scrolling, screenshot-style review cards, animate into view */}
       <section className="py-10">

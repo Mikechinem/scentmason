@@ -95,22 +95,6 @@ export default function MiniDiffuserGraveyard() {
             </span>
           </h2>
 
-          <p
-            className="
-              mx-auto
-              mt-4
-              max-w-[580px]
-              text-[15.5px]
-              font-medium
-              leading-7
-              text-zinc-400
-              sm:text-[17px]
-            "
-          >
-            ScentMason makes it easier to enjoy a fresh,
-            beautiful scent around your home.
-          </p>
-
         </div>
 
 
@@ -503,68 +487,12 @@ export default function MiniDiffuserGraveyard() {
               <div>
 
                 <p className="text-[15px] font-bold text-white">
-                  A more refined scent
+                  Fresh fragrance for longer
                 </p>
 
                 <p className="mt-1 text-[13.5px] leading-5.5 text-zinc-400">
-                  Cold-air diffusion helps fill your space with
-                  a fine fragrance mist.
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          {/* =================================================
-              BENEFIT 5
-          ================================================= */}
-
-          <div
-            className="
-              sm:col-span-2
-              rounded-2xl
-              border
-              border-[#C49A78]/20
-              bg-[#C49A78]/[0.07]
-              p-4
-              shadow-[0_12px_35px_rgba(0,0,0,0.20)]
-              sm:p-5
-            "
-          >
-
-            <div className="flex items-start justify-center gap-3 text-center">
-
-              <span
-                className="
-                  mt-0.5
-                  flex
-                  h-8
-                  w-8
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-full
-                  bg-[#C49A78]
-                  text-[15px]
-                  font-bold
-                  text-[#0b0a09]
-                "
-              >
-                ✦
-              </span>
-
-              <div>
-
-                <p className="text-[15px] font-bold text-white sm:text-[16px]">
-                  Bring that luxury-home feeling into your everyday space.
-                </p>
-
-                <p className="mt-1 text-[13.5px] leading-5.5 text-zinc-400">
-                  Less spraying. Less hassle. Just a home that
-                  smells beautiful.
+                  Built to keep releasing fragrance without
+                  constant refilling or daily spraying.
                 </p>
 
               </div>
