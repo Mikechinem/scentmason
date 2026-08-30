@@ -242,13 +242,15 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
       <form onSubmit={handleSubmit} action="javascript:void(0)" className="bg-white text-black">
         <div className="rounded-xl border-2 border-red-600 bg-red-50 p-4">
-          <p className="text-[14px] font-bold leading-6 text-red-700">
-            IMPORTANT: PLEASE DO NOT fill this form if you don&apos;t have the money for it... OR if you&apos;re travelling in the next 2-4 days.
-          </p>
+          <p className="text-[16px] font-medium leading-6 text-red-700 bg-red-50 p-4 rounded-md border border-red-200">
+  <span className="font-bold">PLEASE NOTE:</span> Failed deliveries cost us a lot of money. 
+  Please fill out this form <span className="font-bold underline text-red-800">ONLY</span> if you are <span className="font-bold">fully ready to receive your order</span> and <span className="font-bold">pay upon delivery</span>. 
+  Our team will call you to confirm your order details before dispatching. Thank you for respecting our business!</p>
+
         </div>
 
         {/* Packages Layout */}
-        <p className="mt-6 text-[15px] font-semibold">Choose your package</p>
+        <p className="mt-6 text-[18px] font-semibold">Choose your package</p>
         <div className="mt-3 space-y-2" id="package-buttons-wrapper">
           {(Object.keys(SET_PRICING) as SetOption[]).map((option) => {
             const data = SET_PRICING[option];
@@ -278,8 +280,8 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         </div>
 
         {/* Extra oil Layout */}
-        <p className="mt-6 text-[15px] font-semibold">Add extra oil</p>
-        <p className="mt-1 text-[13px] font-medium text-black/60">
+        <p className="mt-6 text-[18px] font-semibold">Add extra oil</p>
+        <p className="mt-1 text-[16px] font-medium text-black/60">
           Want extra fragrance oil added to your order? Select how many extra bottles you&apos;d like.
         </p>
         <div className="mt-3 space-y-2" id="oil-buttons-wrapper">

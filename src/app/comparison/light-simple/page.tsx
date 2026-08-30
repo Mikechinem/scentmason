@@ -219,7 +219,7 @@ export default function RechargeableDiffuserPage() {
 <section className="py-12">
   <div className="mx-auto max-w-xl px-4">
     <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
-  No need to driil your wall or chase bad smell up and down
+  Keep your walls flawless. Zero drilling, zero stress, just instant freshness.
 </h2>
 
     <XVideoUsecase
@@ -276,6 +276,18 @@ export default function RechargeableDiffuserPage() {
           ))}
         </div>
       </section>
+
+      <section className="py-12">
+  <div className="mx-auto max-w-xl px-4">
+    <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
+  Zero harsh chemicals—perfectly safe for infants, pets, and asthmatic lungs.
+</h2>
+
+    <XVideoUsecase
+      src="https://res.cloudinary.com/doatbjjtn/video/upload/v1788080755/N0811_sdkzpu.mp4"
+    />
+  </div>
+</section>
 
     <MiniDiffuserGraveyard />
 
