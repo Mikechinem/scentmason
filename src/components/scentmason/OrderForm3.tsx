@@ -246,8 +246,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
   <span className="font-bold">PLEASE NOTE:</span> Failed deliveries cost us a lot of money. 
   Please fill out this form <span className="font-bold underline text-red-800">ONLY</span> if you are <span className="font-bold">fully ready to receive your order</span> and <span className="font-bold">pay upon delivery</span>. 
   Our team will call you to confirm your order details before dispatching. Thank you for respecting our business!</p>
-
-        </div>
+</div>
 
         {/* Packages Layout */}
         <p className="mt-6 text-[18px] font-semibold">Choose your package</p>

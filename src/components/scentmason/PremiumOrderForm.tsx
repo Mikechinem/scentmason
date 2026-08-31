@@ -742,22 +742,10 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             py-4
           "
         >
-          <p
-            className="
-              text-[16px]
-              font-bold
-              leading-6
-              text-red-700
-            "
-          >
-            IMPORTANT: ONLY FILL THIS FORM IF YOU&apos;RE READY TO RECEIVE YOUR ORDER.
-
-            Please do not order if you won&apos;t have the money available
-            or if you&apos;ll be travelling within the next 2-4 days.
-
-            After filling this form, click &quot;I WILL ACCEPT&quot; to confirm
-            you&apos;re ready to receive your order.
-          </p>
+           <p className="text-[16px] font-medium leading-6 text-red-700 bg-red-50 p-4 rounded-md border border-red-200">
+  <span className="font-bold">PLEASE NOTE:</span> Failed deliveries cost us a lot of money. 
+  Please fill out this form <span className="font-bold underline text-red-800">ONLY</span> if you are <span className="font-bold">fully ready to receive your order</span> and <span className="font-bold">pay upon delivery</span>. 
+  Our team will call you to confirm your order details before dispatching. Thank you for respecting our business!</p>
         </div>
 
         <div className="mt-7">
@@ -998,8 +986,8 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         </div>
 
         <div className="mt-7">
-          <p className="text-[15px] font-bold text-[#1e1008]">
-            Delivery details
+          <p className="text-[18px] font-bold text-[#1e1008]">
+            Enter where you'd like to receive your delivery below.
           </p>
 
           <div className="mt-4 space-y-4">
@@ -1384,10 +1372,10 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               </div>
 
               <h3 className="mt-4 text-[21px] font-bold tracking-tight">
-                Order Received Successfully! ✅
+                Order Received Successfully!
               </h3>
 
-              <p className="mt-2 px-2 text-[14px] font-medium leading-relaxed text-black/70">
+              <p className="mt-2 px-2 text-[18px] font-medium leading-relaxed text-black/70">
                 Thank you{" "}
                 <span className="font-bold text-black">
                   {name.split(" ")[0]}
@@ -1407,7 +1395,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
                   text-left
                 "
               >
-                <p className="text-[13px] font-bold leading-relaxed text-amber-950">
+                <p className="text-[18px] font-bold leading-relaxed text-amber-950">
                   ⚠️ WHAT NEXT? A ScentMason customer care
                   representative will call you shortly on{" "}
                   <span className="font-extrabold underline">
