@@ -1251,8 +1251,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
             />
 
             <span className="text-[15px] font-bold leading-6 text-gray-800">
-              I WILL ACCEPT — I am ready to receive my order when contacted for
-              delivery confirmation.
+              I WILL ACCEPT — I confirm that I’m ready to receive and pay for my order when it arrives.
             </span>
           </label>
         </div>
