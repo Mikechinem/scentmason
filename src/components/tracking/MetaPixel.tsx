@@ -107,16 +107,6 @@ export function trackMetaLead(
 // ============================================================
 // META COMPLETE REGISTRATION TRACKER
 // ============================================================
-//
-// This is intentionally separate from Lead.
-//
-// IMPORTANT:
-// - It uses its OWN event ID.
-// - It does NOT replace Lead.
-// - It does NOT replace Purchase.
-// - It supports the Sales campaign using
-//   CompleteRegistration as an earlier optimization signal.
-//
 
 export function trackMetaCompleteRegistration(
   eventId: string,
@@ -264,6 +254,10 @@ export default function MetaPixel() {
 
             ${initScripts}
 
+            // ==================================================
+            // PAGEVIEW EVENT ID
+            // ==================================================
+
             var pageViewEventId =
               (window.crypto && crypto.randomUUID)
                 ? crypto.randomUUID()
@@ -274,24 +268,74 @@ export default function MetaPixel() {
               pageViewEventId
             );
 
+            // ==================================================
+            // BROWSER PAGEVIEW
+            //
+            // This event uses the same event ID as the server
+            // PageView so Meta can deduplicate the two events.
+            // ==================================================
+
             fbq(
               'track',
               'PageView',
               {},
               {
-                eventID:
-                  pageViewEventId
+                eventID: pageViewEventId
               }
             );
+
+            // ==================================================
+            // READ META BROWSER COOKIES
+            //
+            // _fbp = Meta browser identifier
+            // _fbc = Meta click identifier
+            //
+            // These are sent to our server so the CAPI PageView
+            // can use the same browser identity information.
+            // ==================================================
+
+            function getMetaCookie(name) {
+              var prefix = name + '=';
+              var cookies = document.cookie
+                ? document.cookie.split(';')
+                : [];
+
+              for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+
+                if (cookie.indexOf(prefix) === 0) {
+                  return decodeURIComponent(
+                    cookie.substring(prefix.length)
+                  );
+                }
+              }
+
+              return null;
+            }
+
+            var browserFbp = getMetaCookie('_fbp');
+            var browserFbc = getMetaCookie('_fbc');
+
+            console.log(
+              '🔎 [Meta Pixel] Browser identifiers:',
+              {
+                fbp: browserFbp ? 'present' : 'missing',
+                fbc: browserFbc ? 'present' : 'missing'
+              }
+            );
+
+            // ==================================================
+            // SERVER-SIDE PAGEVIEW / CAPI
+            // ==================================================
 
             fetch(
               '/api/track/pageview',
               {
-                method:
-                  'POST',
+                method: 'POST',
 
-                keepalive:
-                  true,
+                keepalive: true,
+
+                credentials: 'same-origin',
 
                 headers: {
                   'Content-Type':
@@ -304,7 +348,15 @@ export default function MetaPixel() {
                       pageViewEventId,
 
                     eventSourceUrl:
-                      window.location.href
+                      window.location.href,
+
+                    browserIdentifiers: {
+                      fbp:
+                        browserFbp,
+
+                      fbc:
+                        browserFbc
+                    }
                   })
               }
             )
