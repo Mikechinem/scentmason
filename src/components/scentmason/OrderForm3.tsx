@@ -43,6 +43,7 @@ export default function OrderForm3() {
   const [whatsapp, setWhatsapp] = useState("");
   const [state, setState] = useState("");
   const [address, setAddress] = useState("");
+  const [willAccept, setWillAccept] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -105,6 +106,17 @@ export default function OrderForm3() {
       return;
     }
 
+    // ========================================================
+    // CUSTOMER ACCEPTANCE
+    // ========================================================
+
+    if (!willAccept) {
+      setError(
+        '😞Please tick “I WILL ACCEPT” to confirm you’re ready to receive your order. Then submit the form again.'
+      );
+      return;
+    }
+
     // LAYER 2 DEDUPLICATION: Check localStorage to prevent double lead entries
     const orderFingerprint = `sm_order_${cleanPhone}_${finalSets}_${finalOil}`;
     if (typeof window !== "undefined" && localStorage.getItem(orderFingerprint)) {
@@ -119,47 +131,37 @@ export default function OrderForm3() {
     const currentUrl = typeof window !== "undefined" ? window.location.href : "";
 
     try {
-      // --- BULLETPROOF TRACKING INLINE FIXES ---
-      const numericValue = Number(currentTotal) || 0;
+      // ========================================================
+      // IMPORTANT:
+      //
+      // Browser Purchase is intentionally NOT fired here.
+      //
+      // Google Sheets must receive and record the order first.
+      // The browser Purchase event is fired only after the
+      // /api/track/purchase endpoint confirms that the order
+      // was successfully recorded.
+      // ========================================================
 
-      if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq("track", "Purchase", {
-          content_name: "ScentMason Diffuser",
-          value: numericValue,
-          currency: "NGN",
-          num_items: Number(finalSets),
-        }, { eventID: sharedEventId });
+      // Normalize phone format to E.164 locally for TikTok
+      let cleanTikTokPhone = cleanPhone.replace(/\D/g, "");
+
+      if (cleanTikTokPhone.startsWith("0")) {
+        cleanTikTokPhone = "234" + cleanTikTokPhone.slice(1);
+      } else if (!cleanTikTokPhone.startsWith("234")) {
+        cleanTikTokPhone = "234" + cleanTikTokPhone;
       }
 
-      if (typeof window !== "undefined" && (window as any).ttq) {
-        // Normalize phone format to E.164 locally to fix the console warning
-        let cleanTikTokPhone = cleanPhone.replace(/\D/g, "");
-        if (cleanTikTokPhone.startsWith("0")) {
-          cleanTikTokPhone = "234" + cleanTikTokPhone.slice(1);
-        } else if (!cleanTikTokPhone.startsWith("234")) {
-          cleanTikTokPhone = "234" + cleanTikTokPhone;
-        }
-        cleanTikTokPhone = "+" + cleanTikTokPhone;
+      cleanTikTokPhone = "+" + cleanTikTokPhone;
 
-        (window as any).ttq.identify({
-          phone_number: cleanTikTokPhone,
-        });
-          
-        (window as any).ttq.track("Purchase", {
-          content_name: "ScentMason Diffuser",
-          content_id: "scentmason_diffuser",
-          value: numericValue,
-          currency: "NGN",
-          quantity: Number(finalSets),
-        }, { event_id: sharedEventId });
-      }
-
-      // 💡 Invisible Match Enhancement: Slices City details dynamically from delivery address for CAPI
+      // Invisible Match Enhancement: Slices City details dynamically from delivery address for CAPI
       const addressParts = cleanAddress.split(",").map(part => part.trim());
-      const extractedCity = addressParts.length > 1 ? addressParts[addressParts.length - 2] : addressParts[0] || "";
+      const extractedCity =
+        addressParts.length > 1
+          ? addressParts[addressParts.length - 2]
+          : addressParts[0] || "";
 
       const unifiedOrderPayload = {
-        eventName: "Purchase", // Explicitly passed to sync backend tracking modules
+        eventName: "Purchase",
         eventId: sharedEventId,
         eventSourceUrl: currentUrl,
         referrer: typeof document !== "undefined" ? document.referrer : undefined,
@@ -167,7 +169,7 @@ export default function OrderForm3() {
         phone: cleanPhone,
         whatsapp: whatsapp.trim(),
         state,
-        city: extractedCity, // 💡 Extracted cleanly in the background to align with the new route expectations
+        city: extractedCity,
         address: cleanAddress,
         sets: finalSets,
         setPrice: SET_PRICING[finalSets as SetOption].price,
@@ -175,33 +177,115 @@ export default function OrderForm3() {
         oilBottlesFree: finalSets === "5" ? 1 : 0,
         oilBottlesTotal: Number(finalOil) + (finalSets === "5" ? 1 : 0),
         oilPrice: OIL_PRICING[finalOil as OilOption].price,
-        total: numericValue, // Ensures server gets clean number format
+        total: Number(currentTotal) || 0,
         fbp: getCookie("_fbp"),
         fbc: getCookie("_fbc"),
         ttp: getCookie("_ttp"),
         ttclid: getCookie("ttclid"),
+
+        // Passed to the backend so Apps Script receives YES.
+        // No Google Sheet column is required.
+        willAccept: true,
       };
 
-      // Execute track calls in parallel; gracefully capture TikTok network failures
-      const [metaResponse] = await Promise.all([
-        fetch("/api/track/purchase", { 
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(unifiedOrderPayload),
-        }),
-        fetch("/api/track/tiktok/purchase", { 
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(unifiedOrderPayload),
-        }).catch((err) => {
-          console.error("TikTok pipeline async suppression background block:", err);
-          return null; 
-        })
-      ]);
+      // ========================================================
+      // STEP 1:
+      // SEND ORDER TO GOOGLE SHEETS / META BACKEND
+      //
+      // The backend now records the order in Google Sheets
+      // BEFORE firing Meta CAPI Purchase.
+      // ========================================================
 
-      if (!metaResponse || !metaResponse.ok) throw new Error("Primary ingestion engine failed");
-      
-      // Save order context locally to lock out secondary duplications
+      const metaResponse = await fetch("/api/track/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(unifiedOrderPayload),
+      });
+
+      if (!metaResponse.ok) {
+        throw new Error("Primary order recording engine failed");
+      }
+
+      const metaResult = await metaResponse.json();
+
+      if (!metaResult?.success || !metaResult?.orderRecorded) {
+        throw new Error("Order was not confirmed as recorded");
+      }
+
+      // ========================================================
+      // STEP 2:
+      // GOOGLE SHEETS HAS CONFIRMED THE ORDER.
+      //
+      // NOW — AND ONLY NOW — FIRE BROWSER PURCHASE.
+      //
+      // SAME sharedEventId is used by the server CAPI Purchase,
+      // so Meta can correctly deduplicate Browser + CAPI.
+      // ========================================================
+
+      const numericValue = Number(currentTotal) || 0;
+
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq(
+          "track",
+          "Purchase",
+          {
+            content_name: "ScentMason Diffuser",
+            value: numericValue,
+            currency: "NGN",
+            num_items: Number(finalSets),
+          },
+          {
+            eventID: sharedEventId,
+          }
+        );
+
+        console.log(
+          "✅ [Meta Pixel] Browser Purchase fired AFTER order recording.",
+          {
+            eventId: sharedEventId,
+            value: numericValue,
+          }
+        );
+      }
+
+      // ========================================================
+      // STEP 3:
+      // FIRE TIKTOK PURCHASE AFTER ORDER RECORDING
+      // ========================================================
+
+      if (typeof window !== "undefined" && (window as any).ttq) {
+        (window as any).ttq.identify({
+          phone_number: cleanTikTokPhone,
+        });
+
+        (window as any).ttq.track(
+          "Purchase",
+          {
+            content_name: "ScentMason Diffuser",
+            content_id: "scentmason_diffuser",
+            value: numericValue,
+            currency: "NGN",
+            quantity: Number(finalSets),
+          },
+          {
+            event_id: sharedEventId,
+          }
+        );
+
+        console.log(
+          "✅ [TikTok Pixel] Browser Purchase fired AFTER order recording.",
+          {
+            eventId: sharedEventId,
+            value: numericValue,
+          }
+        );
+      }
+
+      // ========================================================
+      // STEP 4:
+      // SAVE ORDER CONTEXT LOCALLY TO LOCK OUT DUPLICATIONS
+      // ========================================================
+
       if (typeof window !== "undefined") {
         localStorage.setItem(orderFingerprint, "true");
       }
@@ -209,18 +293,29 @@ export default function OrderForm3() {
       setSubmitted(true);
     } catch (err) {
       console.error("Order submission tracking loop exception:", err);
-      setError("Something went wrong sending your order. Please call or WhatsApp us on 0706 496 9603 to confirm.");
+
+      setError(
+        "Something went wrong sending your order. Please call or WhatsApp us on 0706 496 9603 to confirm."
+      );
     } finally {
       setSubmitting(false);
     }
   }
 
   // Pre-calculate target routing parameters for dynamic customer chat matching
-  const fallbackSets = typeof document !== "undefined" ? (document.getElementById("native-hidden-sets") as HTMLInputElement)?.value : sets;
-  const fallbackOil = typeof document !== "undefined" ? (document.getElementById("native-hidden-oil") as HTMLInputElement)?.value : oil;
+  const fallbackSets = typeof document !== "undefined"
+    ? (document.getElementById("native-hidden-sets") as HTMLInputElement)?.value
+    : sets;
+
+  const fallbackOil = typeof document !== "undefined"
+    ? (document.getElementById("native-hidden-oil") as HTMLInputElement)?.value
+    : oil;
   
-  const selectedPackageLabel = SET_PRICING[fallbackSets as SetOption]?.label || "Order Package";
-  const chosenOilLabel = OIL_PRICING[fallbackOil as OilOption]?.label || "No extra oil";
+  const selectedPackageLabel =
+    SET_PRICING[fallbackSets as SetOption]?.label || "Order Package";
+
+  const chosenOilLabel =
+    OIL_PRICING[fallbackOil as OilOption]?.label || "No extra oil";
 
   // Highly conversion-optimized structural message string
   const successMessageText = `Hello ScentMason, I just successfully completed my order form online! 
@@ -243,10 +338,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
       <form onSubmit={handleSubmit} action="javascript:void(0)" className="bg-white text-black">
         <div className="rounded-xl border-2 border-red-600 bg-red-50 p-4">
           <p className="text-[16px] font-medium leading-6 text-red-700 bg-red-50 p-4 rounded-md border border-red-200">
-  <span className="font-bold">PLEASE NOTE:</span> Failed deliveries cost us a lot of money. 
-  Please fill out this form <span className="font-bold underline text-red-800">ONLY</span> if you are <span className="font-bold">fully ready to receive your order</span> and <span className="font-bold">pay upon delivery</span>. 
-  Our team will call you to confirm your order details before dispatching. Thank you for respecting our business!</p>
-</div>
+            <span className="font-bold">PLEASE NOTE:</span> Failed deliveries cost us a lot of money. 
+            Please fill out this form <span className="font-bold underline text-red-800">ONLY</span> if you are <span className="font-bold">fully ready to receive your order</span> and <span className="font-bold">pay upon delivery</span>. 
+            Our team will call you to confirm your order details before dispatching. Thank you for respecting our business!
+          </p>
+        </div>
 
         {/* Packages Layout */}
         <p className="mt-6 text-[18px] font-semibold">Choose your package</p>
@@ -283,6 +379,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         <p className="mt-1 text-[16px] font-medium text-black/60">
           Want extra fragrance oil added to your order? Select how many extra bottles you&apos;d like.
         </p>
+
         <div className="mt-3 space-y-2" id="oil-buttons-wrapper">
           {(Object.keys(OIL_PRICING) as OilOption[]).map((option) => {
             const data = OIL_PRICING[option];
@@ -312,9 +409,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         {/* Total Summary Box */}
         <div className="mt-6 rounded-xl border-2 border-black px-4 py-4 bg-white">
           <p className="text-[12px] font-semibold uppercase tracking-wide text-black/50">Order Total</p>
+
           <p className="mt-1 text-[13px] font-medium text-black/70" id="native-display-summary">
             {setPricing.label} · {totalOilBottles > 0 ? `${totalOilBottles} bottles` : "no extra oil"}
           </p>
+
           <p className="mt-2 text-[22px] font-semibold text-black" id="native-display-total">
             {formatNaira(total)}
           </p>
@@ -324,34 +423,101 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         <div className="mt-6 space-y-4">
           <div>
             <label className="text-[13px] font-medium text-black/70">Full Name</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Chioma Adeyemi" className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black" />
+
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Chioma Adeyemi"
+              className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black"
+            />
           </div>
+
           <div>
             <label className="text-[13px] font-medium text-black/70">Phone Number</label>
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="08012345678" className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black" />
+
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="08012345678"
+              className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black"
+            />
           </div>
+
           <div>
             <label className="text-[13px] font-medium text-black/70">WhatsApp Number</label>
-            <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="08012345678" className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black" />
+
+            <input
+              type="tel"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
+              placeholder="08012345678"
+              className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black"
+            />
           </div>
+
           <div>
             <label className="text-[13px] font-medium text-black/70">State</label>
-            <select value={state} onChange={(e) => setState(e.target.value)} className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black">
+
+            <select
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black"
+            >
               <option value="">Select your state</option>
-              {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+
+              {STATES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
             </select>
           </div>
+
           <div>
             <label className="text-[13px] font-medium text-black/70">Delivery Address</label>
-            <textarea value={address} onChange={(e) => setAddress(e.target.value)} placeholder="House number, street, area, landmark" rows={3} className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black" />
+
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="House number, street, area, landmark"
+              rows={3}
+              className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3 text-[15px] font-medium text-black outline-none focus:border-black"
+            />
           </div>
         </div>
 
         {error && (
-          <p id="form-error-message" className="mt-4 text-[13px] font-semibold text-red-600 scroll-mt-20">
+          <p
+            id="form-error-message"
+            className="mt-4 text-[13px] font-semibold text-red-600 scroll-mt-20"
+          >
             {error}
           </p>
         )}
+
+        {/* I ACCEPT */}
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50/70 p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={willAccept}
+              onChange={(e) => {
+                setWillAccept(e.target.checked);
+
+                if (e.target.checked) {
+                  setError("");
+                }
+              }}
+              className="mt-1 h-5 w-5 shrink-0 accent-red-600"
+            />
+
+            <span className="text-[15px] font-bold leading-6 text-gray-800">
+              I WILL ACCEPT — I am ready to receive my order when contacted for delivery confirmation.
+            </span>
+          </label>
+        </div>
 
         <button
           type="submit"
@@ -359,7 +525,11 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
           id="native-submit-btn"
           className="mt-6 w-full rounded-full bg-[#25D366] px-6 py-4 text-center text-[17px] font-semibold text-white disabled:opacity-60"
         >
-          {!mounted ? "Loading..." : submitting ? "Sending Your Order..." : `YES I WANT THIS NOW — ${formatNaira(total)}`}
+          {!mounted
+            ? "Loading..."
+            : submitting
+              ? "Sending Your Order..."
+              : `YES I WANT THIS NOW — ${formatNaira(total)}`}
         </button>
 
         <p className="mt-4 text-center text-[12px] font-medium text-black/50">
@@ -367,25 +537,46 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         </p>
       </form>
 
-      {/* PREMIUM THANK YOU MODAL OVERLAY (Safely Teleported to Body Element via Portal) */}
+      {/* PREMIUM THANK YOU MODAL OVERLAY */}
       {mounted && submitted && createPortal(
         <div className="fixed inset-0 z-[9999999] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fadeIn">
           <div className="relative w-full max-w-md transform rounded-2xl bg-white p-6 text-center shadow-2xl animate-scaleIn transition-all border border-black/5 text-black">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-7 h-7">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={3}
+                stroke="currentColor"
+                className="w-7 h-7"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4.5 12.75l6 6 9-13.5"
+                />
               </svg>
             </div>
 
-            <h3 className="mt-4 text-[21px] font-bold text-black tracking-tight">Order Received Successfully! ✅</h3>
+            <h3 className="mt-4 text-[21px] font-bold text-black tracking-tight">
+              Order Received Successfully! ✅
+            </h3>
             
             <p className="mt-2 text-[14px] font-medium leading-relaxed text-black/70 px-2">
-              Thank you <span className="font-bold text-black">{name.split(" ")[0]}</span>, if you want your order delivered faster, please inform us on WhatsApp.
+              Thank you{" "}
+              <span className="font-bold text-black">
+                {name.split(" ")[0]}
+              </span>
+              , if you want your order delivered faster, please inform us on WhatsApp.
             </p>
 
             <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-left">
               <p className="text-[13px] font-bold text-amber-950 leading-relaxed">
-                ⚠️ WHAT NEXT? A ScentMason customer care representative will call you shortly on <span className="underline font-extrabold">{phone}</span> to verify your destination details before your order is delivered.
+                ⚠️ WHAT NEXT? A ScentMason customer care representative will call you shortly on{" "}
+                <span className="underline font-extrabold">
+                  {phone}
+                </span>{" "}
+                to verify your destination details before your order is delivered.
               </p>
             </div>
 
@@ -395,9 +586,14 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
               rel="noopener noreferrer"
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 text-center text-[16px] font-bold text-white shadow-md hover:scale-[1.01] active:scale-100 transition-all"
             >
-              <svg viewBox="0 0 32 32" className="h-5 w-5 shrink-0" fill="#ffffff">
-                <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95-.137-.17-1.103-1.47-1.103-2.8 0-1.33.7-1.984.95-2.255.246-.27.535-.337.713-.337.178 0 .357 0 .513.008.165.008.387-.063.605.462.224.54.762 1.86.83 1.994.067.135.112.293.022.47-.09.178-.135.288-.27.443-.135.157-.284.35-.405.47-.135.135-.276.282-.118.55.157.27.7 1.155 1.504 1.873 1.04.927 1.917 1.213 2.187 1.348.27.135.428.113.586-.067.157-.18.674-.785.854-1.055.18-.27.36-.225.605-.135.246.09 1.564.738 1.832.872.27.135.45.202.516.315.067.113.067.652-.227 1.483z" />
+              <svg
+                viewBox="0 0 32 32"
+                className="h-5 w-5 shrink-0"
+                fill="#ffffff"
+              >
+                <path d="M16.001 3C9.373 3 4 8.373 4 15.001c0 2.385.694 4.6 1.885 6.466L4 29l7.73-1.838A11.94 11.94 0 0 0 16.001 27C22.629 27 28 21.629 28 15.001 28 8.373 22.629 3 16.001 3zm6.992 16.99c-.295.83-1.452 1.59-2.31 1.762-.797.158-1.5.225-3.193-.42-2.726-1.04-4.484-3.78-4.62-3.95-.137-.17-1.103-1.47-1.103-2.8 0-1.33.7-1.984.95-.2.246-.27.535-.337.713-.337.178 0 .357 0 .513.008.165.008.387-.063.605.462.224.54.762 1.86.83 1.994.067.135.112.293.022.47-.09.178-.135.288-.27.443-.135.157-.284.35-.405.47-.135.135-.276.282-.118.55.157.27.7 1.155 1.504 1.873 1.04.927 1.917 1.213 2.187 1.348.27.135.428.113.586-.067.157-.18.674-.785.854-1.055.18-.27.36-.225.605-.135.246.09 1.564.738 1.832.872.27.135.45.202.516.315.067.113.067.652-.227 1.483z" />
               </svg>
+
               Chat Us On WhatsApp
             </a>
           </div>
