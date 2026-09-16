@@ -150,7 +150,7 @@ export default function DiscountPricePage() {
         <h2 className="mx-auto max-w-[650px] text-[26px] font-bold leading-[1.35] tracking-tight text-black sm:text-[31px]">
           Do not let bad smells{" "}
           <span className="text-red-600">embarrass you</span> when visitors come{" "}
-          <span className="underline decoration-black/30 decoration-2">without warning.</span>
+          <span className="underline decoration-black/30 decoration-2">unexpected.</span>
         </h2>
 
         <p className="mx-auto mt-4 max-w-[600px] text-[18px] font-medium leading-7 text-black/70">
