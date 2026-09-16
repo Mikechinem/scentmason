@@ -281,7 +281,7 @@ export default function NewPricePremiumPage() {
       <section className="py-12">
         <div className="mx-auto max-w-xl px-4">
           <h2 className="mx-auto max-w-xl text-center text-[27px] font-bold leading-tight sm:text-[32px]">
-            Enjoy fresh fragrance without having to keep spraying.
+            Safe for infants, pets, and asthmatic lungs.
           </h2>
 
           <XVideoUsecase
