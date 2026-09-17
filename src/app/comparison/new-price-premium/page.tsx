@@ -68,30 +68,34 @@ export default function NewPricePremiumPage() {
     <main className="bg-white text-black">
 
       {/* =====================================================
-          HERO
-      ===================================================== */}
-      <section className="px-4 py-10 text-center">
-        <h1 className="mx-auto mt-5 max-w-[650px] text-[30px] font-normal leading-[1.2] tracking-tight text-black sm:text-[38px]">
-          Your home can look beautiful and still{" "}
-          <span className="font-bold text-red-600">smell bad.</span>
-        </h1>
+    HERO
+===================================================== */}
+<section className="bg-[#111111] px-4 py-10 text-center sm:py-14">
 
-        <p className="mx-auto mt-4 max-w-[600px] text-[19px] font-medium leading-7 text-black/80 sm:text-[21px]">
-          Bad smells make your visitors feel uncomfortable. This Fragrance
-          Machine releases fragrance on its own, so you do not have to keep
-          spraying by hand.
-        </p>
+  <h1 className="mx-auto mt-2 max-w-[650px] text-[30px] font-normal leading-[1.2] tracking-tight text-white sm:text-[38px]">
+    Make Your Home{" "}
+    <span className="font-bold text-[#e8a32d]">
+      Smell Amazing Like a 5-Star Hotel
+    </span>{" "}
+    Without Constant Spraying Or Burning Candles.
+  </h1>
 
-        <div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
-          <img
-            src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915"
-            alt="ScentMason automatic fragrance machine"
-            className="h-auto w-full object-cover"
-          />
-        </div>
+  <div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-white/10">
+    <img
+      src="https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/real%20image_handing.png?updatedAt=1780844410915"
+      alt="ScentMason automatic fragrance machine"
+      className="h-auto w-full object-cover"
+    />
+  </div>
 
-        <CTAButton />
-      </section>
+  <p className="mx-auto mt-5 max-w-[600px] text-[19px] font-medium leading-7 text-white/85 sm:text-[21px]">
+    ScentMason Diffuser releases fragrance automatically, so you can enjoy a fresh,
+    luxurious-smelling space without remembering to spray by hand.
+  </p>
+
+  <CTAButton />
+
+</section>
 
       {/* =====================================================
           VIDEO
