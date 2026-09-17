@@ -663,49 +663,62 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
         ===================================================== */}
         <div className="mt-7 space-y-5">
           {[
-            [
-              "Full Name",
-              name,
-              setName,
-              "e.g. Chioma Adeyemi",
-            ],
-            [
-              "Phone Number",
-              phone,
-              setPhone,
-              "08012345678",
-            ],
-            [
-              "WhatsApp Number",
-              whatsapp,
-              setWhatsapp,
-              "08012345678",
-            ],
-          ].map(
-            ([label, value, setter, placeholder]) => (
-              <div key={String(label)}>
-                <label className="text-[15px] font-medium text-black/70">
-                  {String(label)}
-                </label>
+  [
+    "Full Name",
+    name,
+    setName,
+    "e.g. Chioma Adeyemi",
+    "text",
+  ],
+  [
+    "Phone Number",
+    phone,
+    setPhone,
+    "08012345678",
+    "tel",
+  ],
+  [
+    "WhatsApp Number",
+    whatsapp,
+    setWhatsapp,
+    "08012345678",
+    "tel",
+  ],
+].map(
+  ([label, value, setter, placeholder, inputType]) => (
+    <div key={String(label)}>
+      <label className="text-[15px] font-medium text-black/70">
+        {String(label)}
+      </label>
 
-                <input
-                  type="tel"
-                  value={String(value)}
-                  onChange={(e) =>
-                    (
-                      setter as (
-                        value: string
-                      ) => void
-                    )(e.target.value)
-                  }
-                  placeholder={String(
-                    placeholder
-                  )}
-                  className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3.5 text-[17px] font-medium text-black outline-none focus:border-black"
-                />
-              </div>
-            )
-          )}
+      <input
+        type={String(inputType)}
+        inputMode={
+          inputType === "tel"
+            ? "tel"
+            : "text"
+        }
+        value={String(value)}
+        onChange={(e) =>
+          (
+            setter as (
+              value: string
+            ) => void
+          )(e.target.value)
+        }
+        placeholder={String(
+          placeholder
+        )}
+        autoComplete={
+          label === "Full Name"
+            ? "name"
+            : "tel"
+        }
+        className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3.5 text-[17px] font-medium text-black outline-none focus:border-black"
+      />
+    </div>
+  )
+)}
 
           <div>
             <label className="text-[15px] font-medium text-black/70">
