@@ -1,30 +1,130 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isIP } from "node:net";
 
 export const runtime = "nodejs";
 
 // ============================================================
 // CLIENT IP
 // ============================================================
+//
+// IMPORTANT:
+// - Prefer the original client IP supplied by Cloudflare.
+// - If unavailable, inspect forwarded IPs.
+// - Prefer IPv6 when a valid IPv6 address is available.
+// - Never manufacture/convert an IPv4 address into IPv6.
+// - Fall back to other standard proxy headers.
+//
+// ============================================================
 
-function getClientIp(req: NextRequest) {
-  const forwardedFor = req.headers.get("x-forwarded-for");
+function cleanIp(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
 
-  if (forwardedFor) {
-    const firstIp = forwardedFor
-      .split(",")
-      .map((ip) => ip.trim())
-      .find(Boolean);
+  let ip = value.trim();
 
-    if (firstIp) {
-      return firstIp;
+  if (!ip) {
+    return undefined;
+  }
+
+  // Remove surrounding quotes sometimes added by proxies.
+  ip = ip.replace(/^["']|["']$/g, "").trim();
+
+  // Handle bracketed IPv6 values such as:
+  // [2001:db8::1]
+  if (ip.startsWith("[") && ip.includes("]")) {
+    ip = ip.slice(1, ip.indexOf("]"));
+  }
+
+  // Handle IPv4 values that may contain a port:
+  // 123.123.123.123:443
+  //
+  // Do NOT apply this to IPv6 because IPv6 contains colons.
+  if (ip.includes(".") && ip.includes(":")) {
+    const possibleIpv4 = ip.split(":")[0];
+
+    if (isIP(possibleIpv4) === 4) {
+      ip = possibleIpv4;
     }
   }
 
-  return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-real-ip") ||
-    undefined
+  return isIP(ip) ? ip : undefined;
+}
+
+function getClientIp(req: NextRequest): string | undefined {
+  // ==========================================================
+  // 1. CLOUDFLARE ORIGINAL CLIENT IP
+  // ==========================================================
+  //
+  // When Cloudflare is in front of the application,
+  // CF-Connecting-IP is the original visitor IP.
+  //
+  // If the visitor is IPv6-enabled and Cloudflare provides
+  // their IPv6 address, preserve it exactly.
+  //
+  const cloudflareIp = cleanIp(
+    req.headers.get("cf-connecting-ip")
   );
+
+  if (cloudflareIp) {
+    return cloudflareIp;
+  }
+
+  // ==========================================================
+  // 2. X-FORWARDED-FOR
+  // ==========================================================
+  //
+  // x-forwarded-for may contain multiple addresses:
+  //
+  // client, proxy1, proxy2
+  //
+  // We inspect all valid addresses and prefer IPv6 when
+  // available.
+  //
+  const forwardedFor = req.headers.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    const forwardedIps = forwardedFor
+      .split(",")
+      .map((ip) => cleanIp(ip))
+      .filter((ip): ip is string => Boolean(ip));
+
+    // Prefer a valid IPv6 address.
+    const ipv6 = forwardedIps.find(
+      (ip) => isIP(ip) === 6
+    );
+
+    if (ipv6) {
+      return ipv6;
+    }
+
+    // Otherwise use the first valid IPv4 address.
+    const ipv4 = forwardedIps.find(
+      (ip) => isIP(ip) === 4
+    );
+
+    if (ipv4) {
+      return ipv4;
+    }
+  }
+
+  // ==========================================================
+  // 3. X-REAL-IP
+  // ==========================================================
+
+  const realIp = cleanIp(
+    req.headers.get("x-real-ip")
+  );
+
+  if (realIp) {
+    return realIp;
+  }
+
+  // ==========================================================
+  // 4. NO VALID CLIENT IP AVAILABLE
+  // ==========================================================
+
+  return undefined;
 }
 
 // ============================================================
@@ -174,7 +274,6 @@ export async function POST(req: NextRequest) {
     // We prefer identifiers explicitly supplied by the
     // browser, then fall back to the cookies on the request.
     //
-    // This gives us two ways to capture the identifiers.
     // ========================================================
 
     const browserFbp = cleanOptionalValue(
