@@ -41,6 +41,7 @@ function trackMetaStandardEvent(
     console.warn(
       `[Meta Pixel] ${eventName} tracking skipped: window unavailable.`
     );
+
     return false;
   }
 
@@ -48,6 +49,7 @@ function trackMetaStandardEvent(
     console.error(
       `[Meta Pixel] ${eventName} tracking failed: fbq is unavailable.`
     );
+
     return false;
   }
 
@@ -55,6 +57,7 @@ function trackMetaStandardEvent(
     console.error(
       `[Meta Pixel] ${eventName} tracking failed: missing eventId.`
     );
+
     return false;
   }
 
@@ -236,6 +239,14 @@ export default function MetaPixel() {
     )
     .join("\n");
 
+  // IMPORTANT:
+  // The raw JavaScript inside <Script> cannot directly access
+  // the React/TypeScript variable "pixelIds".
+  //
+  // We serialize the IDs here so they become actual JavaScript
+  // data inside the browser script.
+  const pixelIdList = JSON.stringify(pixelIds);
+
   return (
     <>
       <Script
@@ -253,6 +264,16 @@ export default function MetaPixel() {
             'https://connect.facebook.net/en_US/fbevents.js');
 
             ${initScripts}
+
+            // ==================================================
+            // ACTIVE PIXEL IDS
+            //
+            // These are injected into the browser script from
+            // the React component so the raw script does not
+            // reference an undefined "pixelIds" variable.
+            // ==================================================
+
+            var activeMetaPixelIds = ${pixelIdList};
 
             // ==================================================
             // PAGEVIEW EVENT ID
@@ -275,14 +296,18 @@ export default function MetaPixel() {
             // PageView so Meta can deduplicate the two events.
             // ==================================================
 
-            fbq(
-              'track',
-              'PageView',
-              {},
-              {
-                eventID: pageViewEventId
-              }
-            );
+            // Fire PageView explicitly for every active pixel.
+            activeMetaPixelIds.forEach(function(id) {
+              fbq(
+                'trackSingle',
+                id,
+                'PageView',
+                {},
+                {
+                  eventID: pageViewEventId
+                }
+              );
+            });
 
             // ==================================================
             // READ META BROWSER COOKIES
@@ -315,6 +340,39 @@ export default function MetaPixel() {
 
             var browserFbp = getMetaCookie('_fbp');
             var browserFbc = getMetaCookie('_fbc');
+
+            // ==================================================
+            // FBC FALLBACK
+            //
+            // If Meta has not created the _fbc cookie yet but
+            // the visitor arrived with an fbclid, preserve that
+            // click identifier for CAPI matching.
+            // ==================================================
+
+            if (!browserFbc) {
+              try {
+                var currentFbclid =
+                  new URLSearchParams(window.location.search)
+                    .get('fbclid');
+
+                if (currentFbclid) {
+                  browserFbc =
+                    'fb.1.' +
+                    Date.now() +
+                    '.' +
+                    currentFbclid;
+
+                  console.log(
+                    '🔗 [Meta Pixel] _fbc cookie missing. Using fbclid fallback.'
+                  );
+                }
+              } catch (fbcError) {
+                console.warn(
+                  '⚠️ [Meta Pixel] Could not create fbc fallback:',
+                  fbcError
+                );
+              }
+            }
 
             console.log(
               '🔎 [Meta Pixel] Browser identifiers:',

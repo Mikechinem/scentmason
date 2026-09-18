@@ -1,10 +1,9 @@
 import OrderFormNewPrice from "@/components/scentmason/OrderFormNewPrice";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
+import HeroGallery from "@/components/scentmason/HeroGallery";
 import XVideoUsecase from "@/components/scentmason/XVideoUsecase";
 import MiniDiffuserGraveyard from "@/components/scentmason/MiniDiffuserGraveyard";
 import ScentMasonFAQ from "@/components/scentmason/ScentMasonFAQ";
-
-
 
 
 const useCases = [
@@ -114,7 +113,7 @@ export default function RechargeableDiffuserPage() {
 
         <CTAButton />
       </section>
-
+      <HeroGallery />
 <section className="py-12">
   <div className="mx-auto max-w-xl px-4">
     <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">

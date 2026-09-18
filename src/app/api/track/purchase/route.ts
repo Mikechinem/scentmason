@@ -1,5 +1,6 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { isIP } from "node:net";
 
 export const runtime = "nodejs";
 
@@ -46,18 +47,39 @@ function removeEmptyValues<T extends Record<string, unknown>>(obj: T) {
   );
 }
 
+function cleanIp(value?: string | null) {
+  if (!value) return undefined;
+
+  let ip = value.trim().replace(/^"|"$/g, "");
+
+  if (ip.startsWith("[") && ip.includes("]")) {
+    ip = ip.slice(1, ip.indexOf("]"));
+  }
+
+  const ipv4WithPort = ip.match(/^(\d{1,3}(?:\.\d{1,3}){3}):\d+$/);
+  if (ipv4WithPort) ip = ipv4WithPort[1];
+
+  return isIP(ip) ? ip : undefined;
+}
+
 function getClientIp(req: NextRequest) {
+  const cfIp = cleanIp(req.headers.get("cf-connecting-ip"));
+  if (cfIp) return cfIp;
+
   const forwardedFor = req.headers.get("x-forwarded-for");
 
   if (forwardedFor) {
-    return forwardedFor.split(",")[0]?.trim();
+    const candidates = forwardedFor
+      .split(",")
+      .map((value) => cleanIp(value))
+      .filter((value): value is string => Boolean(value));
+
+    const ipv6 = candidates.find((ip) => isIP(ip) === 6);
+    if (ipv6) return ipv6;
+    if (candidates[0]) return candidates[0];
   }
 
-  return (
-    req.headers.get("cf-connecting-ip") ||
-    req.headers.get("x-real-ip") ||
-    undefined
-  );
+  return cleanIp(req.headers.get("x-real-ip"));
 }
 
 function normalizeNigerianPhone(phone?: string) {
@@ -365,6 +387,13 @@ export async function POST(
 
         country:
           [hashedCountry],
+
+        // Stable first-party identifier for stronger event matching.
+        // Uses the same normalized phone hash as ph.
+        external_id:
+          hashedPhone
+            ? [hashedPhone]
+            : undefined,
       });
 
     // ========================================================

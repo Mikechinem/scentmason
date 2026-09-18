@@ -79,6 +79,18 @@ export default function OrderFormNewPrice() {
     return undefined;
   };
 
+  // Meta click ID fallback: preserve fbclid when _fbc is unavailable.
+  const getFbc = () => {
+    const existingFbc = getCookie("_fbc");
+    if (existingFbc) return existingFbc;
+    if (typeof window === "undefined") return undefined;
+
+    const fbclid = new URLSearchParams(window.location.search).get("fbclid");
+    if (!fbclid) return undefined;
+
+    return `fb.1.${Date.now()}.${fbclid}`;
+  };
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (submitting) return;
@@ -146,7 +158,7 @@ export default function OrderFormNewPrice() {
         oilPrice: OIL_PRICING[finalOil as OilOption].price,
         total: Number(currentTotal) || 0,
         fbp: getCookie("_fbp"),
-        fbc: getCookie("_fbc"),
+        fbc: getFbc(),
         ttp: getCookie("_ttp"),
         ttclid: getCookie("ttclid"),
         willAccept: true,
