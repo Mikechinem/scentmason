@@ -16,7 +16,7 @@ const faqs = [
   {
     question: "How long does the 80ml fragrance oil last?",
     answer:
-      "One 80ml bottle lasts about 1.5 months based on the normal usage benchmark. You can also add extra bottles when placing your order if you want to keep your fragrance supply ready.",
+      "One 80ml bottle lasts about 1 and half months based on the normal usage benchmark. You can also add extra bottles when placing your order if you want to keep your fragrance supply ready.",
   },
   {
     question: "How does payment and delivery work?",
@@ -28,6 +28,12 @@ const faqs = [
     question: "What fragrance oil comes with the diffuser?",
     answer:
       "Each set comes with one premium aromatherapy oil carefully selected for its calming, air-purifying properties..",
+  },
+
+   {
+    question: "How do i buy another fragrance oil to refil?",
+    answer:
+      "You just message us on whatsapp to buy another oil.",
   },
 ];
 

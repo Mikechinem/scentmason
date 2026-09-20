@@ -1,3 +1,4 @@
+import XseriesProductGallery from "@/components/scentmason/XseriesProductGallery";
 import OrderFormNewPrice from "@/components/scentmason/OrderFormNewPrice";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
 import HeroGallery from "@/components/scentmason/HeroGallery";
@@ -163,6 +164,8 @@ export default function RechargeableDiffuserPage() {
           </div>
         </div>
       </section>
+
+      <XseriesProductGallery />
 
       <section className="py-12">
   <div className="mx-auto max-w-xl px-4">
