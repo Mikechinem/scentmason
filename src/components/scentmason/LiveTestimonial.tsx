@@ -35,7 +35,7 @@ export default function LiveTestimonial() {
         {/* Heading */}
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-[27px] font-bold leading-[1.2] tracking-tight text-black sm:text-[34px]">
-            What real customers around the world are saying about the product
+            What real customers around the world are saying about the machine
           </h2>
         </div>
 
