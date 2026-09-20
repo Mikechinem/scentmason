@@ -115,7 +115,9 @@ export default function RechargeableDiffuserPage() {
 
         <CTAButton />
       </section>
-      <HeroGallery />
+      <XseriesProductGallery />
+      <LiveTestimonial />
+      
 <section className="py-12">
   <div className="mx-auto max-w-xl px-4">
     <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
@@ -166,8 +168,9 @@ export default function RechargeableDiffuserPage() {
         </div>
       </section>
 
-      <XseriesProductGallery />
-      <LiveTestimonial />
+      <HeroGallery />
+
+      
 
       <section className="py-12">
   <div className="mx-auto max-w-xl px-4">
