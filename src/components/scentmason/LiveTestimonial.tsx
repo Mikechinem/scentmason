@@ -22,7 +22,7 @@ const TESTIMONIAL_IMAGES = [
     alt: "ScentMason customer review",
   },
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-17%20100740(1)_16px_readable.png?updatedAt=1791008759484",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20104534(1)_16px_readable.png?updatedAt=1791008759176",
     alt: "ScentMason customer review",
   },
 ];
