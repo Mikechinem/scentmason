@@ -43,7 +43,7 @@ const testimonials = [
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/man_diff3.png",
   },
   {
-    name: " Mrs Tolu Martins",
+    name: " Mrs Tolu Martin",
     text: "Simple setup, clean look, and the fragrance throw is strong without being overpowering. Worth every naira.",
     avatar: "https://ik.imagekit.io/j1e78ujalr/boxify_testimonilas_edited/perfume_diffuser_48hrs-60days/womandiff4.png",
   },

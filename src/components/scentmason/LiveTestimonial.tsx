@@ -2,27 +2,27 @@
 
 const TESTIMONIAL_IMAGES = [
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/ScentMason_Customer_Review_02.webp",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20103827(1)_16px_readable.png?updatedAt=1791008760539",
     alt: "ScentMason customer review",
   },
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/ScentMason_Customer_Review_01.webp",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20103935(1)_16px_readable.png?updatedAt=1791008760033",
     alt: "ScentMason customer review",
   },
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/ScentMason_Customer_Review_06.webp",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20104000(1)_16px_readable.png?updatedAt=1791008760008",
     alt: "ScentMason customer review",
   },
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/ScentMason_Customer_Review_08.webp",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20104029(1)_16px_readable.png?updatedAt=1791008759567",
     alt: "ScentMason customer review",
   },
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/ScentMason_Customer_Review_04.webp",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20104047(1)_16px_readable.png?updatedAt=1791008759538",
     alt: "ScentMason customer review",
   },
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/ScentMason_Customer_Review_05.webp",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-17%20100740(1)_16px_readable.png?updatedAt=1791008759484",
     alt: "ScentMason customer review",
   },
 ];
