@@ -225,54 +225,6 @@ export default function RechargeableDiffuserPage() {
 </section>
 
 
-      {/* Testimonials - scrolling, screenshot-style review cards, animate into view */}
-      <section className="py-10">
-        <h2 className="mt-4 px-4 text-center text-[28px] font-bold tracking-tight text-black leading-tight sm:text-[36px]">
-    Customer Reviews
-  </h2>
-
-        <div className="mt-6 flex gap-4 overflow-x-auto px-4 pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {testimonials.map((review, index) => (
-            <ScrollReveal
-              key={review.name}
-              delay={(index % 4) * 100}
-              className="w-[280px] shrink-0"
-            >
-              <article className="rounded-xl border border-black/10 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={review.avatar}
-                      alt={review.name}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="text-[16px] font-semibold leading-tight">
-                        {review.name}
-                      </p>
-                      <p className="text-[12px] font-medium text-black/50">
-                        Verified Buyer
-                      </p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-black/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-black/50">
-                    Review
-                  </span>
-                </div>
-
-                <p className="mt-3 text-[14px] font-semibold text-amber-500">
-                  ★★★★★
-                </p>
-
-                <p className="mt-2 text-[16px] font-medium leading-6 text-black/80">
-                  {review.text}
-                </p>
-              </article>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
-
       <section className="py-12">
   <div className="mx-auto max-w-xl px-4">
     <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
