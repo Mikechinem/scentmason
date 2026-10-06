@@ -1,11 +1,12 @@
 import XseriesProductGallery from "@/components/scentmason/XseriesProductGallery";
 import LiveTestimonial from "@/components/scentmason/LiveTestimonial";
-import OrderFormNewPrice from "@/components/scentmason/OrderFormNewPrice";
 import ScrollReveal from "@/components/scentmason/ScrollReveal";
 import HeroGallery from "@/components/scentmason/HeroGallery";
 import XVideoUsecase from "@/components/scentmason/XVideoUsecase";
 import MiniDiffuserGraveyard from "@/components/scentmason/MiniDiffuserGraveyard";
+import SocialTestimonial from "@/components/scentmason/SocialTestimonia"
 import ScentMasonFAQ from "@/components/scentmason/ScentMasonFAQ";
+import OrderFormNewPrice from "@/components/scentmason/OrderFormNewPrice";
 
 
 const useCases = [
@@ -294,6 +295,8 @@ export default function RechargeableDiffuserPage() {
     <CTAButton label="I Want This Now" />
   </div>
 </section>
+
+<SocialTestimonial />
       
 
       {/* What's inside */}
