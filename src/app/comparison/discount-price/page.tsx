@@ -334,7 +334,7 @@ export default function RechargeableDiffuserPage() {
           <div className="text-center">
             <p className="text-[16px] font-extrabold uppercase tracking-wider text-red-600 sm:text-[17px]">
               PRICES IN NIGERIA CAN CHANGE FAST
-           This price may go back to ₦38,000 soon.  </p>
+           </p>
             <h2 className="mt-2 text-[27px] font-bold tracking-tight text-black sm:text-[31px]">
               Fill The Order Form Below
             </h2>
