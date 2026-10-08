@@ -91,7 +91,7 @@ export default function MiniDiffuserGraveyard() {
             Tired of Diffusers That Stop Spraying After 2 Months?
 
             <span className="text-[#C49A78]">
-              {" "}This one last well well
+              {" "}This one is designed to make oil clogging difficult
             </span>
           </h2>
 
