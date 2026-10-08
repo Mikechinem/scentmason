@@ -229,7 +229,7 @@ export default function RechargeableDiffuserPage() {
       <section className="py-12">
   <div className="mx-auto max-w-xl px-4">
     <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
-  Zero harsh chemicals—perfectly safe for infants, pets, and asthmatic lungs.
+  A pleasant way to keep your space smelling fresh always.
 </h2>
 
     <XVideoUsecase
