@@ -106,33 +106,15 @@ export default function RechargeableDiffuserPage() {
   />
 </div>
 <h1 className="mx-auto mt-4 max-w-[620px] text-[25px] font-normal leading-9 tracking-tight text-black sm:text-[28px]">
-          The diffuser that <span className="font-bold">makes your home smell luxurious</span> like a <br></br>5-star hotel without you remembering to spray all the time.
+          Make Your Home Smell Like A Luxury Hotel <span className="font-bold">Without Constantly Remembring To Spray</span><br></br>Air-Freshners
         </h1>
 <div className="mx-auto mt-5 max-w-[520px] rounded-xl border border-black/[0.06] bg-black/[0.02] p-4 text-center">
   <p className="mt-1 text-[18px] font-medium text-amber-600">
-    Just set it once and enjoy luxury scent all days all nights.
+    This machine makes your room smell great all on its own. You choose how much it sprays. You never have to think about it!
   </p>
 </div>
 
-        <CTAButton />
-      </section>
-      <XseriesProductGallery />
-      <LiveTestimonial />
-      
-<section className="py-12">
-  <div className="mx-auto max-w-xl px-4">
-    <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
-  Imagine coming home to a fresh-smelling house. All Day. Every Day. Without the constant spraying.
-</h2>
-
-    <XVideoUsecase
-      src="https://res.cloudinary.com/doatbjjtn/video/upload/v1788080744/M0811_2_vhfx8n.mp4"
-      className="mt-6"
-    />
-  </div>
-</section>
-
-        {/* PRICING HIGHLIGHT */}
+  {/* PRICING HIGHLIGHT */}
       <section className="px-4 py-10">
         <div className="mx-auto w-full max-w-[480px] rounded-2xl border-2 border-[#3B1F0E] bg-[#FAF7F2] p-6 text-center">
           <p className="text-[20px] font-extrabold uppercase tracking-wider text-[#3B1F0E] sm:text-[21px]">
@@ -168,6 +150,25 @@ export default function RechargeableDiffuserPage() {
           </div>
         </div>
       </section>
+
+        <CTAButton />
+      </section>
+      <XseriesProductGallery />
+      <LiveTestimonial />
+      
+<section className="py-12">
+  <div className="mx-auto max-w-xl px-4">
+    <h2 className="mx-auto max-w-xl text-center text-2xl font-bold">
+  Imagine coming home to a fresh-smelling house. All Day. Every Day. Without the constant spraying.
+</h2>
+
+    <XVideoUsecase
+      src="https://res.cloudinary.com/doatbjjtn/video/upload/v1788080744/M0811_2_vhfx8n.mp4"
+      className="mt-6"
+    />
+  </div>
+</section>
+
 
       <HeroGallery />
 
@@ -237,8 +238,6 @@ export default function RechargeableDiffuserPage() {
     />
   </div>
 </section>
-
-    <MiniDiffuserGraveyard />
 
       {/* Why you'll love it */}
       <section className="bg-white px-4 py-14 text-center">

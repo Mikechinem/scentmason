@@ -8,21 +8,34 @@ const faqs = [
     answer:
       "Yes. ScentMason releases fragrance automatically according to the setting you choose, so you do not need to keep picking up a spray can throughout the day.",
   },
+
+
   {
     question: "Does it need to stay plugged into a socket?",
     answer:
       "No. ScentMason is rechargeable. A full charge takes about 2 hours and can last up to 60 days depending on your settings and usage.",
   },
+
+  {
+    question: "How long does one charge last?",
+    answer:
+      "A full charge can last up to 60 days, depending on the spray setting you choose.",
+  },
+
+
   {
     question: "How long does the 80ml fragrance oil last?",
     answer:
       "One 80ml bottle lasts about 1 and half months based on the normal usage benchmark. You can also add extra bottles when placing your order if you want to keep your fragrance supply ready.",
   },
+
+  
   {
     question: "How does payment and delivery work?",
     answer:
       "Place your order online and a ScentMason customer care representative will call to confirm your details before dispatch. Delivery is free, and you pay when your order arrives.",
   },
+
 
   {
     question: "What fragrance oil comes with the diffuser?",
@@ -30,11 +43,23 @@ const faqs = [
       "Each set comes with one premium aromatherapy oil carefully selected for its calming, air-purifying properties..",
   },
 
+  {
+    question: "Can I use it in my bedroom, office, car or salon?",
+    answer:
+      "Yes. ScentMason works well in bedrooms, living rooms, offices, salons, shops, Airbnb spaces and other indoor areas.",
+  },
+
    {
     question: "How do i buy another fragrance oil to refil?",
     answer:
       "You just message us on whatsapp to buy another oil.",
   },
+{
+    question: "Do you deliver to my state?",
+    answer:
+      "Yes, we deliver across Nigeria. Enter your state and delivery address when ordering, and our team will contact you to confirm.",
+  },
+  
 ];
 
 export default function ScentMasonFAQ() {
