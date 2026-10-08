@@ -3,19 +3,22 @@
 import React from "react";
 
 const SOCIAL_TESTIMONIALS = [
+
+   {
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/1.png",
+    alt: "ScentMason customer testimonial",
+  },
+
+  {
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/reordertestimoniawhatsapp.png",
+    alt: "ScentMason WhatsApp reorder testimonial",
+  },
+
 {
     src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20103827(1)_16px_readable.png?updatedAt=1791008760539",
     alt: "ScentMason customer review",
   },
   
-  {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/1.png",
-    alt: "ScentMason customer testimonial",
-  },
-  {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/reordertestimoniawhatsapp.png",
-    alt: "ScentMason WhatsApp reorder testimonial",
-  },
 ];
 
 export default function SocialTestimonia() {
