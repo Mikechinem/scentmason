@@ -94,7 +94,7 @@ export default function RechargeableDiffuserPage() {
 
       {/* Hero */}
       <section className="px-4 py-10 text-center">
-        <p className="inline-block rounded-full bg-[#FAF7F2] px-4 py-1.5 text-[16px] font-bold uppercase tracking-wider text-[#3B1F0E] border border-[#3B1F0E]/10">
+        <p className="inline-block rounded-full bg-[#FAF7F2] px-4 py-1.5 text-[12px] font-bold uppercase tracking-wider text-[#3B1F0E] border border-[#3B1F0E]/10">
           Automatic Fragrance Machine (Rechargeable)
         </p>
 
