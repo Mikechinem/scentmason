@@ -97,6 +97,10 @@ export default function RechargeableDiffuserPage() {
         <p className="inline-block rounded-full bg-[#FAF7F2] px-4 py-1.5 text-[16px] font-bold uppercase tracking-wider text-[#3B1F0E] border border-[#3B1F0E]/10">
           Automatic Fragrance Machine (Rechargeable)
         </p>
+
+        <h1 className="mx-auto mt-4 max-w-[620px] text-[25px] font-normal leading-9 tracking-tight text-black sm:text-[28px]">
+          Make Your Home Smell Like A Luxury Hotel <span className="font-bold">Without Constantly Remembring To Spray</span><br></br>Air-Freshners
+        </h1>
       
 <div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
   <img
@@ -105,9 +109,7 @@ export default function RechargeableDiffuserPage() {
     className="h-auto w-full object-cover"
   />
 </div>
-<h1 className="mx-auto mt-4 max-w-[620px] text-[25px] font-normal leading-9 tracking-tight text-black sm:text-[28px]">
-          Make Your Home Smell Like A Luxury Hotel <span className="font-bold">Without Constantly Remembring To Spray</span><br></br>Air-Freshners
-        </h1>
+
 <div className="mx-auto mt-5 max-w-[520px] rounded-xl border border-black/[0.06] bg-black/[0.02] p-4 text-center">
   <p className="mt-1 text-[18px] font-medium text-amber-600">
     This machine makes your room smell great all on its own. You choose how much it sprays. You never have to think about it!
