@@ -279,6 +279,110 @@ export default function MetaPixel() {
             // PAGEVIEW EVENT ID
             // ==================================================
 
+            
+            // ==================================================
+            // SCENTMASON FIRST-PARTY VISITOR ID
+            // ==================================================
+
+            function getOrCreateScentMasonVisitorId() {
+              var cookieName = 'sm_vid';
+              var prefix = cookieName + '=';
+              var cookies = document.cookie
+                ? document.cookie.split(';')
+                : [];
+
+              for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+
+                if (cookie.indexOf(prefix) === 0) {
+                  var existingId = decodeURIComponent(
+                    cookie.substring(prefix.length)
+                  );
+
+                  if (
+                    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(existingId)
+                  ) {
+                    return existingId;
+                  }
+                }
+              }
+
+              var newId =
+                (window.crypto && window.crypto.randomUUID)
+                  ? window.crypto.randomUUID()
+                  : (
+                      'smv_' +
+                      Date.now() +
+                      '_' +
+                      Math.random().toString(16).slice(2) +
+                      Math.random().toString(16).slice(2)
+                    );
+
+              var cookieValue =
+                cookieName + '=' + encodeURIComponent(newId) +
+                '; Path=/' +
+                '; Max-Age=31536000' +
+                '; SameSite=Lax' +
+                (window.location.protocol === 'https:' ? '; Secure' : '');
+
+              document.cookie = cookieValue;
+
+              return newId;
+            }
+
+            var scentMasonVisitorId =
+              getOrCreateScentMasonVisitorId();
+
+
+function getOrCreateScentMasonVisitorId() {
+  var cookieName = "sm_vid";
+  var prefix = cookieName + "=";
+  var cookies = document.cookie
+    ? document.cookie.split(";")
+    : [];
+
+  for (var i = 0; i < cookies.length; i++) {
+    var cookie = cookies[i].trim();
+
+    if (cookie.indexOf(prefix) === 0) {
+      try {
+        var existingId = decodeURIComponent(
+          cookie.substring(prefix.length)
+        );
+
+        if (/^[a-zA-Z0-9_-]{16,100}$/.test(existingId)) {
+          return existingId;
+        }
+      } catch (error) {
+        // Create a new ID if the cookie cannot be decoded.
+      }
+    }
+  }
+
+  var newId =
+    window.crypto && typeof window.crypto.randomUUID === "function"
+      ? window.crypto.randomUUID()
+      : "smv_" +
+        Date.now() +
+        "_" +
+        Math.random().toString(16).slice(2) +
+        Math.random().toString(16).slice(2);
+
+  document.cookie =
+    cookieName +
+    "=" +
+    encodeURIComponent(newId) +
+    "; Path=/" +
+    "; Max-Age=31536000" +
+    "; SameSite=Lax" +
+    (window.location.protocol === "https:" ? "; Secure" : "");
+
+  return newId;
+}
+
+var scentMasonVisitorId = getOrCreateScentMasonVisitorId();
+
+
             var pageViewEventId =
               (window.crypto && crypto.randomUUID)
                 ? crypto.randomUUID()
@@ -404,6 +508,8 @@ export default function MetaPixel() {
                   JSON.stringify({
                     eventId:
                       pageViewEventId,
+
+                      visitorId: scentMasonVisitorId,
 
                     eventSourceUrl:
                       window.location.href,

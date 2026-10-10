@@ -11,6 +11,7 @@ type PurchaseRequestBody = {
   fbc?: string;
   phone?: string;
   whatsapp?: string;
+  visitorId?: string;
 
   customData?: Record<string, unknown>;
 
@@ -277,6 +278,20 @@ export async function POST(
         ? sha256(normalizedPhone)
         : undefined;
 
+        
+    // ========================================================
+    // VISITOR ID
+    // ========================================================
+
+    const rawVisitorId = body.visitorId;
+
+    const visitorId =
+      typeof rawVisitorId === "string" &&
+      /^[a-zA-Z0-9_-]{16,100}$/.test(rawVisitorId)
+        ? rawVisitorId
+        : undefined;
+
+
     // ========================================================
     // NAME MATCHING
     // ========================================================
@@ -390,10 +405,13 @@ export async function POST(
 
         // Stable first-party identifier for stronger event matching.
         // Uses the same normalized phone hash as ph.
-        external_id:
-          hashedPhone
-            ? [hashedPhone]
-            : undefined,
+        
+       external_id: visitorId
+        ? [visitorId]
+        : hashedPhone
+        ? [hashedPhone]
+        : undefined,
+
       });
 
     // ========================================================

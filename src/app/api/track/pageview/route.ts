@@ -284,6 +284,17 @@ export async function POST(req: NextRequest) {
       body?.browserIdentifiers?.fbc
     );
 
+
+    const rawVisitorId = cleanOptionalValue(body?.visitorId);
+
+    // Accept only an opaque, bounded first-party identifier.
+    const visitorId =
+      rawVisitorId &&
+      /^[a-zA-Z0-9_-]{16,100}$/.test(rawVisitorId)
+        ? rawVisitorId
+        : undefined;
+
+
     const cookieFbp = getCookie(req, "_fbp");
 
     const cookieFbc = getCookie(req, "_fbc");
@@ -321,7 +332,7 @@ export async function POST(req: NextRequest) {
     // We use legitimate anonymous/browser identifiers instead.
     // ========================================================
 
-    const userData: Record<string, string> = {};
+   const userData: Record<string, string | string[]> = {};
 
     if (clientIp) {
       userData.client_ip_address = clientIp;
@@ -339,6 +350,12 @@ export async function POST(req: NextRequest) {
       userData.fbc = fbc;
     }
 
+    
+    if (visitorId) {
+  userData.external_id = [visitorId];
+}
+
+
     // ========================================================
     // DEBUG INFORMATION
     //
@@ -350,6 +367,8 @@ export async function POST(req: NextRequest) {
       "📊 [Meta PageView CAPI] Identity data:",
       {
         eventId,
+
+        visitorId: visitorId ? "present" : "missing",
 
         clientIp:
           clientIp
@@ -533,6 +552,9 @@ export async function POST(req: NextRequest) {
 
         fbc:
           Boolean(fbc),
+
+          visitorId: 
+             Boolean(visitorId),
       },
     });
   } catch (error) {

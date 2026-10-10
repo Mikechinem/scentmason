@@ -135,6 +135,40 @@ export default function OrderFormNewPrice() {
 
   };
 
+  
+const getOrCreateScentMasonVisitorId = () => {
+  const cookieName = "sm_vid";
+  const existingId = getCookie(cookieName);
+
+  if (
+    existingId &&
+    /^[a-zA-Z0-9_-]{16,100}$/.test(existingId)
+  ) {
+    return existingId;
+  }
+
+  const newId =
+    typeof window !== "undefined" &&
+    window.crypto &&
+    typeof window.crypto.randomUUID === "function"
+      ? window.crypto.randomUUID()
+      : `smv_${Date.now()}_${Math.random()
+          .toString(16)
+          .slice(2)}_${Math.random().toString(16).slice(2)}`;
+
+  if (typeof document !== "undefined") {
+    document.cookie =
+      `${cookieName}=${encodeURIComponent(newId)}` +
+      "; Path=/" +
+      "; Max-Age=31536000" +
+      "; SameSite=Lax" +
+      (window.location.protocol === "https:" ? "; Secure" : "");
+  }
+
+  return newId;
+};
+
+
   // Meta click ID fallback: preserve fbclid when _fbc is unavailable.
 
   const getFbc = () => {
@@ -269,6 +303,8 @@ export default function OrderFormNewPrice() {
         addressParts.length > 1 ? addressParts[addressParts.length - 2] : addressParts[0] || "";
 
       const unifiedOrderPayload = {
+      
+        visitorId: getOrCreateScentMasonVisitorId(),
 
         eventName: "Purchase",
 
