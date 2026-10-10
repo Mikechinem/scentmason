@@ -9,7 +9,7 @@ type ProductImage = {
 
 const PRODUCT_IMAGES: ProductImage[] = [
   {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonimg/ScentMason_Carousel_08.jpg",
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonimg/12x.png",
     alt: "ScentMason automatic fragrance machine",
   },
   {
