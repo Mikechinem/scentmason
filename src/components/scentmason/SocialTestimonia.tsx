@@ -18,6 +18,12 @@ const SOCIAL_TESTIMONIALS = [
     src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/temu-scentmason-testimonials/Screenshot%202026-09-20%20103827(1)_16px_readable.png?updatedAt=1791008760539",
     alt: "ScentMason customer review",
   },
+
+
+  {
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/vegan.jpeg?updatedAt=1794601582110",
+    alt: "ScentMason customer good review",
+  },
   
 ];
 

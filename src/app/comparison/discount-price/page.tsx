@@ -354,7 +354,7 @@ export default function RechargeableDiffuserPage() {
         <p className="mx-auto max-w-3xl text-[25px] font-semibold leading-[1.25] text-black sm:text-[34px]">
           Have questions? Call us on{" "}
           <a href="tel:07064969603" className="inline-block font-black text-black underline decoration-black/30 underline-offset-4">
-            0706 496 9603
+            09044319665
           </a>
         </p>
       </section>

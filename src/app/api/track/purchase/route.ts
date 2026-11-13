@@ -10,6 +10,7 @@ type PurchaseRequestBody = {
   fbp?: string;
   fbc?: string;
   phone?: string;
+  email?: string;
   whatsapp?: string;
   visitorId?: string;
 
@@ -104,6 +105,14 @@ function sha256(value: string) {
     .createHash("sha256")
     .update(value.trim().toLowerCase())
     .digest("hex");
+}
+
+function normalizeLocation(value?: string) {
+  return (value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
 }
 
 function getMetaEnv() {
@@ -278,6 +287,11 @@ export async function POST(
         ? sha256(normalizedPhone)
         : undefined;
 
+    const normalizedEmail = (body.email || "").trim().toLowerCase();
+    const hashedEmail = normalizedEmail
+      ? sha256(normalizedEmail)
+      : undefined;
+
         
     // ========================================================
     // VISITOR ID
@@ -323,9 +337,10 @@ export async function POST(
     // LOCATION MATCHING
     // ========================================================
 
+    const normalizedState = normalizeLocation(body.state);
     const hashedState =
-      body.state
-        ? sha256(body.state)
+      normalizedState
+        ? sha256(normalizedState)
         : undefined;
 
     const hashedCountry =
@@ -352,9 +367,10 @@ export async function POST(
           : addressParts[0];
       })();
 
+    const normalizedCity = normalizeLocation(rawCity);
     const hashedCity =
-      rawCity
-        ? sha256(rawCity)
+      normalizedCity
+        ? sha256(normalizedCity)
         : undefined;
 
     // ========================================================
@@ -378,6 +394,11 @@ export async function POST(
         ph:
           hashedPhone
             ? [hashedPhone]
+            : undefined,
+
+        em:
+          hashedEmail
+            ? [hashedEmail]
             : undefined,
 
         fn:
@@ -541,6 +562,9 @@ export async function POST(
 
       phone:
         body.phone || "",
+
+      email:
+        normalizedEmail,
 
       whatsapp:
         body.whatsapp || "",

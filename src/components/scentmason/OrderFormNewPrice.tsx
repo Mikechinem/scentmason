@@ -64,7 +64,7 @@ export default function OrderFormNewPrice() {
 
   const [phone, setPhone] = useState("");
 
-  const [whatsapp, setWhatsapp] = useState("");
+  const [email, setEmail] = useState("");
 
   const [state, setState] = useState("");
 
@@ -135,6 +135,21 @@ export default function OrderFormNewPrice() {
 
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined" || getCookie("sm_fbc")) return;
+
+    const fbclid = new URLSearchParams(window.location.search).get("fbclid");
+    if (!fbclid) return;
+
+    const landingFbc = `fb.1.${Date.now()}.${fbclid}`;
+    document.cookie =
+      `sm_fbc=${encodeURIComponent(landingFbc)}` +
+      "; Path=/" +
+      "; Max-Age=7776000" +
+      "; SameSite=Lax" +
+      (window.location.protocol === "https:" ? "; Secure" : "");
+  }, []);
+
   
 const getOrCreateScentMasonVisitorId = () => {
   const cookieName = "sm_vid";
@@ -175,15 +190,18 @@ const getOrCreateScentMasonVisitorId = () => {
 
     const existingFbc = getCookie("_fbc");
 
-    if (existingFbc) return existingFbc;
+    if (existingFbc) {
+      try {
+        return decodeURIComponent(existingFbc);
+      } catch {
+        return existingFbc;
+      }
+    }
 
-    if (typeof window === "undefined") return undefined;
+    const storedFbc = getCookie("sm_fbc");
+    if (storedFbc) return decodeURIComponent(storedFbc);
 
-    const fbclid = new URLSearchParams(window.location.search).get("fbclid");
-
-    if (!fbclid) return undefined;
-
-    return `fb.1.${Date.now()}.${fbclid}`;
+    return undefined;
 
   };
 
@@ -246,11 +264,13 @@ const getOrCreateScentMasonVisitorId = () => {
 
     const cleanPhone = phone.trim();
 
+    const cleanEmail = email.trim();
+
     const cleanName = name.trim();
 
     const cleanAddress = address.trim();
 
-    if (!cleanName || !cleanPhone || !state || !cleanAddress) {
+    if (!cleanName || !cleanPhone || !cleanEmail || !state || !cleanAddress) {
 
       setError("Please fill in all fields so we can confirm your order.");
 
@@ -318,7 +338,9 @@ const getOrCreateScentMasonVisitorId = () => {
 
         phone: cleanPhone,
 
-        whatsapp: whatsapp.trim(),
+        whatsapp: cleanPhone,
+
+        email: cleanEmail,
 
         state,
 
@@ -507,7 +529,7 @@ const getOrCreateScentMasonVisitorId = () => {
 
 Please verify my delivery data details and speed up my dispatch assembly!`;
 
-  const whatsappUrl = `https://wa.me/2347064969603?text=${encodeURIComponent(successMessageText)}`;
+  const whatsappUrl = `https://wa.me/2349044319665?text=${encodeURIComponent(successMessageText)}`;
 
   return (
 
@@ -683,7 +705,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
     ["Phone Number", phone, setPhone, "08012345678", "tel"],
 
-    ["WhatsApp Number", whatsapp, setWhatsapp, "08012345678", "tel"],
+    ["Email Address", email, setEmail, "you@example.com", "email"],
 
   ].map(([label, value, setter, placeholder, inputType]) => (
 
@@ -699,7 +721,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
         type={String(inputType)}
 
-        inputMode={inputType === "tel" ? "tel" : "text"}
+        inputMode={inputType === "tel" ? "tel" : inputType === "email" ? "email" : "text"}
 
         value={String(value)}
 
@@ -710,7 +732,9 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
         placeholder={String(placeholder)}
 
-        autoComplete={label === "Full Name" ? "name" : "tel"}
+        autoComplete={label === "Full Name" ? "name" : label === "Email Address" ? "email" : "tel"}
+
+        required
 
         className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3.5 text-[17px] font-medium text-black outline-none focus:border-black"
 
