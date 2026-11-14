@@ -5,6 +5,7 @@ import { BRAND, SITE } from "@/lib/constants";
 import MetaPixel from "@/components/tracking/MetaPixel";
 import GoogleAnalytics from "@/components/tracking/GoogleAnalytics";
 import TikTokPixel from "@/components/tracking/TikTokPixel";
+import MicrosoftClarity from "@/components/tracking/MicrosoftClarity";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} | Rechargeable Automatic Fragrance Diffuser`,
@@ -40,6 +41,7 @@ export default function RootLayout({
         <MetaPixel />
         <GoogleAnalytics />
         <TikTokPixel />
+        <MicrosoftClarity />
       </body>
     </html>
   );
