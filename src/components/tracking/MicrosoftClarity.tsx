@@ -1,16 +1,16 @@
 "use client";
 
-import Script from "next/script";
+import { useEffect } from "react";
+import Clarity from "@microsoft/clarity";
 
-const CLARITY_PROJECT_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
+export default function ClarityTracking() {
+  useEffect(() => {
+    const projectId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
 
-export default function MicrosoftClarity() {
-  if (!CLARITY_PROJECT_ID) return null;
+    if (projectId) {
+      Clarity.init(projectId);
+    }
+  }, []);
 
-  return (
-    <Script
-      src={`https://www.clarity.ms/tag/${CLARITY_PROJECT_ID}`}
-      strategy="afterInteractive"
-    />
-  );
+  return null;
 }
