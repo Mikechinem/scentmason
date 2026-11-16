@@ -359,7 +359,7 @@ export default function RechargeableDiffuserPage() {
         This site is not part of Facebook, Google, or their companies. It is not endorsed by Facebook or Google. Facebook and Google are trademarks of their respective companies.
       </p>
 
-      <div className="fixed inset-x-0 top-0 z-50 border-b border-[#3B1F0E]/10 bg-[#FAF7F2]/95 px-3 pt-[env(safe-area-inset-top)] shadow-sm backdrop-blur-sm">
+      <div className="fixed inset-x-0 top-0 z-[1000000] border-b border-[#3B1F0E]/10 bg-[#FAF7F2]/95 px-3 pt-[env(safe-area-inset-top)] shadow-sm backdrop-blur-sm">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-end">
           <a
             href="#order-form-start"
