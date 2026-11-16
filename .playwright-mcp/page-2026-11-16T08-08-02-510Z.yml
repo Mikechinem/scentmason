@@ -1,0 +1,270 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Make Your Home Smell Like A Luxury Hotel Without Constantly Remembring To Spray Air-Freshners" [level=1] [ref=e4]: Make Your Home Smell Like A Luxury Hotel Without Constantly Remembring To SprayAir-Freshners
+      - paragraph [ref=e5]: Automatic Fragrance Machine (Rechargeable)
+      - img "ScentMason rechargeable automatic fragrance diffuser" [ref=e7]
+      - generic [ref=e9]:
+        - paragraph [ref=e10]: 60 Days No Charging
+        - img "ScentMason automatic fragrance machine" [ref=e12]
+        - paragraph [ref=e13]: ₦38,000
+        - paragraph [ref=e14]: ₦26,990
+        - paragraph [ref=e15]: 1 ScentMason Machine + 1 × 80ml Fragrance Oil
+        - generic [ref=e16]:
+          - paragraph [ref=e18]: Free Delivery
+          - paragraph [ref=e20]: Payment On Delivery
+          - paragraph [ref=e22]: 60 Days No Charging
+      - link "YES! I WANT TO BUY NOW" [ref=e23] [cursor=pointer]:
+        - /url: "#order-form-start"
+    - region "ScentMason product gallery" [ref=e24]:
+      - generic [ref=e328]:
+        - generic [ref=e329]:
+          - img "ScentMason automatic fragrance machine" [ref=e331]
+          - button "Previous product image" [ref=e332]
+          - button "Next product image" [ref=e335]
+          - generic [ref=e338]: 1 / 13
+        - generic [ref=e339]:
+          - button "View product image 1" [ref=e340]
+          - button "View product image 2" [ref=e341]
+          - button "View product image 3" [ref=e342]
+          - button "View product image 4" [ref=e343]
+          - button "View product image 5" [ref=e344]
+          - button "View product image 6" [ref=e345]
+          - button "View product image 7" [ref=e346]
+          - button "View product image 8" [ref=e347]
+          - button "View product image 9" [ref=e348]
+          - button "View product image 10" [ref=e349]
+          - button "View product image 11" [ref=e350]
+          - button "View product image 12" [ref=e351]
+          - button "View product image 13" [ref=e352]
+        - generic [ref=e354]:
+          - generic [ref=e355]:
+            - generic [ref=e356]: 484 reviews
+            - generic [ref=e357]: "|"
+            - generic [ref=e358]: "4.8"
+            - generic "4.8 out of 5 stars" [ref=e359]
+          - generic [ref=e370]: Verified purchases
+        - paragraph [ref=e375]: Tap an image to view
+    - generic [ref=e73]:
+      - heading "What real customers around the world are saying about the machine" [level=2] [ref=e75]
+      - generic [ref=e76]: Live customer reviews
+      - generic [ref=e376]:
+        - img "ScentMason customer review" [ref=e378]
+        - img "ScentMason customer review" [ref=e380]
+        - img "ScentMason customer review" [ref=e382]
+        - generic [ref=e383]:
+          - img "ScentMason customer review"
+        - generic [ref=e384]:
+          - img "ScentMason customer review"
+      - paragraph [ref=e385]: Swipe to see more customer reviews →
+    - heading "Imagine coming home to a fresh-smelling house. All Day. Every Day. Without the constant spraying." [level=2] [ref=e94]
+    - generic [ref=e97]:
+      - generic [ref=e99]:
+        - img "ScentMason fragrance showcase 1" [ref=e101]
+        - img "ScentMason fragrance showcase 2" [ref=e103]
+        - img "ScentMason fragrance showcase 3" [ref=e105]
+        - img "ScentMason fragrance showcase 4" [ref=e107]
+      - generic [ref=e108]:
+        - button "Go to slide 1" [ref=e109]
+        - button "Go to slide 2" [ref=e110]
+        - button "Go to slide 3" [ref=e111]
+        - button "Go to slide 4" [ref=e112]
+    - heading "Place it anywhere you want...works automatically without you remembering to spray." [level=2] [ref=e115]
+    - generic [ref=e118]:
+      - heading "Your home should never embarrass you even when visitors come unannounced. This Smart diffuser helps you kick-out annoying odour in your:" [level=2] [ref=e119]
+      - list [ref=e120]:
+        - listitem [ref=e121]: ✔ Bedroom
+        - listitem [ref=e122]: ✔ Living room
+        - listitem [ref=e123]: ✔ Office
+        - listitem [ref=e124]: ✔ Hotel room
+        - listitem [ref=e125]: ✔ Salon
+        - listitem [ref=e126]: ✔ Shop counter
+      - img "ScentMason diffuser misting demo" [ref=e128]
+    - heading "Keep your walls flawless. Zero drilling, zero stress, just instant freshness." [level=2] [ref=e131]
+    - heading "A pleasant way to keep your space smelling fresh always." [level=2] [ref=e136]
+    - generic [ref=e139]:
+      - generic [ref=e140]: Intelligent Engineering
+      - heading "Why You’ll Love the ScentMason Intelligent Diffuser" [level=2] [ref=e141]
+      - list [ref=e142]:
+        - listitem [ref=e143]:
+          - paragraph [ref=e147]: Rechargeable — one charge lasts more than a month, even through power outages.
+        - listitem [ref=e148]:
+          - paragraph [ref=e152]: Set & forget — it sprays on its own, no need to remember to spray.
+        - listitem [ref=e153]:
+          - paragraph [ref=e157]: No-drill mount — sticks up with the included mount, no drilling your wall.
+      - generic [ref=e158]:
+        - img "ScentMason diffuser mounted seamlessly on a wall"
+      - link "I Want This Now" [ref=e160] [cursor=pointer]:
+        - /url: "#order-form-start"
+    - generic [ref=e162]:
+      - heading "PEOPLE ARE BUYING MORE AFTER TRYING IT" [level=2] [ref=e163]
+      - generic [ref=e164]:
+        - img "ScentMason customer testimonial" [ref=e166]
+        - generic [ref=e167]:
+          - img "ScentMason WhatsApp reorder testimonial"
+        - generic [ref=e168]:
+          - img "ScentMason customer review"
+        - generic [ref=e169]:
+          - img "ScentMason customer good review"
+    - generic [ref=e170]:
+      - heading "What Is Inside Your Order?" [level=2] [ref=e171]
+      - img "Everything that comes inside your ScentMason order" [ref=e173]
+      - list [ref=e174]:
+        - listitem [ref=e175]: ✔ 1 ScentMason Diffuser Machine
+        - listitem [ref=e176]: ✔ 1 Signature Fragrance Oil
+        - listitem [ref=e177]: ✔ 1 No-Drill Wall Mount
+        - listitem [ref=e178]: ✔ 1 USB Charging Cable
+        - listitem [ref=e179]: ✔ 1 User Manual
+    - generic [ref=e181]:
+      - generic [ref=e182]:
+        - paragraph [ref=e183]: Before You Order
+        - heading "Questions You May Have" [level=2] [ref=e184]
+        - paragraph [ref=e185]: Here are the important things to know before placing your order.
+      - generic [ref=e186]:
+        - button "Will ScentMason really keep my space smelling fresh without me spraying?" [ref=e188]:
+          - generic [aria-hidden] [ref=e190]: +
+        - button "Does it need to stay plugged into a socket?" [ref=e192]:
+          - generic [aria-hidden] [ref=e194]: +
+        - button "How long does one charge last?" [ref=e196]:
+          - generic [aria-hidden] [ref=e198]: +
+        - button "How long does the 80ml fragrance oil last?" [ref=e200]:
+          - generic [aria-hidden] [ref=e202]: +
+        - button "How does payment and delivery work?" [ref=e204]:
+          - generic [aria-hidden] [ref=e206]: +
+        - button "What fragrance oil comes with the diffuser?" [ref=e208]:
+          - generic [aria-hidden] [ref=e210]: +
+        - button "Can I use it in my bedroom, office, car or salon?" [ref=e212]:
+          - generic [aria-hidden] [ref=e214]: +
+        - button "How do i buy another fragrance oil to refil?" [ref=e216]:
+          - generic [aria-hidden] [ref=e218]: +
+        - button "Do you deliver to my state?" [ref=e220]:
+          - generic [aria-hidden] [ref=e222]: +
+    - generic [ref=e224]:
+      - generic [ref=e225]:
+        - paragraph [ref=e226]: PRICES IN NIGERIA CAN CHANGE FAST
+        - heading "Fill The Order Form Below" [level=2] [ref=e227]
+        - paragraph [ref=e228]: Choose your package below. We'll call you to confirm your order before delivery.
+      - generic [ref=e230]:
+        - paragraph [ref=e232]: "PLEASE NOTE: Failed deliveries cost us a lot of money. Please fill out this form ONLY if you are fully ready to receive your order and pay upon delivery. Our team will call you to confirm your order details before dispatching. Thank you for respecting our business!"
+        - paragraph [ref=e233]: Choose your package
+        - generic [ref=e234]:
+          - button [ref=e235]:
+            - generic [ref=e236]:
+              - paragraph [ref=e237]: 1 Set
+              - paragraph [ref=e238]: 1 Machine + 1 × 80ml Fragrance Oil
+            - paragraph [ref=e239]: ₦26,990
+          - button [ref=e240]:
+            - generic [ref=e241]:
+              - paragraph [ref=e242]: 2 Sets
+              - paragraph [ref=e243]: 2 Machines + 2 × 80ml Fragrance Oils
+              - paragraph [ref=e244]: Save ₦3,990
+            - paragraph [ref=e245]: ₦49,990
+          - button [ref=e246]:
+            - generic [ref=e247]:
+              - paragraph [ref=e248]: 3 Sets
+              - paragraph [ref=e249]: 3 Machines + 3 × 80ml Fragrance Oils
+              - paragraph [ref=e250]: Save ₦7,980
+            - paragraph [ref=e251]: ₦72,990
+          - button [ref=e252]:
+            - generic [ref=e253]:
+              - paragraph [ref=e254]: 4 Sets
+              - paragraph [ref=e255]: 4 Machines + 4 × 80ml Fragrance Oils
+              - paragraph [ref=e256]: Save ₦12,970
+            - paragraph [ref=e257]: ₦94,990
+        - paragraph [ref=e258]: Add extra oil
+        - paragraph [ref=e259]: Each set already includes one 80ml fragrance oil. Add more only if you want extra fragrance supply.
+        - generic [ref=e260]:
+          - button [ref=e261]:
+            - paragraph [ref=e263]: No extra oil
+            - paragraph [ref=e264]: ₦0
+          - button [ref=e265]:
+            - generic [ref=e266]:
+              - paragraph [ref=e267]: +1 Extra Oil Bottle
+              - paragraph [ref=e268]: ≈ 1.5 months
+            - paragraph [ref=e269]: +₦9,490
+          - button [ref=e270]:
+            - generic [ref=e271]:
+              - paragraph [ref=e272]: +2 Extra Oil Bottles
+              - paragraph [ref=e273]: ≈ 3 months
+            - paragraph [ref=e274]: +₦17,490
+          - button [ref=e275]:
+            - generic [ref=e276]:
+              - paragraph [ref=e277]: +3 Extra Oil Bottles
+              - paragraph [ref=e278]: ≈ 4.5 months
+            - paragraph [ref=e279]: +₦21,490
+          - button [ref=e280]:
+            - generic [ref=e281]:
+              - paragraph [ref=e282]: +4 Extra Oil Bottles
+              - paragraph [ref=e283]: ≈ 6 months
+            - paragraph [ref=e284]: +₦32,490
+          - button [ref=e285]:
+            - generic [ref=e286]:
+              - paragraph [ref=e287]: +5 Extra Oil Bottles
+              - paragraph [ref=e288]: ≈ 7.5 months
+            - paragraph [ref=e289]: +₦42,490
+        - generic [ref=e290]:
+          - paragraph [ref=e291]: Order Total
+          - paragraph [ref=e292]: 1 Set · 1 Machine + 1 × 80ml Fragrance Oil
+          - paragraph [ref=e293]: ₦26,990
+        - generic [ref=e294]:
+          - generic [ref=e295]:
+            - text: Full Name
+            - textbox "e.g. Chioma Adeyemi" [ref=e296]
+          - generic [ref=e297]:
+            - text: Phone Number
+            - textbox "08012345678" [ref=e298]
+          - generic [ref=e299]:
+            - text: Email Address
+            - textbox "you@example.com" [ref=e300]
+          - generic [ref=e301]:
+            - text: State
+            - combobox [ref=e302]:
+              - option "Select your state" [selected]
+              - option "Abia"
+              - option "Abuja (FCT)"
+              - option "Adamawa"
+              - option "Akwa Ibom"
+              - option "Anambra"
+              - option "Bauchi"
+              - option "Bayelsa"
+              - option "Benue"
+              - option "Borno"
+              - option "Cross River"
+              - option "Delta"
+              - option "Ebonyi"
+              - option "Edo"
+              - option "Ekiti"
+              - option "Enugu"
+              - option "Gombe"
+              - option "Imo"
+              - option "Kaduna"
+              - option "Kano"
+              - option "Sokoto"
+              - option "Kogi"
+              - option "Kwara"
+              - option "Lagos"
+              - option "Nasarawa"
+              - option "Niger"
+              - option "Ogun"
+              - option "Ondo"
+              - option "Osun"
+              - option "Oyo"
+              - option "Plateau"
+              - option "Rivers"
+          - generic [ref=e303]:
+            - text: Delivery Address
+            - textbox "House number, street, area, landmark" [ref=e304]
+        - generic [ref=e306] [cursor=pointer]:
+          - checkbox "I WILL ACCEPT — I am ready to receive my order when contacted for delivery confirmation." [ref=e307]
+          - generic [ref=e308]: I WILL ACCEPT — I am ready to receive my order when contacted for delivery confirmation.
+        - button "YES I WANT THIS NOW — ₦26,990" [ref=e309]
+        - paragraph [ref=e310]: A sales rep will call to confirm before your order is dispatched.
+    - paragraph [ref=e312]:
+      - text: Have questions? Call us on
+      - link "09044319665" [ref=e313] [cursor=pointer]:
+        - /url: tel:07064969603
+    - paragraph [ref=e314]: This site is not part of Facebook, Google, or their companies. It is not endorsed by Facebook or Google. Facebook and Google are trademarks of their respective companies.
+    - link "Order Now" [ref=e317] [cursor=pointer]:
+      - /url: "#order-form-start"
+  - button "Open Next.js Dev Tools" [ref=e323] [cursor=pointer]
+  - alert [ref=e327]

@@ -61,7 +61,7 @@ const testimonials = [
 function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/2347064969603"
+      href="https://wa.me/2349044319665"
       className="mx-auto mt-6 flex w-full max-w-[320px] items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-4 text-center text-[19px] font-semibold text-white"
     >
       <svg
@@ -93,14 +93,16 @@ export default function RechargeableDiffuserPage() {
     <main className="bg-white text-black">
 
       {/* Hero */}
-      <section className="px-4 py-10 text-center">
-        <p className="inline-block rounded-full bg-[#FAF7F2] px-4 py-1.5 text-[12px] font-bold uppercase tracking-wider text-[#3B1F0E] border border-[#3B1F0E]/10">
-          Automatic Fragrance Machine (Rechargeable)
-        </p>
+      <section className="px-4 pb-10 pt-[calc(5rem+env(safe-area-inset-top))] text-center sm:pt-28">
+
 
         <h1 className="mx-auto mt-4 max-w-[620px] text-[25px] font-normal leading-9 tracking-tight text-black sm:text-[28px]">
           Make Your Home Smell Like A Luxury Hotel <span className="font-bold">Without Constantly Remembring To Spray</span><br></br>Air-Freshners
         </h1>
+
+        <p className="inline-block rounded-full bg-[#FAF7F2] px-4 py-1.5 text-[12px] font-bold uppercase tracking-wider text-[#3B1F0E] border border-[#3B1F0E]/10">
+          Automatic Fragrance Machine (Rechargeable)
+        </p>
       
 <div className="mx-auto mt-8 w-full max-w-[520px] overflow-hidden rounded-2xl border border-black/10">
   <img
@@ -108,12 +110,6 @@ export default function RechargeableDiffuserPage() {
     alt="ScentMason rechargeable automatic fragrance diffuser"
     className="h-auto w-full object-cover"
   />
-</div>
-
-<div className="mx-auto mt-5 max-w-[520px] rounded-xl border border-black/[0.06] bg-black/[0.02] p-4 text-center">
-  <p className="mt-1 text-[18px] font-medium text-amber-600">
-    This machine makes your room smell great all on its own. You choose how much it sprays. You never have to think about it!
-  </p>
 </div>
 
   {/* PRICING HIGHLIGHT */}
@@ -330,7 +326,7 @@ export default function RechargeableDiffuserPage() {
       <ScentMasonFAQ />
 
       {/* ORDER */}
-      <section id="order-form-start" className="scroll-mt-6 px-4 py-10">
+      <section id="order-form-start" className="scroll-mt-[calc(5rem+env(safe-area-inset-top))] px-4 py-10">
         <div className="mx-auto w-full max-w-[500px] rounded-2xl border-2 border-[#bff0d4] p-4 sm:p-5">
           <div className="text-center">
             <p className="text-[16px] font-extrabold uppercase tracking-wider text-red-600 sm:text-[17px]">
@@ -362,6 +358,17 @@ export default function RechargeableDiffuserPage() {
       <p className="mx-auto max-w-[720px] px-4 pb-14 text-center text-[11px] font-medium leading-5 text-black/40">
         This site is not part of Facebook, Google, or their companies. It is not endorsed by Facebook or Google. Facebook and Google are trademarks of their respective companies.
       </p>
+
+      <div className="fixed inset-x-0 top-0 z-50 border-b border-[#3B1F0E]/10 bg-[#FAF7F2]/95 px-3 pt-[env(safe-area-inset-top)] shadow-sm backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-end">
+          <a
+            href="#order-form-start"
+            className="flex min-h-11 items-center justify-center rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#1fbd5a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:px-6 sm:text-base"
+          >
+            Order Now
+          </a>
+        </div>
+      </div>
     </main>
   );
 }
