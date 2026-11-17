@@ -4,6 +4,11 @@ import React from "react";
 
 const SOCIAL_TESTIMONIALS = [
 
+  {
+    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/vegan.jpeg?updatedAt=1794601582110",
+    alt: "ScentMason customer good review",
+  },
+
    {
     src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/1.png",
     alt: "ScentMason customer testimonial",
@@ -19,12 +24,6 @@ const SOCIAL_TESTIMONIALS = [
     alt: "ScentMason customer review",
   },
 
-
-  {
-    src: "https://ik.imagekit.io/j1e78ujalr/scentmasonTestimonialsreal/vegan.jpeg?updatedAt=1794601582110",
-    alt: "ScentMason customer good review",
-  },
-  
 ];
 
 export default function SocialTestimonia() {
