@@ -64,6 +64,8 @@ export default function OrderFormNewPrice() {
 
   const [phone, setPhone] = useState("");
 
+  const [whatsapp, setWhatsapp] = useState("");
+
   const [email, setEmail] = useState("");
 
   const [state, setState] = useState("");
@@ -264,13 +266,15 @@ const getOrCreateScentMasonVisitorId = () => {
 
     const cleanPhone = phone.trim();
 
+    const cleanWhatsapp = whatsapp.trim();
+
     const cleanEmail = email.trim();
 
     const cleanName = name.trim();
 
     const cleanAddress = address.trim();
 
-    if (!cleanName || !cleanPhone || !cleanEmail || !state || !cleanAddress) {
+    if (!cleanName || !cleanPhone || !cleanWhatsapp || !state || !cleanAddress) {
 
       setError("Please fill in all fields so we can confirm your order.");
 
@@ -338,7 +342,7 @@ const getOrCreateScentMasonVisitorId = () => {
 
         phone: cleanPhone,
 
-        whatsapp: cleanPhone,
+        whatsapp: cleanWhatsapp,
 
         email: cleanEmail,
 
@@ -705,7 +709,9 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
     ["Phone Number", phone, setPhone, "08012345678", "tel"],
 
-    ["Email Address", email, setEmail, "you@example.com", "email"],
+    ["WhatsApp Number", whatsapp, setWhatsapp, "08012345678", "tel"],
+
+    ["Email Address", email, setEmail, "Optional", "email"],
 
   ].map(([label, value, setter, placeholder, inputType]) => (
 
@@ -734,7 +740,7 @@ Please verify my delivery data details and speed up my dispatch assembly!`;
 
         autoComplete={label === "Full Name" ? "name" : label === "Email Address" ? "email" : "tel"}
 
-        required
+        required={label !== "Email Address"}
 
         className="mt-1 w-full rounded-lg border border-black/15 bg-white px-4 py-3.5 text-[17px] font-medium text-black outline-none focus:border-black"
 
