@@ -365,7 +365,7 @@ export default function RechargeableDiffuserPage() {
             href="#order-form-start"
             className="flex min-h-11 items-center justify-center rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-[#1fbd5a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] sm:px-6 sm:text-base"
           >
-            Order Now
+            Buy Now
           </a>
         </div>
       </div>
